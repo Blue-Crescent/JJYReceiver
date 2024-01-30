@@ -20,7 +20,7 @@ extern SoftwareSerial debugSerial;
 #endif
 
 
-enum STATE {INIT,BITSYNC,RECEIVE,DECODE,TIME,TIMESYNCED};
+enum STATE {INIT,BITSYNC,RECEIVE,DECODE,TIME,PACKETFORMED,SECSYNCED};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
     uint8_t datetime[8];
@@ -101,7 +101,7 @@ class JJYReceiver {
     int freq(int freq);
     int freq();
     int monitor(int monitor);
-    int receive_nonblock();
+    //int receive_nonblock();
     int rotateArray(int8_t diff, uint8_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
     int receive();

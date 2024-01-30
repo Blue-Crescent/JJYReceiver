@@ -114,6 +114,10 @@ JJYReceiver::delta_tick(){
         if(markercount==2){
           jjyoffset = jjypos;
           jjystate = JJY_MIN;
+          if(state == SECSYNCED){
+            state = PACKETFORMED;
+          }
+          state = SECSYNCED;
         }else{
           // if(jjypos == 5){
            // rotateArray(jjyoffset,jjypayload,6);
@@ -167,32 +171,7 @@ JJYReceiver::delta_tick(){
     DEBUG_PRINT(" BIT:");
     DEBUG_PRINT((int)bitcount);
 
-    DEBUG_PRINT(" :");
-    switch(jjystate) {
-        case JJY_INIT:
-            DEBUG_PRINT("INIT");
-            break;
-        case JJY_MIN:
-            DEBUG_PRINT("MIN");
-            break;
-        case JJY_HOUR:
-            DEBUG_PRINT("HOUR");
-            break;
-        case JJY_DOYH:
-            DEBUG_PRINT("DOYH");
-            break;
-        case JJY_DOYL:
-            DEBUG_PRINT("DOYL");
-            break;
-        case JJY_YEAR:
-            DEBUG_PRINT("YEAR");
-            break;
-        case JJY_WEEK:
-            DEBUG_PRINT("WEEK");
-            break;
-        default:
-            DEBUG_PRINT("UNKNOWN");
-    }
+    debug();
 
     // DEBUG_PRINT(" JJYPOS:");
     // DEBUG_PRINT((int)jjypos);
@@ -273,7 +252,6 @@ JJYReceiver::begin(int pindata,int pinsel,int pinpon){
   datapin = pindata;
   selpin = pinsel;
   ponpin = pinpon;
-
   state = BITSYNC;
 }
 JJYReceiver::begin(int pindata,int pinsel){
@@ -288,16 +266,17 @@ JJYReceiver::begin(int pindata){
   datapin = pindata;
   state = BITSYNC;
 }
-JJYReceiver::receive_nonblock(){
-  power(true);
-  rcvcnt = 0;
-}
+//JJYReceiver::receive_nonblock(){
+//  power(true);
+//  rcvcnt = 0;
+//}
 JJYReceiver::receive(){
   power(true);
   rcvcnt = 0;
   while(rcvcnt == VERIFYLOOP){
     delay(1000);
   }
+  state = RECEIVE;
 }
 #ifdef DEBUG_BUILD
 JJYReceiver::datetest(){
@@ -367,6 +346,33 @@ int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month,
   //(*month)++;
 }
 JJYReceiver::debug(){
+    DEBUG_PRINT(" :");
+    switch(jjystate) {
+        case JJY_INIT:
+            DEBUG_PRINT("INIT");
+            break;
+        case JJY_MIN:
+            DEBUG_PRINT("MIN");
+            break;
+        case JJY_HOUR:
+            DEBUG_PRINT("HOUR");
+            break;
+        case JJY_DOYH:
+            DEBUG_PRINT("DOYH");
+            break;
+        case JJY_DOYL:
+            DEBUG_PRINT("DOYL");
+            break;
+        case JJY_YEAR:
+            DEBUG_PRINT("YEAR");
+            break;
+        case JJY_WEEK:
+            DEBUG_PRINT("WEEK");
+            break;
+        default:
+            DEBUG_PRINT("UNKNOWN");
+    }
+   DEBUG_PRINT(":");
    switch(state){
     case INIT:
       DEBUG_PRINT("INIT");
@@ -383,12 +389,13 @@ JJYReceiver::debug(){
     case TIME:
       DEBUG_PRINT("TIME");
       break;
-    case TIMESYNCED:
-      DEBUG_PRINT("TIMESYNCED");
+    case SECSYNCED:
+      DEBUG_PRINT("SECSYNCED");
+      break;
+    case PACKETFORMED:
+      DEBUG_PRINT("PACKETFORMED");
       break;
   }
-  DEBUG_PRINT(":");
-  DEBUG_PRINTLN(sampleindex);
 }
 #endif
 
