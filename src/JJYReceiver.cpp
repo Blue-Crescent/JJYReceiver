@@ -78,8 +78,9 @@ JJYReceiver::delta_tick(){
     shift_in(data, sampling, 13);
   }
   sampleindex++;
-  if(sampleindex == 108){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
+  if(sampleindex == 100){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
     clock_tick();
+    sampleindex = 0;
   }else if(sampleindex == 98){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
     bitcount++;
     // #ifdef DEBUG_BUILD
@@ -201,7 +202,6 @@ JJYReceiver::delta_tick(){
     String str = String(ctime(&localtime[0]));
     DEBUG_PRINTLN(str);  // Print current localtime.
     #endif
-    sampleindex = 0;
     clear(sampling,13);
   }
 
