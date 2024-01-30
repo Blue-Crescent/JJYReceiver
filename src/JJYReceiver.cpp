@@ -78,7 +78,7 @@ JJYReceiver::delta_tick(){
     shift_in(data, sampling, 13);
   }
   sampleindex++;
-  if(sampleindex == 99){ // 1sec
+  if(sampleindex == 98){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
     clock_tick();
     bitcount++;
     // #ifdef DEBUG_BUILD
@@ -95,44 +95,58 @@ JJYReceiver::delta_tick(){
     PM = distance(CONST_PM , sampling, 13);
     switch(max_of_three(L,H,PM)){
       case 0: // L
-        jjybits[jjystate] <<= 1;
+        jjypayload[jjystate] <<= 1;
         markercount=0;
         DEBUG_PRINT("L");
       break;
       case 1: // H
-        jjybits[jjystate] <<= 1;
-        jjybits[jjystate] |= 0x1; 
+        jjypayload[jjystate] <<= 1;
+        jjypayload[jjystate] |= 0x1; 
         markercount=0;
         DEBUG_PRINT("H");
       break;
       case 2: // PM
-        //jjybits[jjystate] <<= 1;
         markercount++;
+        jjypayloadlen[jjystate] = bitcount-1;
         bitcount=0;
         if(markercount==2){
           jjyoffset = jjypos;
           jjystate = JJY_MIN;
-          jjydata[0].bits.min =(uint8_t) 0x00FF & jjybits[JJY_MIN]; //0x25;
-          jjydata[0].bits.hour =(uint16_t) 0x006F & jjybits[JJY_HOUR];//0x27; 
-          jjydata[0].bits.doyh =(uint16_t) 0x007F & jjybits[JJY_DOYH]; //0x26;
-          //jjydata[0].bits.doyh = jjybits[JJY_HOUR]; //0x26;
-          DEBUG_PRINT("DOYH:");  DEBUG_PRINTLN((int)((jjybits[JJY_DOYH] & 0x000f) * 10) );
-          jjydata[0].bits.doyl =(uint8_t) ((0x01E0 & jjybits[JJY_DOYL]) >> 5); //0x82;
-          //jjydata[0].bits.doyl = jjybits[JJY_DOYL]; //0x82;
-          DEBUG_PRINT("DOYL:");  DEBUG_PRINTLN((int)((0x01E0 & jjybits[JJY_DOYL]) >> 5));
-          jjydata[0].bits.parity =(uint8_t) (0x06 & jjybits[JJY_DOYL]);
-          jjydata[0].bits.year =(uint8_t) 0x00FF & jjybits[JJY_YEAR]; //0x16
-          settime();
         }else{
           // if(jjypos == 5){
-           // rotateArray(jjyoffset,jjybits,6);
-
-            
+           // rotateArray(jjyoffset,jjypayload,6);
           // }
-          jjypos = (jjypos + 1) % 6;
+          //jjypos = (jjypos + 1) % 6;
           jjystate = (jjystate + 1) % 6;
         }
-        
+          DEBUG_PRINT("PAYLOADLEN:");
+          for(uint8_t i=0; i<6;i++){
+            DEBUG_PRINT(jjypayloadlen[i]);
+            DEBUG_PRINT(" ");
+          }
+          DEBUG_PRINTLN("");
+        if(jjypayloadlen[JJY_MIN] == 8){
+          DEBUG_PRINT("UPDATE:MIN");
+          jjydata[0].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
+          settime();
+        }
+        if(jjypayloadlen[JJY_HOUR] == 9){
+          DEBUG_PRINT("UPDATE:HOUR");
+          jjydata[0].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
+          settime();
+        }
+        if(jjypayloadlen[JJY_DOYH] == 9 && jjypayloadlen[JJY_DOYL] ==9){
+          DEBUG_PRINT("UPDATE:DOY");
+          jjydata[0].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
+          jjydata[0].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
+          jjydata[0].bits.parity =(uint8_t) (0x06 & jjypayload[JJY_DOYL]);
+          settime();
+        }
+        if(jjypayloadlen[JJY_YEAR] == 9){
+          DEBUG_PRINT("UPDATE:YEAR");
+          jjydata[0].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
+          settime();
+        }
         DEBUG_PRINT("P");
       break;
 
@@ -145,38 +159,38 @@ JJYReceiver::delta_tick(){
     //   sprintf(buf, "%02X", jjydata[0].datetime[i]);
     //   DEBUG_PRINT(buf);
     // }
-    // DEBUG_PRINT(" JJYBITS:");
+    // DEBUG_PRINT(" jjypayload:");
     // for(int i=5; i>=0; i--){
-    //   sprintf(buf, "%02X", jjybits[i]);
+    //   sprintf(buf, "%02X", jjypayload[i]);
     //   DEBUG_PRINT(buf);
     // }
-    DEBUG_PRINT(" MARKERCNT:");
+    DEBUG_PRINT(" M:");
     DEBUG_PRINT((int)markercount);
-    DEBUG_PRINT(" BITCNT:");
+    DEBUG_PRINT(" BIT:");
     DEBUG_PRINT((int)bitcount);
 
-    DEBUG_PRINT(" STAT:");
+    DEBUG_PRINT(" :");
     switch(jjystate) {
         case JJY_INIT:
-            DEBUG_PRINT("JJY_INIT");
+            DEBUG_PRINT("INIT");
             break;
         case JJY_MIN:
-            DEBUG_PRINT("JJY_MIN");
+            DEBUG_PRINT("MIN");
             break;
         case JJY_HOUR:
-            DEBUG_PRINT("JJY_HOUR");
+            DEBUG_PRINT("HOUR");
             break;
         case JJY_DOYH:
-            DEBUG_PRINT("JJY_DOYH");
+            DEBUG_PRINT("DOYH");
             break;
         case JJY_DOYL:
-            DEBUG_PRINT("JJY_DOYL");
+            DEBUG_PRINT("DOYL");
             break;
         case JJY_YEAR:
-            DEBUG_PRINT("JJY_YEAR");
+            DEBUG_PRINT("YEAR");
             break;
         case JJY_WEEK:
-            DEBUG_PRINT("JJY_WEEK");
+            DEBUG_PRINT("WEEK");
             break;
         default:
             DEBUG_PRINT("UNKNOWN");
