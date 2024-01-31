@@ -1,4 +1,4 @@
-#include "JJYReceiver.h"
+#include <JJYReceiver.h>
 
 //#include <sys/time.h>
 
@@ -25,9 +25,10 @@ JJYReceiver::~JJYReceiver(){
 }
 
 JJYReceiver::clock_tick(){
-  for(int index = 0; index < VERIFYLOOP; index++){
+  uint8_t index = 0;
+  //for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
-  }
+  //}
 }
 
 
@@ -49,7 +50,7 @@ int JJYReceiver::max_of_three(uint8_t a, uint8_t b, uint8_t c) {
     return (a > b) ? ((a > c) ? 0 : 2) : ((b > c) ? 1 : 2);
 }
 JJYReceiver::clear(uint8_t* sampling, int length){
-    for (int i = 0; i < length; i++) {
+    for (uint8_t i = 0; i < length; i++) {
       sampling[i] = 0;
     }
 }
@@ -65,33 +66,26 @@ int JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
   }
 }
 
-int JJYReceiver::rotateArray(int8_t diff, uint8_t* array, uint8_t size) {
+int JJYReceiver::rotateArray(int8_t shift, uint16_t* array, uint8_t size) {
   for (uint8_t i = 0; i < size; i++) {
-    array[i] = (array[i] + diff + size) % size;
+    array[i] = (array[i] + shift + size) % size;
   }
 }
 
 JJYReceiver::delta_tick(){
   uint8_t data = digitalRead(datapin)==HIGH ? 1 : 0;  
   int PM, H, L;
-  if((millis() - fallingtime[0]) < 990){
-    shift_in(data, sampling, 13);
-  }
+  shift_in(data, sampling, 13);
   sampleindex++;
-  if(sampleindex == 100){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
-    clock_tick();
+  if(sampleindex == 100){
     sampleindex = 0;
+    clear(sampling,13);
+  }
+  if(sampleindex == 50){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
+    clock_tick();
   }else if(sampleindex == 98){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
     bitcount++;
-    // #ifdef DEBUG_BUILD
-    //   char buf[32];
-    //   for(int i=12; i>=0; i--){
-    //     sprintf(buf, "%02X", sampling[i]);
-    //     debugSerial.print(buf);
-    //     if(i==0) debugSerial.print(":");
-    //   }
-    // #endif
-    //if(edgecnt==3)edgecnt = 0;
+    //debug2();
     L = distance(CONST_L , sampling, 13);
     H = distance(CONST_H , sampling, 13);
     PM = distance(CONST_PM , sampling, 13);
@@ -112,17 +106,24 @@ JJYReceiver::delta_tick(){
         jjypayloadlen[jjystate] = bitcount-1;
         bitcount=0;
         if(markercount==2){
-          jjyoffset = jjypos;
           jjystate = JJY_MIN;
+          rotateArray((6-jjypayloadcnt),jjypayload,6);
+          DEBUG_PRINT("PAYLOADLEN:");
+          DEBUG_PRINT((int)jjypayloadcnt);
+          debug3();
+          jjypayloadcnt=0;
+          update_time();
           if(state == SECSYNCED){
             state = PACKETFORMED;
+          }else{
+            state = SECSYNCED;
           }
-          state = SECSYNCED;
         }else{
           // if(jjypos == 5){
            // rotateArray(jjyoffset,jjypayload,6);
           // }
           //jjypos = (jjypos + 1) % 6;
+          jjypayloadcnt++;
           jjystate = (jjystate + 1) % 6;
         }
        //   DEBUG_PRINT("PAYLOADLEN:");
@@ -131,28 +132,8 @@ JJYReceiver::delta_tick(){
        //     DEBUG_PRINT(" ");
        //   }
        //   DEBUG_PRINTLN("");
-        if(jjypayloadlen[JJY_MIN] == 8){
-          jjydata[0].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
-          settime();
-        }
-        if(jjypayloadlen[JJY_HOUR] == 9){
-          jjydata[0].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
-          settime();
-        }
-        if(jjypayloadlen[JJY_DOYH] == 9 && jjypayloadlen[JJY_DOYL] ==9){
-          jjydata[0].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
-          jjydata[0].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
-          jjydata[0].bits.parity =(uint8_t) (0x06 & jjypayload[JJY_DOYL]);
-          settime();
-        }
-        if(jjypayloadlen[JJY_YEAR] == 9){
-          jjydata[0].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
-          settime();
-        }
         DEBUG_PRINT("P");
       break;
-
-
     }
     
     #ifdef DEBUG_BUILD
@@ -177,31 +158,50 @@ JJYReceiver::delta_tick(){
     // DEBUG_PRINT((int)jjypos);
     // DEBUG_PRINT(" JJYOFFSET:");
     // DEBUG_PRINT((int)jjyoffset);
-    DEBUG_PRINT(" ");
+
     String str = String(ctime(&localtime[0]));
     DEBUG_PRINTLN(str);  // Print current localtime.
     #endif
-    clear(sampling,13);
   }
 
 }
 
+JJYReceiver::update_time(){
+ // if(state == PACKETFORMED){
+ //  if(jjypayloadlen[JJY_MIN] == 8){
+     jjydata[0].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
+ //  }
+ //  if(jjypayloadlen[JJY_HOUR] == 9){
+     jjydata[0].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
+ //  }
+ //  if(jjypayloadlen[JJY_DOYH] == 9 && jjypayloadlen[JJY_DOYL] ==9){
+     jjydata[0].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
+     jjydata[0].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
+     jjydata[0].bits.parity =(uint8_t) (0x06 & jjypayload[JJY_DOYL]);
+ //  }
+ //  if(jjypayloadlen[JJY_YEAR] == 9){
+     jjydata[0].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
+ //  }
+   settime();
+  //}
+}
 JJYReceiver::jjy_receive(){
-  
+  unsigned long time = millis();
+  unsigned long window;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
   if (data == LOW) {
-    if(1000 < (millis() - fallingtime[0]) ){
+    //if(monitorpin != -1) digitalWrite(monitorpin,LOW);
+    window = time - fallingtime[0];
+    if(1000 < window){
       sampleindex = 0;
       clear(sampling,13);
     }
-
-    if(monitorpin != -1) digitalWrite(monitorpin,LOW);
     fallingtime[1] = fallingtime[0];
-    fallingtime[0] = millis();
+    fallingtime[0] = time;
   }else{
-    if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
+    //if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
       risingtime[1] = risingtime[0];
-      risingtime[0] = millis();
+      risingtime[0] = time;
   }
   // if(rcvcnt == VERIFYLOOP){
   //   power(false);
@@ -278,6 +278,29 @@ JJYReceiver::receive(){
   }
   state = RECEIVE;
 }
+int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day) {
+  uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
+    // 閏年の場合、2月は29日
+    daysInMonth[1] = 29;
+  }
+  *month = 0;
+  while (dayOfYear > daysInMonth[*month]) {
+    dayOfYear -= daysInMonth[*month];
+    (*month)++;
+  }
+  *day = dayOfYear;
+  //(*month)++;
+}
+bool JJYReceiver::calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity) {
+  byte count = 0;
+  for (uint8_t i = 0; i < bitLength; i++) {
+    if (value & (1 << i)) {
+      count++;
+    }
+  }
+  return (count % 2 == 0 ? 0 : 1) == expectedParity;
+}
 #ifdef DEBUG_BUILD
 JJYReceiver::datetest(){
   // 2016/6/10 Fri 17:15
@@ -331,21 +354,9 @@ JJYReceiver::printJJYData(const JJYData& data) {
   debugSerial.print("dummy: "); debugSerial.println(data.bits.dummy, HEX);
 }
 
-int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day) {
-  uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-  if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
-    // 閏年の場合、2月は29日
-    daysInMonth[1] = 29;
-  }
-  *month = 0;
-  while (dayOfYear > daysInMonth[*month]) {
-    dayOfYear -= daysInMonth[*month];
-    (*month)++;
-  }
-  *day = dayOfYear;
-  //(*month)++;
-}
 JJYReceiver::debug(){
+    DEBUG_PRINT(" ");
+    DEBUG_PRINT(jjypayloadcnt);
     DEBUG_PRINT(" :");
     switch(jjystate) {
         case JJY_INIT:
@@ -396,18 +407,9 @@ JJYReceiver::debug(){
       DEBUG_PRINT("PACKETFORMED");
       break;
   }
+  DEBUG_PRINT(" ");
 }
-#endif
 
-bool JJYReceiver::calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity) {
-  byte count = 0;
-  for (uint8_t i = 0; i < bitLength; i++) {
-    if (value & (1 << i)) {
-      count++;
-    }
-  }
-  return (count % 2 == 0 ? 0 : 1) == expectedParity;
-}
 // JJYReceiver::agc(bool activate){
 //   if(activate == true){
 //     digitalWrite(agcpin,LOW);
@@ -424,3 +426,18 @@ bool JJYReceiver::calculateParity(uint8_t value, uint8_t bitLength, uint8_t expe
 //   pinMode(agc, OUTPUT);
 //   JJYReceiver::datapin = datapin;
 // }
+int JJYReceiver::debug2(){
+       char buf[32];
+       for(int i=12; i>=0; i--){
+         sprintf(buf, "%02X", sampling[i]);
+         debugSerial.print(buf);
+         if(i==0) debugSerial.print(":");
+       }
+}
+int JJYReceiver::debug3(){
+  DEBUG_PRINTLN("PAYLOAD:");
+  for(uint8_t i; i<6; i++)
+    DEBUG_PRINT(jjypayload[i],HEX);
+  DEBUG_PRINTLN(" ");
+}
+#endif

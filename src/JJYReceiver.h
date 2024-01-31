@@ -64,6 +64,7 @@ class JJYReceiver {
     volatile uint8_t jjypos = 0;
     volatile uint16_t jjypayload[6]; // 8bits bit data between marker
     volatile uint8_t jjypayloadlen[6]; // 
+    volatile int8_t jjypayloadcnt = -2;
 
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [13] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
@@ -102,8 +103,9 @@ class JJYReceiver {
     int freq();
     int monitor(int monitor);
     //int receive_nonblock();
-    int rotateArray(int8_t diff, uint8_t* array, uint8_t size);
+    int rotateArray(int8_t shift, uint16_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
+    int update_time();
     int receive();
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
@@ -112,6 +114,8 @@ class JJYReceiver {
     int datetest();
     int printJJYData(const JJYData& data);
     int debug();
+    int debug2();
+    int debug3();
     #endif
 
   private:
@@ -130,11 +134,10 @@ class JJYReceiver {
       timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
       timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 1;          // 分
       timeinfo.tm_sec   = 1;           // 秒
-      timeinfo.tm_isdst = jjydata[index].bits.su1;           // 夏時間情報はシステムに依存
+      //timeinfo.tm_isdst = jjydata[index].bits.su1;           // 夏時間情報はシステムに依存
 
       // mktimeを使って、エポック時間に変換
       localtime[index] = mktime(&timeinfo);
-      
      }
 
 };
