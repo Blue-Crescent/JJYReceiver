@@ -19,7 +19,7 @@ extern SoftwareSerial debugSerial;
 # define DEBUG_PRINTLN(fmt,...)
 #endif
 
-
+#define N 7
 enum STATE {INIT,BITSYNC,RECEIVE,DECODE,TIME,PACKETFORMED,SECSYNCED};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
@@ -53,6 +53,7 @@ class JJYReceiver {
   
 	public:
     JJYData jjydata[VERIFYLOOP];
+    uint8_t rcvcnt = 0;
     volatile enum STATE state = INIT;
     volatile unsigned long risingtime[2], fallingtime[2];
     int datapin,ponpin,selpin;
@@ -63,21 +64,23 @@ class JJYReceiver {
     volatile uint8_t jjyoffset = 0;
     volatile uint8_t jjypos = 0;
     volatile uint16_t jjypayload[6]; // 8bits bit data between marker
-    volatile uint8_t jjypayloadlen[6]; // 
+    volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
     volatile int8_t jjypayloadcnt = -2;
 
     volatile uint8_t sampleindex = 0;
-    volatile uint8_t sampling [13] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile uint8_t CONST_PM [13] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00};
-    volatile uint8_t CONST_H [13]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,};
-    volatile uint8_t CONST_L [13]  = {0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile uint8_t sampling [N] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00};
+    volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00};
+    volatile uint8_t CONST_L [N]  = {0xFF,0x00,0x00,0x00,0x00,0x00,0x00};
+    //volatile uint8_t sampling [N] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    //volatile uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00};
+    //volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,};
+    //volatile uint8_t CONST_L [N]  = {0x0F,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
    
-    char rcvcnt = 0;
-    volatile uint8_t bitcount = 0;
     volatile unsigned long syncmillis;
 
     int monitorpin = -1;
-    time_t localtime [3];
+    time_t localtime[3];
     struct tm timeinfo;
     
   #ifdef DEBUG_BUILD
@@ -105,7 +108,7 @@ class JJYReceiver {
     //int receive_nonblock();
     int rotateArray(int8_t shift, uint16_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
-    int update_time();
+    int update_time(int jjystate);
     int receive();
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
@@ -116,14 +119,14 @@ class JJYReceiver {
     int debug();
     int debug2();
     int debug3();
+    int debug4();
     #endif
 
   private:
     //unsigned long margin = 60;
     unsigned long margin = 100;
     char countmarker = 0;
-    void settime(){
-      char index = rcvcnt;
+    void settime(uint8_t index,uint8_t zero){
       // struct tm のメンバーを設定
       uint16_t year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
       timeinfo.tm_year  = year - 1900; // 年      
@@ -133,11 +136,13 @@ class JJYReceiver {
       calculateDate(year, yday ,&timeinfo.tm_mon, &timeinfo.tm_mday);
       timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
       timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 1;          // 分
-      timeinfo.tm_sec   = 1;           // 秒
+      //if(zero == 0){
+        timeinfo.tm_sec   = 1;           // 秒
+      //}
       //timeinfo.tm_isdst = jjydata[index].bits.su1;           // 夏時間情報はシステムに依存
 
-      // mktimeを使って、エポック時間に変換
-      localtime[index] = mktime(&timeinfo);
+      localtime[index]= mktime(&timeinfo);
+
      }
 
 };
