@@ -113,6 +113,7 @@ class JJYReceiver {
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
+    int next_payload();
     #ifdef DEBUG_BUILD
     int datetest();
     int printJJYData(const JJYData& data);

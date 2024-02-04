@@ -73,6 +73,12 @@ int JJYReceiver::rotateArray(int8_t shift, uint16_t* array, uint8_t size) {
     array[i] = (array[i] + shift + size) % size;
   }
 }
+JJYReceiver::next_payload(){
+          update_time(jjystate);
+          debug();
+          jjystate = (jjystate + 1) % 6;
+          jjypayloadcnt++;
+}
 
 JJYReceiver::delta_tick(){
   uint8_t data = digitalRead(datapin)==HIGH ? 1 : 0;  
@@ -95,6 +101,8 @@ JJYReceiver::delta_tick(){
       case 0: // L
         jjypayload[jjystate] <<= 1;
         jjypayloadlen[jjystate]++;
+        if(jjypayloadlen[jjystate]>9)
+          next_payload();
         markercount=0;
         DEBUG_PRINT("L");
       break;
@@ -102,6 +110,8 @@ JJYReceiver::delta_tick(){
         jjypayload[jjystate] <<= 1;
         jjypayload[jjystate] |= 0x1; 
         jjypayloadlen[jjystate]++;
+        if(jjypayloadlen[jjystate]>9)
+          next_payload();
         markercount=0;
         DEBUG_PRINT("H");
       break;
@@ -129,10 +139,7 @@ JJYReceiver::delta_tick(){
           DEBUG_PRINT("M");
         }else{
           DEBUG_PRINT("P");
-          update_time(jjystate);
-          debug();
-          jjystate = (jjystate + 1) % 6;
-          jjypayloadcnt++;
+          next_payload();
         }
       break;
     }
