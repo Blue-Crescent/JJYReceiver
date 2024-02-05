@@ -91,12 +91,13 @@ JJYReceiver::delta_tick(){
   uint8_t PM, H, L;
   shift_in(data, sampling, N);
   sampleindex++;
+  tick = (tick+1) % 100;
+  if(tick == 0){
+    clock_tick();
+  }
   if(sampleindex == 100){
     sampleindex = 0;
     clear(sampling,N);
-  }
-  if(sampleindex == 0){
-    clock_tick();
   }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
     debug2();
     L = distance(CONST_L , sampling, N);
@@ -120,7 +121,6 @@ JJYReceiver::delta_tick(){
         markercount++;
         if(markercount==2){
           settime(rcvcnt);
-          debug4();
           //timeinfo.tm_sec = 1;
           //localtime[rcvcnt]= mktime(&timeinfo);
           //if(state == PACKETFORMED){
@@ -153,6 +153,7 @@ JJYReceiver::delta_tick(){
       break;
     }
     debug();
+    debug4();
     #ifdef DEBUG_BUILD
     // DEBUG_PRINT(" JJYDATA:");
     // for(int i=7; i>=0; i--){
@@ -507,16 +508,18 @@ int JJYReceiver::debug3(){
   DEBUG_PRINTLN(" ");
 }
 int JJYReceiver::debug4(){
-    DEBUG_PRINTLN("");  // Print current localtime.
+    DEBUG_PRINT(" ");  // Print current localtime.
     String str = String(ctime(&localtime[0]));
     String marker;
     marker = (rcvcnt == 0) ? "*" : " ";
-    DEBUG_PRINTLN(marker + str);  // Print current localtime.
+    DEBUG_PRINT(marker + str);  // Print current localtime.
+    DEBUG_PRINT(" ");  // Print current localtime.
     str = String(ctime(&localtime[1]));
     marker = (rcvcnt == 1) ? "*" : " ";
-    DEBUG_PRINTLN(marker + str);  // Print current localtime.
+    DEBUG_PRINT(marker + str);  // Print current localtime.
+    DEBUG_PRINT(" ");  // Print current localtime.
     str = String(ctime(&localtime[2]));
     marker = (rcvcnt == 2) ? "*" : " ";
-    DEBUG_PRINTLN(marker + str);  // Print current localtime.
+    DEBUG_PRINT(marker + str);  // Print current localtime.
 }
 #endif

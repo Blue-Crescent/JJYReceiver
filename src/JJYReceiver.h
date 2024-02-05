@@ -63,6 +63,7 @@ class JJYReceiver {
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t jjyoffset = 0;
     volatile uint8_t jjypos = 0;
+    volatile uint8_t tick = 0;
     volatile uint16_t jjypayload[6]; // 8bits bit data between marker
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
     volatile int8_t jjypayloadcnt = -2;
