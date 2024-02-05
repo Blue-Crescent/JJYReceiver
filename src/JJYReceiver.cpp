@@ -74,10 +74,6 @@ int JJYReceiver::rotateArray(int8_t shift, uint16_t* array, uint8_t size) {
   }
 }
 JJYReceiver::next_payload(){
-          update_time(jjystate);
-          debug();
-          jjystate = (jjystate + 1) % 6;
-          jjypayloadcnt++;
 }
 
 JJYReceiver::delta_tick(){
@@ -85,15 +81,15 @@ JJYReceiver::delta_tick(){
   uint8_t PM, H, L;
   shift_in(data, sampling, N);
   sampleindex++;
-  if(sampleindex == 50){
+  if(sampleindex == 100){
     sampleindex = 0;
     clear(sampling,N);
   }
-  //if(sampleindex == 50){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
-    //clock_tick();
-  //}
-  else if(sampleindex == 48){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
-    //debug2();
+  if(sampleindex == 50){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
+    clock_tick();
+  }
+  else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
+    debug2();
     L = distance(CONST_L , sampling, N);
     H = distance(CONST_H , sampling, N);
     PM = distance(CONST_PM , sampling, N);
@@ -101,8 +97,6 @@ JJYReceiver::delta_tick(){
       case 0: // L
         jjypayload[jjystate] <<= 1;
         jjypayloadlen[jjystate]++;
-        if(jjypayloadlen[jjystate]>9)
-          next_payload();
         markercount=0;
         DEBUG_PRINT("L");
       break;
@@ -110,8 +104,6 @@ JJYReceiver::delta_tick(){
         jjypayload[jjystate] <<= 1;
         jjypayload[jjystate] |= 0x1; 
         jjypayloadlen[jjystate]++;
-        if(jjypayloadlen[jjystate]>9)
-          next_payload();
         markercount=0;
         DEBUG_PRINT("H");
       break;
@@ -119,31 +111,34 @@ JJYReceiver::delta_tick(){
         markercount++;
         if(markercount==2){
           timeinfo.tm_sec = 1;
-          rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
           if(state != PACKETFORMED){
             rotateArray((jjypayloadcnt),jjypayload,6);
             rotateArray((jjypayloadcnt),testarray,6);
           }
           debug3();
+          
           if(state == SECSYNCED){
             state = PACKETFORMED;
           }else{
             state = SECSYNCED;
           }
+          rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
           jjypayloadcnt=0;
           jjystate = JJY_MIN;
           for (uint8_t i = 0; i < 6; i++){
             jjypayload[i]=0;
             jjypayloadlen[i]=0;
           }
-          DEBUG_PRINT("M");
+          DEBUG_PRINTLN("M");
         }else{
           DEBUG_PRINT("P");
-          next_payload();
+          update_time(jjystate);
+          jjystate = (jjystate + 1) % 6;
+          jjypayloadcnt++;
         }
       break;
     }
-    
+    debug();
     #ifdef DEBUG_BUILD
     // DEBUG_PRINT(" JJYDATA:");
     // for(int i=7; i>=0; i--){
@@ -166,7 +161,7 @@ JJYReceiver::delta_tick(){
     // DEBUG_PRINT((int)jjypos);
     // DEBUG_PRINT(" JJYOFFSET:");
     // DEBUG_PRINT((int)jjyoffset);
-
+    DEBUG_PRINTLN("");
     #endif
   }
 
@@ -178,20 +173,24 @@ JJYReceiver::update_time(int jjystate){
   switch(jjystate){
     case JJY_MIN:
       if( jjypayloadlen[JJY_MIN] == 8){
+       uint16_t min;
        jjydata[rcvcnt].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
-       timeinfo.tm_min   = ((jjydata[rcvcnt].bits.min >> 5) & 0x7)  * 10 + (jjydata[rcvcnt].bits.min & 0x0f) + 1; // 分
+       min = ((jjydata[rcvcnt].bits.min >> 5) & 0x7)  * 10 + (jjydata[rcvcnt].bits.min & 0x0F) + 1; // 分
+       timeinfo.tm_min = min;
        localtime[rcvcnt]= mktime(&timeinfo);
        DEBUG_PRINT("min:");
-       DEBUG_PRINT(timeinfo.tm_min);
+       DEBUG_PRINT(min);
       }
       break;
     case JJY_HOUR:
       if(jjypayloadlen[JJY_HOUR] == 9){
+       uint16_t hour;
        jjydata[rcvcnt].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
-       timeinfo.tm_hour  = ((jjydata[rcvcnt].bits.hour >> 5) & 0x3) * 10 + (jjydata[rcvcnt].bits.hour & 0x0f) ;         // 時
+       hour = ((jjydata[rcvcnt].bits.hour >> 5) & 0x3) * 10 + (jjydata[rcvcnt].bits.hour & 0x0f) ;         // 時
+       timeinfo.tm_hour  = hour;
        localtime[rcvcnt]= mktime(&timeinfo);
        DEBUG_PRINT("hour:");
-       DEBUG_PRINT(timeinfo.tm_hour);
+       DEBUG_PRINT(hour);
       }
       break;
     case JJY_DOYH:
@@ -202,8 +201,8 @@ JJYReceiver::update_time(int jjystate){
        //errflag |= calculateParity(jjydata[rcvcnt].bits.hour,8,(0x01 & (jjypayload[JJY_DOYL]>>2)));
        //settime(rcvcnt,1);
       }
-    case JJY_YEAR:
       break;
+    case JJY_YEAR:
       if(jjypayloadlen[JJY_YEAR] == 9){
        jjydata[rcvcnt].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
        uint16_t year = (((jjydata[rcvcnt].bits.year & 0xf0) >> 4) * 10 + (jjydata[rcvcnt].bits.year & 0x0f)) + 2000;
@@ -224,8 +223,6 @@ JJYReceiver::update_time(int jjystate){
     //  }
     //  break;
   }
-   if(errflag == 0x0){
-     // mktimeを使って、エポック時間に変換
     DEBUG_PRINTLN("");  // Print current localtime.
     String str = String(ctime(&localtime[0]));
     String marker;
@@ -237,9 +234,6 @@ JJYReceiver::update_time(int jjystate){
     str = String(ctime(&localtime[2]));
     marker = (rcvcnt == 2) ? "*" : " ";
     DEBUG_PRINTLN(marker + str);  // Print current localtime.
-   }else{
-    DEBUG_PRINT("PARITY_ERR");
-   }
   //}
 }
 JJYReceiver::jjy_receive(){
@@ -247,7 +241,7 @@ JJYReceiver::jjy_receive(){
   unsigned long window;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
   if (data == LOW) {
-    //if(monitorpin != -1) digitalWrite(monitorpin,LOW);
+    if(monitorpin != -1) digitalWrite(monitorpin,LOW);
     window = time - fallingtime[0];
     if(990 < window){
       sampleindex = 0;
@@ -256,9 +250,8 @@ JJYReceiver::jjy_receive(){
     fallingtime[1] = fallingtime[0];
     fallingtime[0] = time;
   }else{
-    //if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
-      risingtime[1] = risingtime[0];
-      risingtime[0] = time;
+    if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
+
   }
   // if(rcvcnt == VERIFYLOOP){
   //   power(false);
@@ -466,7 +459,7 @@ JJYReceiver::debug(){
    // }
   DEBUG_PRINT(" ");
   DEBUG_PRINT((int)jjypayloadlen[jjystate]);
-  DEBUG_PRINTLN("");
+  DEBUG_PRINT("");
 }
 
 // JJYReceiver::agc(bool activate){
