@@ -14,8 +14,7 @@
   extern SoftwareSerial debugSerial;
 #endif
 
-
-  uint16_t testarray[6] = {0,1,2,3,4,5};
+uint16_t testarray[6] = {0,1,2,3,4,5};
 JJYReceiver::JJYReceiver(){
 }
 
@@ -73,9 +72,9 @@ time_t JJYReceiver::getTime() {
     time_t diff1 = labs(localtime[0] - localtime[1]);
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
-    if( diff1 < 3){
+    if( diff1 < 2){
       return localtime[1];
-    }else if(diff2 < 3){
+    }else if(diff2 < 2){
       return localtime[2];
     }else if(diff3 < 3){
       return localtime[0];
@@ -244,10 +243,6 @@ JJYReceiver::begin(int pindata){
   datapin = pindata;
   state = BITSYNC;
 }
-//JJYReceiver::receive_nonblock(){
-//  power(true);
-//  rcvcnt = 0;
-//}
 JJYReceiver::receive(){
   power(true);
   state = RECEIVE;
@@ -279,6 +274,11 @@ bool JJYReceiver::calculateParity(uint8_t value, uint8_t bitLength, uint8_t expe
     return 1;
   }
 }
+
+// ***********************************************************************************************
+//  DEBUG FUNCTION
+// ***********************************************************************************************
+
 #ifdef DEBUG_BUILD
 JJYReceiver::printJJYData(const JJYData& data) {
   debugSerial.println("datetime:");
