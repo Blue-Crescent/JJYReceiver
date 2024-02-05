@@ -75,7 +75,7 @@ class JJYReceiver {
     volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     int monitorpin = -1;
-    volatile time_t localtime[3];
+    volatile time_t localtime[3] = {-1,-2,-3};
     volatile struct tm timeinfo;
     
   #ifdef DEBUG_BUILD
@@ -103,15 +103,12 @@ class JJYReceiver {
     //int receive_nonblock();
     int rotateArray(int8_t shift, uint16_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
-    int update_time(int jjystate);
     int receive();
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
-    int next_payload();
     time_t getTime();
     #ifdef DEBUG_BUILD
-    int datetest();
     int printJJYData(const JJYData& data);
     int debug();
     int debug2();
