@@ -53,6 +53,12 @@ void loop() {
   if(now != -1){
     String str = String(ctime(&now));
     debugSerial.println(str);  // Print current localtime.
+
+    // After time received, it can release Timer and isr routine.
+    detachInterrupt(digitalPinToInterrupt(DATA));
+
+    // If RTC used, it can stop Timer after RTC time updated.
+    // MsTimer2::stop();
   }else{
     String str = "Receiving";
     debugSerial.println(str);
