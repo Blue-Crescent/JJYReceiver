@@ -75,7 +75,7 @@ class JJYReceiver {
     volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     int monitorpin = -1;
-    volatile time_t localtime[3] = {-1,-2,-3};
+    volatile time_t localtime[3] = {-100,-200,-300};
     volatile struct tm timeinfo;
     
   #ifdef DEBUG_BUILD

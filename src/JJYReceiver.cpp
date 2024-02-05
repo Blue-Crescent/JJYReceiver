@@ -17,10 +17,6 @@
 
   uint16_t testarray[6] = {0,1,2,3,4,5};
 JJYReceiver::JJYReceiver(){
-  for(int index = 0; index < VERIFYLOOP; index++){
-    for(int j=0;j <8; j++)  
-      jjydata[index].datetime[j] = 0;
-  }
 }
 
 JJYReceiver::~JJYReceiver(){
@@ -74,13 +70,22 @@ int JJYReceiver::rotateArray(int8_t shift, uint16_t* array, uint8_t size) {
   }
 }
 time_t JJYReceiver::getTime() {
-    if (localtime[0] == localtime[1] || localtime[0] == localtime[2]) {
-        return localtime[0];
-    } else if (localtime[1] == localtime[2]) {
-        return localtime[1];
-    } else {
-        return -1;
+    time_t diff1 = labs(localtime[0] - localtime[1]);
+    time_t diff2 = labs(localtime[1] - localtime[2]);
+    time_t diff3 = labs(localtime[2] - localtime[0]);
+    if( diff1 < 3){
+      return localtime[1];
+    }else if(diff2 < 3){
+      return localtime[2];
+    }else if(diff3 < 3){
+      return localtime[0];
     }
+    //DEBUG_PRINT(diff1);
+    //DEBUG_PRINT(" ");
+    //DEBUG_PRINT(diff2);
+    //DEBUG_PRINT(" ");
+    //DEBUG_PRINTLN(diff3);
+    return -1;
 }
 
 JJYReceiver::delta_tick(){
