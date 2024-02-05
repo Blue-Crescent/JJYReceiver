@@ -85,10 +85,9 @@ JJYReceiver::delta_tick(){
     sampleindex = 0;
     clear(sampling,N);
   }
-  if(sampleindex == 50){ // 100sampleを毎秒きっかりだと処理時間が厳しいので少し間引く
+  if(sampleindex == 0){
     clock_tick();
-  }
-  else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
+  }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
     debug2();
     L = distance(CONST_L , sampling, N);
     H = distance(CONST_H , sampling, N);
@@ -111,9 +110,13 @@ JJYReceiver::delta_tick(){
         markercount++;
         if(markercount==2){
           timeinfo.tm_sec = 1;
+          localtime[rcvcnt]= mktime(&timeinfo);
           if(state != PACKETFORMED){
             rotateArray((jjypayloadcnt),jjypayload,6);
             rotateArray((jjypayloadcnt),testarray,6);
+            for(uint8_t i; i<6; i++){
+              update_time(jjystate);
+            }
           }
           debug3();
           
@@ -173,24 +176,26 @@ JJYReceiver::update_time(int jjystate){
   switch(jjystate){
     case JJY_MIN:
       if( jjypayloadlen[JJY_MIN] == 8){
-       uint16_t min;
+       //uint16_t min;
        jjydata[rcvcnt].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
-       min = ((jjydata[rcvcnt].bits.min >> 5) & 0x7)  * 10 + (jjydata[rcvcnt].bits.min & 0x0F) + 1; // 分
-       timeinfo.tm_min = min;
-       localtime[rcvcnt]= mktime(&timeinfo);
-       DEBUG_PRINT("min:");
-       DEBUG_PRINT(min);
+       //min = ((jjydata[rcvcnt].bits.min >> 5) & 0x7)  * 10 + (jjydata[rcvcnt].bits.min & 0x0F) + 1; // 分
+       //timeinfo.tm_min = min;
+       //localtime[rcvcnt]= mktime(&timeinfo);
+       //DEBUG_PRINT("min:");
+       //DEBUG_PRINT(min);
+       settime(rcvcnt);
       }
       break;
     case JJY_HOUR:
       if(jjypayloadlen[JJY_HOUR] == 9){
-       uint16_t hour;
+       //uint16_t hour;
        jjydata[rcvcnt].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
-       hour = ((jjydata[rcvcnt].bits.hour >> 5) & 0x3) * 10 + (jjydata[rcvcnt].bits.hour & 0x0f) ;         // 時
-       timeinfo.tm_hour  = hour;
-       localtime[rcvcnt]= mktime(&timeinfo);
-       DEBUG_PRINT("hour:");
-       DEBUG_PRINT(hour);
+       //hour = ((jjydata[rcvcnt].bits.hour >> 5) & 0x3) * 10 + (jjydata[rcvcnt].bits.hour & 0x0f) ;         // 時
+       //timeinfo.tm_hour  = hour;
+       //localtime[rcvcnt]= mktime(&timeinfo);
+       //DEBUG_PRINT("hour:");
+       //DEBUG_PRINT(hour);
+       settime(rcvcnt);
       }
       break;
     case JJY_DOYH:
@@ -199,21 +204,21 @@ JJYReceiver::update_time(int jjystate){
        jjydata[rcvcnt].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
        //errflag |= calculateParity(jjydata[rcvcnt].bits.min, 8,(0x01 & (jjypayload[JJY_DOYL]>>1)));
        //errflag |= calculateParity(jjydata[rcvcnt].bits.hour,8,(0x01 & (jjypayload[JJY_DOYL]>>2)));
-       //settime(rcvcnt,1);
+       //settime(rcvcnt);
       }
       break;
     case JJY_YEAR:
       if(jjypayloadlen[JJY_YEAR] == 9){
        jjydata[rcvcnt].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
-       uint16_t year = (((jjydata[rcvcnt].bits.year & 0xf0) >> 4) * 10 + (jjydata[rcvcnt].bits.year & 0x0f)) + 2000;
-       timeinfo.tm_year  = year - 1900; // 年      
-       uint16_t yday = ((((jjydata[rcvcnt].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[rcvcnt].bits.doyh & 0x000f)) * 10) + jjydata[rcvcnt].bits.doyl;
-       calculateDate(year, yday ,&timeinfo.tm_mon, &timeinfo.tm_mday);
-       localtime[rcvcnt]= mktime(&timeinfo);
-       DEBUG_PRINT("year:");
-       DEBUG_PRINT(timeinfo.tm_year);
-       DEBUG_PRINT("yday:");
-       DEBUG_PRINT(yday);
+       //uint16_t year = (((jjydata[rcvcnt].bits.year & 0xf0) >> 4) * 10 + (jjydata[rcvcnt].bits.year & 0x0f)) + 2000;
+       //timeinfo.tm_year  = year - 1900; // 年      
+       //uint16_t yday = ((((jjydata[rcvcnt].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[rcvcnt].bits.doyh & 0x000f)) * 10) + jjydata[rcvcnt].bits.doyl;
+       //calculateDate(year, yday ,&timeinfo.tm_mon, &timeinfo.tm_mday);
+       //DEBUG_PRINT("year:");
+       //DEBUG_PRINT(timeinfo.tm_year);
+       //DEBUG_PRINT("yday:");
+       //DEBUG_PRINT(yday);
+       settime(rcvcnt);
       }
       break;
     //case JJY_WEEK:
@@ -223,6 +228,7 @@ JJYReceiver::update_time(int jjystate){
     //  }
     //  break;
   }
+    //localtime[rcvcnt]= mktime(&timeinfo);
     DEBUG_PRINTLN("");  // Print current localtime.
     String str = String(ctime(&localtime[0]));
     String marker;
@@ -368,7 +374,7 @@ JJYReceiver::datetest(){
       shift_in(bit,jjydata[rcvcnt].datetime,8);
      }
   }
-  settime(rcvcnt,1);
+  settime(rcvcnt);
 
 }
 JJYReceiver::printJJYData(const JJYData& data) {
