@@ -20,7 +20,8 @@ extern SoftwareSerial debugSerial;
 #endif
 
 #define N 13
-enum STATE {INIT,BITSYNC,RECEIVE,DECODE,TIME,PACKETFORMED,SECSYNCED};
+//enum STATE {INIT,BITSYNC,RECEIVE,DECODE,TIME,PACKETFORMED,SECSYNCED};
+enum STATE {INIT,RECEIVE,DATAVALID,TIMEVALID,STOP};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
     uint8_t datetime[8];
@@ -76,6 +77,7 @@ class JJYReceiver {
 
     int monitorpin = -1;
     volatile time_t localtime[3] = {-100,-200,-300};
+    volatile time_t globaltime;
     volatile struct tm timeinfo;
     
   #ifdef DEBUG_BUILD
@@ -92,6 +94,7 @@ class JJYReceiver {
     int begin(int datapin);
     int begin(int datapin,int pon);
     int begin(int datapin,int pon,int sel);
+    int stop();
     // int begin(int datapin,int pon,int sel,int agcpin);
     // int agc(bool agc);
     int power(bool power);
@@ -108,7 +111,6 @@ class JJYReceiver {
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
     time_t getTime();
     #ifdef DEBUG_BUILD
-    int printJJYData(const JJYData& data);
     int debug();
     int debug2();
     int debug3();
@@ -134,7 +136,12 @@ class JJYReceiver {
 
       localtime[index]= mktime(&timeinfo);
      }
-
+    void init(){
+      state = RECEIVE;
+      for(uint8_t index = 0; index < VERIFYLOOP; index++){
+        localtime[index] = index * -100;
+      }
+    }
 
 };
 #endif

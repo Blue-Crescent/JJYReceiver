@@ -22,7 +22,6 @@ JJYReceiver::~JJYReceiver(){
 }
 
 JJYReceiver::clock_tick(){
-  uint8_t index = 0;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
@@ -73,11 +72,17 @@ time_t JJYReceiver::getTime() {
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
     if( diff1 < 2){
-      return localtime[1];
+      state = TIMEVALID;
+      globaltime = localtime[1];
+      return globaltime;
     }else if(diff2 < 2){
-      return localtime[2];
-    }else if(diff3 < 3){
-      return localtime[0];
+      state = TIMEVALID;
+      globaltime = localtime[2];
+      return globaltime;
+    }else if(diff3 < 2){
+      state = TIMEVALID;
+      globaltime = localtime[0];
+      return globaltime;
     }
     //DEBUG_PRINT(diff1);
     //DEBUG_PRINT(" ");
@@ -90,12 +95,13 @@ time_t JJYReceiver::getTime() {
 JJYReceiver::delta_tick(){
   uint8_t data = digitalRead(datapin)==HIGH ? 1 : 0;  
   uint8_t PM, H, L;
-  shift_in(data, sampling, N);
-  sampleindex++;
   tick = (tick+1) % 100;
   if(tick == 0){
     clock_tick();
   }
+  if(state == TIMEVALID) return;
+  shift_in(data, sampling, N);
+  sampleindex++;
   if(sampleindex == 100){
     sampleindex = 0;
     clear(sampling,N);
@@ -124,9 +130,10 @@ JJYReceiver::delta_tick(){
         markercount++;
         if(markercount==2){
           settime(rcvcnt);
+          getTime();
           //timeinfo.tm_sec = 1;
           //localtime[rcvcnt]= mktime(&timeinfo);
-          //if(state == PACKETFORMED){
+          //if(state == TIMEVALID){
           //  rotateArray((jjypayloadcnt),jjypayload,6);
           //  rotateArray((jjypayloadcnt),testarray,6);
           //  for(uint8_t i; i<6; i++){
@@ -134,11 +141,6 @@ JJYReceiver::delta_tick(){
           //  }
           //}
           //debug3();
-          if(state == SECSYNCED){
-            state = PACKETFORMED;
-          }else{
-            state = SECSYNCED;
-          }
           rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
           jjypayloadcnt=0;
           jjystate = JJY_MIN;
@@ -166,6 +168,7 @@ JJYReceiver::delta_tick(){
 JJYReceiver::jjy_receive(){
   unsigned long time = millis();
   unsigned long window;
+  if(state == TIMEVALID) return;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
   if (data == LOW) {
     if(monitorpin != -1) digitalWrite(monitorpin,LOW);
@@ -222,27 +225,30 @@ JJYReceiver::monitor(int monitorpin){
 }
 
 JJYReceiver::begin(int pindata,int pinsel,int pinpon){
-  
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   pinMode(pinpon, OUTPUT);
   datapin = pindata;
   selpin = pinsel;
   ponpin = pinpon;
-  state = BITSYNC;
+  init();
 }
 JJYReceiver::begin(int pindata,int pinsel){
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   datapin = pindata;
   selpin = pinsel;
-  state = BITSYNC;
+  init();
 }
 JJYReceiver::begin(int pindata){
   pinMode(pindata, INPUT);
   datapin = pindata;
-  state = BITSYNC;
+  init();
 }
+JJYReceiver::stop(){
+
+}
+
 JJYReceiver::receive(){
   power(true);
   state = RECEIVE;
@@ -280,39 +286,6 @@ bool JJYReceiver::calculateParity(uint8_t value, uint8_t bitLength, uint8_t expe
 // ***********************************************************************************************
 
 #ifdef DEBUG_BUILD
-JJYReceiver::printJJYData(const JJYData& data) {
-  debugSerial.println("datetime:");
-  for (int i = 0; i < 8; i++) {
-    debugSerial.print(data.datetime[i], HEX);
-    debugSerial.print(" ");
-  }
-  debugSerial.println();
-
-  debugSerial.println("bits:");
-  debugSerial.print("M: "); debugSerial.println(data.bits.M, HEX);
-  debugSerial.print("min: "); debugSerial.println(data.bits.min, HEX);
-  debugSerial.print("P1: "); debugSerial.println(data.bits.P1, HEX);
-  debugSerial.print("hour: "); debugSerial.println(data.bits.hour, HEX);
-  debugSerial.print("P2: "); debugSerial.println(data.bits.P2, HEX);
-  debugSerial.print("space1: "); debugSerial.println(data.bits.space1, HEX);
-  debugSerial.print("doyh: "); debugSerial.println(data.bits.doyh, HEX);
-  debugSerial.print("P3: "); debugSerial.println(data.bits.P3, HEX);
-  debugSerial.print("doyl: "); debugSerial.println(data.bits.doyl, HEX);
-  debugSerial.print("space2: "); debugSerial.println(data.bits.space2, HEX);
-  debugSerial.print("parity: "); debugSerial.println(data.bits.parity, HEX);
-  debugSerial.print("su1: "); debugSerial.println(data.bits.su1, HEX);
-  debugSerial.print("P4: "); debugSerial.println(data.bits.P4, HEX);
-  debugSerial.print("su2: "); debugSerial.println(data.bits.su2, HEX);
-  debugSerial.print("year: "); debugSerial.println(data.bits.year, HEX);
-  debugSerial.print("P5: "); debugSerial.println(data.bits.P5, HEX);
-  debugSerial.print("weekday: "); debugSerial.println(data.bits.weekday, HEX);
-  debugSerial.print("leap: "); debugSerial.println(data.bits.leap, HEX);
-  debugSerial.print("space3: "); debugSerial.println(data.bits.space3, HEX);
-  debugSerial.print("P0: "); debugSerial.println(data.bits.P0, HEX);
-  
-  debugSerial.print("dummy: "); debugSerial.println(data.bits.dummy, HEX);
-}
-
 JJYReceiver::debug(){
     DEBUG_PRINT(" ");
     //DEBUG_PRINT(jjypayloadcnt);
@@ -342,30 +315,24 @@ JJYReceiver::debug(){
         default:
             DEBUG_PRINT("UNKNOWN");
     }
-   //DEBUG_PRINT(":");
-   //switch(state){
-   // case INIT:
-   //   DEBUG_PRINT("INIT");
-   //   break;
-   // case BITSYNC:
-   //   DEBUG_PRINT("BITSYNC");
-   //   break;
-   // case RECEIVE:
-   //   DEBUG_PRINT("RECEIVE");
-   //   break;
-   // case DECODE:
-   //   DEBUG_PRINT("DECODE");
-   //   break;
-   // case TIME:
-   //   DEBUG_PRINT("TIME");
-   //   break;
-   // case SECSYNCED:
-   //   DEBUG_PRINT("SECSYNCED");
-   //   break;
-   // case PACKETFORMED:
-   //   DEBUG_PRINT("PACKETFORMED");
-   //   break;
-   // }
+   DEBUG_PRINT(":");
+   switch(state){
+   case INIT:
+     DEBUG_PRINT("INIT");
+     break;
+   case RECEIVE:
+     DEBUG_PRINT("RECEIVE");
+     break;
+   case DATAVALID:
+     DEBUG_PRINT("DATAVALID");
+     break;
+   case TIMEVALID:
+     DEBUG_PRINT("TIMEVALID");
+     break;
+   case STOP:
+     DEBUG_PRINT("STOP");
+     break;
+   }
   DEBUG_PRINT(" ");
   DEBUG_PRINT((int)jjypayloadlen[jjystate]);
   DEBUG_PRINT("");
@@ -428,6 +395,6 @@ int JJYReceiver::debug4(){
     DEBUG_PRINT(" =>");  // Print current localtime.
     time_t resulttime = getTime();
     str = String(ctime(&resulttime));
-    DEBUG_PRINT(marker + str);  // Print current localtime.
+    DEBUG_PRINT(str);  // Print current localtime.
 }
 #endif
