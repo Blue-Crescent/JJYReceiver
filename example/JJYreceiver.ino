@@ -2,7 +2,6 @@
 #include <SoftwareSerial.h>
 #include <MsTimer2.h>
 
-
 #include <JJYReceiver.h>
 
 #define DATA 2
@@ -46,7 +45,7 @@ void isr_routine() { // pin change interrupt service routine
 void ticktock() {  // 10 msec interrupt service routine
   jjy.delta_tick();
 }
-hay
+
 void loop() {
   delay(10000);
   time_t now = jjy.getTime();
