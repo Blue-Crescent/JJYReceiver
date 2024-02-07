@@ -49,13 +49,15 @@ void ticktock() {  // 10 msec interrupt service routine
 
 void loop() {
   delay(10000);
+  
   time_t now = jjy.get_time();
-  if(now != -1){
+  time_t lastreceived = jjy.getTime();
+
+  if(lastreceived != -1){
     String str = String(ctime(&now));
     debugSerial.print(str);  // Print current date time.
 
-    debugSerial.print(" Last received:");
-    time_t lastreceived = jjy.getTime();
+    debugSerial.print(" Last received:");    
     str = String(ctime(&lastreceived));
     debugSerial.println(str);  // Print last received time
 
