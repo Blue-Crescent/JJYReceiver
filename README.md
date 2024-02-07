@@ -64,6 +64,9 @@ H
 
 ![wave (5).jpeg](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(5).jpeg)
 
+
+![](img/wave%20(5).jpeg)
+
 L
 
 ![wave (6).jpeg](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(6).jpeg)
