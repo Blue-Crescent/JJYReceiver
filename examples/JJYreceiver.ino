@@ -1,3 +1,5 @@
+#include <JJYReceiver.h>
+
 #include "lgt_LowPower.h"
 #include <SoftwareSerial.h>
 #include <MsTimer2.h>
@@ -22,10 +24,9 @@ void setup() {
   // Debug print
   debugSerial.begin(115200);
 
-  // Time for clock ticktock
+  // 10msec Timer for clock ticktock
   MsTimer2::set(10, ticktock);
   MsTimer2::start();
-  
   
   // JJYReceiver lib setup.
   digitalWrite(MONITORPIN,HIGH);
@@ -48,23 +49,22 @@ void ticktock() {  // 10 msec interrupt service routine
 
 void loop() {
   delay(10000);
-  time_t now = jjy.getTime();
-  if(now != -1){
+  
+  time_t now = jjy.get_time();
+  time_t lastreceived = jjy.getTime();
+
+  if(lastreceived != -1){
     String str = String(ctime(&now));
-    debugSerial.println(str);  // Print current localtime.
+    debugSerial.print(str);  // Print current date time.
 
-    // After time received, it can release Timer and isr routine.
-    detachInterrupt(digitalPinToInterrupt(DATA));
+    debugSerial.print(" Last received:");    
+    str = String(ctime(&lastreceived));
+    debugSerial.println(str);  // Print last received time
 
-    // If RTC used, it can stop Timer after RTC time updated.
-    // MsTimer2::stop();
   }else{
     String str = "Receiving:";
     debugSerial.print(str);
     str = String(ctime(&now));
-    debugSerial.println(str);  // Print current localtime.
-  }
-  
-  
-  
+    debugSerial.println(str);
+  } 
 }

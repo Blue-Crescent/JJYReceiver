@@ -22,11 +22,12 @@ JJYReceiver::~JJYReceiver(){
 }
 
 JJYReceiver::clock_tick(){
+  globaltime = globaltime + 1;
+  if(state == TIMEVALID) return;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
 }
-
 
 int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
     int hammingDistance = 0;
@@ -72,27 +73,30 @@ time_t JJYReceiver::getTime() {
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
     if( diff1 < 2){
-      state = TIMEVALID;
-      globaltime = localtime[1];
-      return globaltime;
-    }else if(diff2 < 2){
-      state = TIMEVALID;
-      globaltime = localtime[2];
-      return globaltime;
-    }else if(diff3 < 2){
-      state = TIMEVALID;
-      globaltime = localtime[0];
-      return globaltime;
-    }
-    if(state == TIMEVALID)
       power(false);
-    return;
+      if(state != TIMEVALID) globaltime = localtime[1];
+      state = TIMEVALID;
+      return localtime[1];
+    }else if(diff2 < 2){
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[2];
+      state = TIMEVALID;
+      return localtime[2];
+    }else if(diff3 < 2){
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[0];
+      state = TIMEVALID;
+      return localtime[0];
+    }
     //DEBUG_PRINT(diff1);
     //DEBUG_PRINT(" ");
     //DEBUG_PRINT(diff2);
     //DEBUG_PRINT(" ");
     //DEBUG_PRINTLN(diff3);
     return -1;
+}
+time_t JJYReceiver::get_time() {
+  return globaltime;
 }
 
 JJYReceiver::delta_tick(){
@@ -209,12 +213,13 @@ JJYReceiver::power(){
   return (digitalRead(ponpin) == LOW) ?  true : false;
 }
 JJYReceiver::power(bool power){
+  if(ponpin == -1) return true;
   if(power == true){
-    if(ponpin != -1) digitalWrite(ponpin,LOW);
+    digitalWrite(ponpin,LOW);
     delay(300);
     return true;
   }else{
-    if(ponpin != -1) digitalWrite(ponpin,HIGH);
+    digitalWrite(ponpin,HIGH);
     return false;
   }
 }

@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#define DEBUG_BUILD
+//#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #include <SoftwareSerial.h>
@@ -57,7 +57,7 @@ class JJYReceiver {
     volatile uint8_t rcvcnt = 0;
     volatile enum STATE state = INIT;
     volatile unsigned long risingtime[2], fallingtime[2];
-    int datapin,ponpin,selpin;
+    uint8_t datapin,ponpin = -1 ,selpin = -1;
     // int agcpin;
     volatile uint8_t markercount = 0;
 
@@ -75,7 +75,7 @@ class JJYReceiver {
     volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    int monitorpin = -1;
+    uint8_t monitorpin = -1;
     volatile time_t localtime[3] = {-100,-200,-300};
     volatile time_t globaltime;
     volatile struct tm timeinfo;
@@ -109,6 +109,7 @@ class JJYReceiver {
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
     time_t getTime();
+    time_t get_time();
     #ifdef DEBUG_BUILD
     int debug();
     int debug2();
