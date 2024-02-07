@@ -74,21 +74,18 @@ time_t JJYReceiver::getTime() {
     time_t diff3 = labs(localtime[2] - localtime[0]);
     if( diff1 < 2){
       state = TIMEVALID;
-      digitalWrite(ponpin,HIGH);
-      //power(false);
-      globaltime = localtime[1];
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[1];
       return localtime[1];
     }else if(diff2 < 2){
       state = TIMEVALID;
-      digitalWrite(ponpin,HIGH);
-      //power(false);
-      globaltime = localtime[2];
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[2];
       return localtime[2];
     }else if(diff3 < 2){
       state = TIMEVALID;
-      digitalWrite(ponpin,HIGH);
-      //power(false);
-      globaltime = localtime[0];
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[0];
       return localtime[0];
     }
     //DEBUG_PRINT(diff1);
