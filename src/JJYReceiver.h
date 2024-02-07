@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #include <SoftwareSerial.h>
@@ -105,7 +105,6 @@ class JJYReceiver {
     int monitor(int monitor);
     int rotateArray(int8_t shift, uint16_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
-    int receive();
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
@@ -141,6 +140,7 @@ class JJYReceiver {
       for(uint8_t index = 0; index < VERIFYLOOP; index++){
         localtime[index] = index * -100;
       }
+      power(true);
     }
 
 };

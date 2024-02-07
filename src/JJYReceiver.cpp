@@ -84,6 +84,9 @@ time_t JJYReceiver::getTime() {
       globaltime = localtime[0];
       return globaltime;
     }
+    if(state == TIMEVALID)
+      power(false);
+    return;
     //DEBUG_PRINT(diff1);
     //DEBUG_PRINT(" ");
     //DEBUG_PRINT(diff2);
@@ -183,9 +186,6 @@ JJYReceiver::jjy_receive(){
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
 
   }
-  // if(rcvcnt == VERIFYLOOP){
-  //   power(false);
-  // }
 }
 JJYReceiver::status(){
   return state;
@@ -210,11 +210,11 @@ JJYReceiver::power(){
 }
 JJYReceiver::power(bool power){
   if(power == true){
-    digitalWrite(ponpin,LOW);
+    if(ponpin != -1) digitalWrite(ponpin,LOW);
     delay(300);
     return true;
   }else{
-    digitalWrite(ponpin,HIGH);
+    if(ponpin != -1) digitalWrite(ponpin,HIGH);
     return false;
   }
 }
@@ -249,10 +249,6 @@ JJYReceiver::stop(){
 
 }
 
-JJYReceiver::receive(){
-  power(true);
-  state = RECEIVE;
-}
 int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {

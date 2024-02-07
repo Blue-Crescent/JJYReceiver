@@ -44,7 +44,7 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 ![](img/IMG_5777.jpeg)
 ![](img/IMG_5776.jpeg)
 
-負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
+
 
 | 基板シルク | 機能                                                                                                              |
 | ----- | --------------------------------------------------------------------------------------------------------------- |
@@ -53,6 +53,36 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 | PON   | L: 動作<br/> H: 停止                                                                                                |
 | GND   | 基準電位                                                                                                            |
 | VDD   | 1.1~3.3 v                                                                                                       |
+
+
+
+負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
+
+![](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(2).jpeg)
+
+JJY波形
+
+
+
+![](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(3).jpeg)
+
+H
+
+
+
+![wave (5).jpeg](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(5).jpeg)
+
+L
+
+
+
+![wave (6).jpeg](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(6).jpeg)
+
+P,M
+
+
+
+
 
 補足
 lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されます。この受信モジュールは3.6Vが絶対最大定格ですので、書き込み時は受信モジュールを外すか、電圧レギュレーターをライタとの間に設けて保護してください。3.3Vでも書き込めました。
