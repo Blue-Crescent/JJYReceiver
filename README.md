@@ -58,25 +58,24 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
 
-![](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(2).jpeg)
+![](img/wave%20(2).jpeg)
 
 JJY波形
 
 
 
-![](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(3).jpeg)
+![](img/wave%20(3).jpeg)
 
 H
 
 
 
-![wave (5).jpeg](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(5).jpeg)
-
+![](img/wave%20(5).jpeg)
 L
 
 
 
-![wave (6).jpeg](D:\Documents\Arduino\libraries\JJYreceiver\img\wave%20(6).jpeg)
+![](img/wave%20(6).jpeg)
 
 P,M
 
