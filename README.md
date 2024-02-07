@@ -62,9 +62,6 @@ JJY波形
 
 H
 
-![](img\wave%20(5).jpeg)
-
-
 ![](img/wave%20(5).jpeg)
 
 L
@@ -118,8 +115,6 @@ JJYデータはLを含むデータが多いので、短めの点灯時間が多�
 ### jjy_receive()
 
 JJY受信モジュールのデータ出力をマイコンの端子変化割り込み対応の端子に接続し、その端子の変化割り込みルーチンで呼び出してください。
-
-
 
 ### getTime()
 
@@ -187,6 +182,7 @@ https://www.nict.go.jp/sts/jjy_signal.html
 - 40kHz/60kHz自動選択
 
 未定
+
 - 本家Arduinoボード動作確認。未所持 Uno R4欲しいな～
 
 # その他
