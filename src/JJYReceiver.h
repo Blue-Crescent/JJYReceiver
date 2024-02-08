@@ -60,6 +60,7 @@ class JJYReceiver {
     uint8_t datapin,ponpin = -1 ,selpin = -1;
     // int agcpin;
     volatile uint8_t markercount = 0;
+    volatile uint8_t reliability = 0;
 
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t jjyoffset = 0;
