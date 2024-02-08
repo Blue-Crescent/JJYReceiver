@@ -4,7 +4,7 @@
 #include <SoftwareSerial.h>
 #include <MsTimer2.h>
 
-#include <JJYReceiver.h>
+
 
 #define DATA 2
 #define PON 8
@@ -28,7 +28,7 @@ void setup() {
   MsTimer2::set(10, ticktock);
   MsTimer2::start();
   
-  // JJYReceiver lib setup.
+  // JJYReceiver lib sep.
   digitalWrite(MONITORPIN,HIGH);
   delay(1000);
   jjy.begin(DATA,SEL,PON);
