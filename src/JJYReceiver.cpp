@@ -72,21 +72,11 @@ time_t JJYReceiver::getTime() {
     time_t diff1 = labs(localtime[0] - localtime[1]);
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
-    if( diff1 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[1];
-      state = TIMEVALID;
-      return localtime[1];
-    }else if(diff2 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[2];
-      state = TIMEVALID;
-      return localtime[2];
-    }else if(diff3 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[0];
-      state = TIMEVALID;
-      return localtime[0];
+    if( diff1 <= 1 && diff2 <= 1 && diff3 <= 1){
+        power(false);
+        globaltime = localtime[0];
+        state = TIMEVALID;
+        return localtime[0];
     }
     //DEBUG_PRINT(diff1);
     //DEBUG_PRINT(" ");
@@ -95,18 +85,19 @@ time_t JJYReceiver::getTime() {
     //DEBUG_PRINTLN(diff3);
     return -1;
 }
+
 time_t JJYReceiver::get_time() {
   return globaltime;
 }
 
 JJYReceiver::delta_tick(){
-  uint8_t data = digitalRead(datapin)==HIGH ? 1 : 0;  
-  uint8_t PM, H, L;
+  uint8_t data, PM, H, L;
   tick = (tick+1) % 100;
   if(tick == 0){
     clock_tick();
   }
   if(state == TIMEVALID) return;
+  data = digitalRead(datapin)==HIGH ? 1 : 0;  
   shift_in(data, sampling, N);
   sampleindex++;
   if(sampleindex == 100){
