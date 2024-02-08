@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #include <SoftwareSerial.h>

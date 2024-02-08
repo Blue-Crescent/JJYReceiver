@@ -72,14 +72,16 @@ time_t JJYReceiver::getTime() {
     time_t diff1 = labs(localtime[0] - localtime[1]);
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
-    reliability = 0;
-    if( diff1 < 1 ) reliability++;
-    if( diff2 < 1 ) reliability++;
-    if( diff3 < 1 ) reliability++;
 
-    if( reliability >= 2){
+    reliability = 0;
+    if( diff1 <= 2 ) reliability++;
+    if( diff2 <= 2 ) reliability++;
+    if( diff3 <= 2 ) reliability++;
+
+    if( reliability >= 3){
         power(false);
-        globaltime = localtime[0];
+        if(state != TIMEVALID)
+          globaltime = localtime[0];
         state = TIMEVALID;
         return localtime[0];
     }
