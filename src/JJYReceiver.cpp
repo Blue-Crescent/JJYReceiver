@@ -172,7 +172,7 @@ void JJYReceiver::delta_tick(){
       quality = PM;
       break;
     }
-    quality = (quality * 100) / 90;
+    quality = (quality * 100) / (N*8);
     #ifdef DEBUG_BUILD
     debug();
     debug4();
