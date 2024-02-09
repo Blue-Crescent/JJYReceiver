@@ -153,7 +153,7 @@ SoftwareSerialなどのシリアル通信ライブラリを有効にすること
 
 ![](img/Debug1.png)
 
-受信中の中間データはlocaltime[0],localtime[1],localtime[2]のデータに格納されます。[0]のデータは途中から受信し、[1]のデータは最初から受信処理がされるためlocaltime[1]に最も早く時刻データが入ります。
+受信中の中間データはlocaltime[0],localtime[1],localtime[2]のデータに格納されます。
 
 # アルゴリズム
 
