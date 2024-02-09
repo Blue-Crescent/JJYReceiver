@@ -133,7 +133,7 @@ class JJYReceiver {
         calculateDate(year, yday ,&timeinfo.tm_mon, &timeinfo.tm_mday);
         timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
         timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 1;          // 分
-        timeinfo.tm_sec   = 2;           // 秒
+        timeinfo.tm_sec   = 1;           // 秒
         localtime[index]= mktime(&timeinfo);
         return true;
       }
