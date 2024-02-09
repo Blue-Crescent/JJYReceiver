@@ -52,6 +52,7 @@ JJYReceiver::clear(uint8_t* sampling, int length){
     }
 }
 
+
 int JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
   uint8_t carry;
   for (int i = 0; i < length; i++) {
@@ -77,8 +78,8 @@ time_t JJYReceiver::getTime() {
     if( diff1 <= 2 ) reliability++;
     if( diff2 <= 2 ) reliability++;
     if( diff3 <= 2 ) reliability++;
-
-    if( reliability >= 3){
+    DEBUG_PRINT("RELIABILITY:");    DEBUG_PRINTLN(matchcnt);
+    if( reliability >= 1){
         power(false);
         if(state != TIMEVALID)
           globaltime = localtime[0];
@@ -129,19 +130,20 @@ JJYReceiver::delta_tick(){
       case 2: // PM
         markercount++;
         if(markercount==2){
-          settime(rcvcnt);
-          getTime();
-          //timeinfo.tm_sec = 1;
-          //localtime[rcvcnt]= mktime(&timeinfo);
-          //if(state == TIMEVALID){
-          //  rotateArray((jjypayloadcnt),jjypayload,6);
+          if(settime(rcvcnt)){
+            rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
+            getTime();
+          }else{
+            rotateArray((jjypayloadcnt),jjypayload,6);
+          }
           //  rotateArray((jjypayloadcnt),testarray,6);
           //  for(uint8_t i; i<6; i++){
           //    update_time(jjystate);
           //  }
           //}
-          //debug3();
-          rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
+          #ifdef DEBUG_BUILD
+          debug3();
+          #endif
           jjypayloadcnt=0;
           jjystate = JJY_MIN;
           for (uint8_t i = 0; i < 6; i++){
@@ -261,19 +263,6 @@ int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month,
   *day = dayOfYear;
   //(*month)++;
 }
-bool JJYReceiver::calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity) {
-  byte count = 0;
-  for (uint8_t i = 0; i < bitLength; i++) {
-    if (value & (1 << i)) {
-      count++;
-    }
-  }
-  if((count % 2 == 0 ? 0 : 1) == expectedParity){ // Parity OK
-    return 0;
-  }else{// Parity Error
-    return 1;
-  }
-}
 
 // ***********************************************************************************************
 //  DEBUG FUNCTION
@@ -387,8 +376,7 @@ int JJYReceiver::debug4(){
     marker = (rcvcnt == 2) ? "*" : " ";
     DEBUG_PRINT(marker + str);  // Print current localtime.
     DEBUG_PRINT(" =>");  // Print current localtime.
-    time_t resulttime = getTime();
-    str = String(ctime(&resulttime));
+    str = String(ctime(&globaltime));
     DEBUG_PRINT(str);  // Print current localtime.
 }
 #endif
