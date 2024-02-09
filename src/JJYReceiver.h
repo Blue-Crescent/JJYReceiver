@@ -55,15 +55,13 @@ class JJYReceiver {
     JJYData jjydata[VERIFYLOOP];
     volatile uint8_t rcvcnt = 0;
     volatile enum STATE state = INIT;
-    volatile unsigned long risingtime[2], fallingtime[2];
+    volatile unsigned long fallingtime[2];
     uint8_t datapin,ponpin = -1 ,selpin = -1;
     // int agcpin;
     volatile uint8_t markercount = 0;
     volatile uint8_t reliability = 0;
 
     volatile enum JJYSTATE jjystate = JJY_INIT;
-    volatile uint8_t jjyoffset = 0;
-    volatile uint8_t jjypos = 0;
     volatile uint8_t tick = 0;
     volatile uint16_t jjypayload[6]; // 8bits bit data between marker
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
@@ -76,7 +74,7 @@ class JJYReceiver {
     volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     uint8_t monitorpin = -1;
-    volatile time_t localtime[3] = {-100,-200,-300};
+    volatile time_t localtime[3] = {-111,-222,-333};
     volatile time_t globaltime;
     volatile struct tm timeinfo;
     

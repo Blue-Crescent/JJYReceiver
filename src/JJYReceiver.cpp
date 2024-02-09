@@ -78,7 +78,7 @@ time_t JJYReceiver::getTime() {
     if( diff1 <= 2 ) reliability++;
     if( diff2 <= 2 ) reliability++;
     if( diff3 <= 2 ) reliability++;
-    DEBUG_PRINT("RELIABILITY:");    DEBUG_PRINTLN(matchcnt);
+    DEBUG_PRINT("RELIABILITY:");    DEBUG_PRINTLN(reliability);
     if( reliability >= 1){
         power(false);
         if(state != TIMEVALID)
@@ -133,13 +133,9 @@ JJYReceiver::delta_tick(){
           if(settime(rcvcnt)){
             rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
             getTime();
-          }else{
-            rotateArray((jjypayloadcnt),jjypayload,6);
           }
-          //  rotateArray((jjypayloadcnt),testarray,6);
-          //  for(uint8_t i; i<6; i++){
-          //    update_time(jjystate);
-          //  }
+          //else{
+            //rotateArray((jjypayloadcnt),jjypayload,6);
           //}
           #ifdef DEBUG_BUILD
           debug3();
