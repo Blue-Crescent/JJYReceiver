@@ -79,7 +79,7 @@ time_t JJYReceiver::getTime() {
     if( diff2 <= 2 ) reliability++;
     if( diff3 <= 2 ) reliability++;
     DEBUG_PRINT("RELIABILITY:");    DEBUG_PRINTLN(matchcnt);
-    if( reliability > 1){
+    if( reliability >= 1){
         power(false);
         if(state != TIMEVALID)
           globaltime = localtime[0];
