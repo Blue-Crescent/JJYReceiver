@@ -1,10 +1,6 @@
 #include <JJYReceiver.h>
-
-#include "lgt_LowPower.h"
 #include <SoftwareSerial.h>
 #include <MsTimer2.h>
-
-
 
 #define DATA 2
 #define PON 8
