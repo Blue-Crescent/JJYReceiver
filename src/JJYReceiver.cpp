@@ -65,16 +65,16 @@ int JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
   }
 }
 
-int JJYReceiver::rotateArray16(int8_t shift, uint16_t* array, uint8_t size) {
-  for (uint8_t i = 0; i < size; i++) {
-    array[i] = (array[i] + shift + size) % size;
-  }
-}
-int JJYReceiver::rotateArray8(int8_t shift, uint8_t* array, uint8_t size) {
-  for (uint8_t i = 0; i < size; i++) {
-    array[i] = (array[i] + shift + size) % size;
-  }
-}
+//int JJYReceiver::rotateArray16(int8_t shift, uint16_t* array, uint8_t size) {
+//  for (uint8_t i = 0; i < size; i++) {
+//    array[i] = (array[i] + shift + size) % size;
+//  }
+//}
+//int JJYReceiver::rotateArray8(int8_t shift, uint8_t* array, uint8_t size) {
+//  for (uint8_t i = 0; i < size; i++) {
+//    array[i] = (array[i] + shift + size) % size;
+//  }
+//}
 time_t JJYReceiver::getTime() {
     time_t diff1 = labs(localtime[0] - localtime[1]);
     time_t diff2 = labs(localtime[1] - localtime[2]);

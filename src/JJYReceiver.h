@@ -102,8 +102,8 @@ class JJYReceiver {
     int freq(int freq);
     int freq();
     int monitor(int monitor);
-    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
-    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
+//    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
+//    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
