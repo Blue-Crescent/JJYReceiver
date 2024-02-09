@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #include <SoftwareSerial.h>
@@ -19,7 +19,7 @@ extern SoftwareSerial debugSerial;
 # define DEBUG_PRINTLN(fmt,...)
 #endif
 
-#define N 13
+#define N 12
 enum STATE {INIT,RECEIVE,DATAVALID,TIMEVALID,STOP};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
@@ -60,6 +60,7 @@ class JJYReceiver {
     // int agcpin;
     volatile uint8_t markercount = 0;
     volatile uint8_t reliability = 0;
+    volatile uint8_t quality = 0;
 
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t tick = 0;
@@ -68,10 +69,10 @@ class JJYReceiver {
     volatile int8_t jjypayloadcnt = -2;
 
     volatile uint8_t sampleindex = 0;
-    volatile uint8_t sampling [N] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00,0x00};
-    volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile uint8_t sampling [N];
+    volatile uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00};
+    volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     uint8_t monitorpin = -1;
     volatile time_t localtime[3] = {-111,-222,-333};
@@ -84,9 +85,9 @@ class JJYReceiver {
 
 		JJYReceiver();
     ~JJYReceiver();
-    int jjy_receive();
-    int clock_tick();
-    int delta_tick();
+    void jjy_receive();
+    time_t clock_tick();
+    void delta_tick();
     int shift_in(uint8_t data, uint8_t* sampling, int length);
     int clear(uint8_t* sampling, int length);
     int begin(int datapin);
@@ -101,7 +102,8 @@ class JJYReceiver {
     int freq(int freq);
     int freq();
     int monitor(int monitor);
-    int rotateArray(int8_t shift, uint16_t* array, uint8_t size);
+    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
+    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
     int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);

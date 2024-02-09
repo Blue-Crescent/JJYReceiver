@@ -21,12 +21,13 @@ JJYReceiver::JJYReceiver(){
 JJYReceiver::~JJYReceiver(){
 }
 
-JJYReceiver::clock_tick(){
+time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
   if(state == TIMEVALID) return;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
+  return globaltime;
 }
 
 int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
@@ -64,7 +65,12 @@ int JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
   }
 }
 
-int JJYReceiver::rotateArray(int8_t shift, uint16_t* array, uint8_t size) {
+int JJYReceiver::rotateArray16(int8_t shift, uint16_t* array, uint8_t size) {
+  for (uint8_t i = 0; i < size; i++) {
+    array[i] = (array[i] + shift + size) % size;
+  }
+}
+int JJYReceiver::rotateArray8(int8_t shift, uint8_t* array, uint8_t size) {
   for (uint8_t i = 0; i < size; i++) {
     array[i] = (array[i] + shift + size) % size;
   }
@@ -73,28 +79,35 @@ time_t JJYReceiver::getTime() {
     time_t diff1 = labs(localtime[0] - localtime[1]);
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
-
-    reliability = 0;
-    if( diff1 <= 2 ) reliability++;
-    if( diff2 <= 2 ) reliability++;
-    if( diff3 <= 2 ) reliability++;
-    DEBUG_PRINT("RELIABILITY:");    DEBUG_PRINTLN(reliability);
-    if( reliability >= 1){
-        power(false);
-        if(state != TIMEVALID)
-          globaltime = localtime[0];
-        state = TIMEVALID;
-        return localtime[0];
+    if( diff1 < 2){
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[1];
+      state = TIMEVALID;
+      return localtime[1];
+    }else if(diff2 < 2){
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[2];
+      state = TIMEVALID;
+      return localtime[2];
+    }else if(diff3 < 2){
+      power(false);
+      if(state != TIMEVALID) globaltime = localtime[0];
+      state = TIMEVALID;
+      return localtime[0];
     }
+    //DEBUG_PRINT(diff1);
+    //DEBUG_PRINT(" ");
+    //DEBUG_PRINT(diff2);
+    //DEBUG_PRINT(" ");
+    //DEBUG_PRINTLN(diff3);
     return -1;
 }
-
 time_t JJYReceiver::get_time() {
   return globaltime;
 }
 
-JJYReceiver::delta_tick(){
-  uint8_t data, PM, H, L;
+void JJYReceiver::delta_tick(){
+  uint8_t data, PM, H, L, max;
   tick = (tick+1) % 100;
   if(tick == 0){
     clock_tick();
@@ -106,18 +119,20 @@ JJYReceiver::delta_tick(){
   if(sampleindex == 100){
     sampleindex = 0;
     clear(sampling,N);
-  }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
+  }else if(sampleindex == 95){ // クロックが揺らぐので100sampleしっかりないため少し間引く
     #ifdef DEBUG_BUILD
     debug2();
     #endif
     L = distance(CONST_L , sampling, N);
     H = distance(CONST_H , sampling, N);
     PM = distance(CONST_PM , sampling, N);
-    switch(max_of_three(L,H,PM)){
+    max = max_of_three(L,H,PM);
+    switch(max){
       case 0: // L
         jjypayload[jjystate] <<= 1;
         jjypayloadlen[jjystate]++;
         markercount=0;
+        quality = L;
         DEBUG_PRINT("L");
       break;
       case 1: // H
@@ -125,6 +140,7 @@ JJYReceiver::delta_tick(){
         jjypayload[jjystate] |= 0x1; 
         jjypayloadlen[jjystate]++;
         markercount=0;
+        quality = H;
         DEBUG_PRINT("H");
       break;
       case 2: // PM
@@ -133,9 +149,10 @@ JJYReceiver::delta_tick(){
           if(settime(rcvcnt)){
             rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
             getTime();
-          }
-          //else{
-            //rotateArray((jjypayloadcnt),jjypayload,6);
+          }//else{
+            //rotateArray16((jjypayloadcnt),testarray,6);
+            //rotateArray16((jjypayloadcnt),jjypayload,6);
+            //rotateArray8((jjypayloadcnt),jjypayloadlen,6);
           //}
           #ifdef DEBUG_BUILD
           debug3();
@@ -152,18 +169,21 @@ JJYReceiver::delta_tick(){
           jjystate = (jjystate + 1) % 6;
           jjypayloadcnt++;
         }
+      quality = PM;
       break;
     }
+    quality = (quality * 100) / 96;
     #ifdef DEBUG_BUILD
     debug();
     debug4();
+    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     #endif
     DEBUG_PRINTLN("");
   }
 
 }
 
-JJYReceiver::jjy_receive(){
+void JJYReceiver::jjy_receive(){
   unsigned long time = millis();
   unsigned long window;
   if(state == TIMEVALID) return;
@@ -342,6 +362,7 @@ int JJYReceiver::debug2(){
        }
 }
 int JJYReceiver::debug3(){
+  DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADLEN:");
   for(uint8_t i;i<6;i++)
     DEBUG_PRINT(jjypayloadlen[i],HEX);
@@ -355,7 +376,7 @@ int JJYReceiver::debug3(){
   DEBUG_PRINT("PAYLOAD:");
   for(uint8_t i; i<6; i++)
     DEBUG_PRINT(jjypayload[i],HEX);
-  DEBUG_PRINTLN(" ");
+  DEBUG_PRINTLN("");
 }
 int JJYReceiver::debug4(){
     DEBUG_PRINT(" ");  // Print current localtime.
