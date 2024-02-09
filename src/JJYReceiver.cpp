@@ -119,7 +119,7 @@ void JJYReceiver::delta_tick(){
   if(sampleindex == 100){
     sampleindex = 0;
     clear(sampling,N);
-  }else if(sampleindex == 95){ // クロックが揺らぐので100sampleしっかりないため少し間引く
+  }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
     #ifdef DEBUG_BUILD
     debug2();
     #endif
@@ -172,7 +172,7 @@ void JJYReceiver::delta_tick(){
       quality = PM;
       break;
     }
-    quality = (quality * 100) / 96;
+    quality = (quality * 100) / 90;
     #ifdef DEBUG_BUILD
     debug();
     debug4();
