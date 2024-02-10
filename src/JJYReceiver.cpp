@@ -233,7 +233,7 @@ JJYReceiver::freq(int freq){
 }
 
 JJYReceiver::power(){
-  return (digitalRead(ponpin) == LOW) ?  true : false;
+  return (digitalRead(ponpin) == HIGH && digitalRead(selpin) == HIGH) ?  false : true;
 }
 JJYReceiver::power(bool power){
   // PDN1(SEL) PDN2(PON)
