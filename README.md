@@ -46,13 +46,13 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 ![](img/IMG_5777.jpeg)
 ![](img/IMG_5776.jpeg)
 
-| 基板シルク | 機能                                                                                                              |
-| ----- | --------------------------------------------------------------------------------------------------------------- |
-| SEL   | L: 40kHz<br/>H: 60kHz                                                                                           |
-| OUT   | JJYデータ出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High |
-| PON   | L: 動作<br/> H: 停止                                                                                                |
-| GND   | 基準電位                                                                                                            |
-| VDD   | 1.1~3.3 v                                                                                                       |
+| 基板シルク | 機能                                                                                                              | MAS6181B端子 | ライブラリコンストラクタ |
+| ----- | --------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
+| SEL   | L: 40kHz<br/>H: 60kHz                                                                                           | PDN1       | pinsel       |
+| OUT   | JJYデータ出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
+| PON   | L: 動作<br/> H: 停止                                                                                                | PDN2       | pinpon       |
+| GND   | 基準電位                                                                                                            | VSS        | -            |
+| VDD   | 1.1~3.3 v                                                                                                       | VDD        | -            |
 
 負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
 
@@ -86,7 +86,15 @@ https://ja.aliexpress.com/item/1005005254051736.html
 
 ### JJYReceiver(ピン番号)
 
-ピン番号にはJJY受信モジュール出力を接続したマイコンの入力端子番号を設定します。
+    JJYReceiver(int pindata);
+    JJYReceiver(int pindata,int pinpon);
+    JJYReceiver(int pindata,int pinpon, int pinsel);
+
+- pindata  JJYデータ入力端子の端子番号
+
+- pinpon 電源動作（アクティブロー)
+
+- pinsel 周波数選択 (L:40kHz, H:60kHz)
 
 [Note] v0.4.0より変更
 

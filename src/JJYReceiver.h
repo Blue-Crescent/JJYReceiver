@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #include <SoftwareSerial.h>
@@ -84,9 +84,9 @@ class JJYReceiver {
     char buf[32];
   #endif
 
-    JJYReceiver(int datapin);
-    JJYReceiver(int datapin,int pon);
-    JJYReceiver(int datapin,int pon,int sel);
+    JJYReceiver(int pindata);
+    JJYReceiver(int pindata,int pinpon);
+    JJYReceiver(int pindata,int pinpon, int pinsel);
     ~JJYReceiver();
     void jjy_receive();
     time_t clock_tick();

@@ -21,11 +21,11 @@ JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon){
   selpin = pinsel;
   ponpin = pinpon;
 }
-JJYReceiver::JJYReceiver(int pindata,int pinsel){
+JJYReceiver::JJYReceiver(int pindata,int pinpon){
   pinMode(pindata, INPUT);
-  pinMode(pinsel, OUTPUT);
+  pinMode(pinpon, OUTPUT);
   datapin = pindata;
-  selpin = pinsel;
+  ponpin = pinpon;
 }
 JJYReceiver::JJYReceiver(int pindata){
   pinMode(pindata, INPUT);
@@ -220,6 +220,7 @@ JJYReceiver::status(){
   return state;
 }
 JJYReceiver::freq(int freq){
+  if(selpin == -1) return -1;
   if(freq == 40){
     digitalWrite(selpin,LOW);
     delay(300);

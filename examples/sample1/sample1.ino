@@ -10,26 +10,29 @@
 
 SoftwareSerial debugSerial(7, 6); // RX, TX
 
-JJYReceiver jjy(DATA,SEL,PON);
+JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
 
 void setup() {
-  // For LGT8f328 board setting.
+  // For LGT8f328 board setting. This can be ignored for other board.
   pinMode(10, INPUT);  pinMode(11, INPUT); // DATA
   pinMode(9, INPUT); // PON
+
   // Debug print
   debugSerial.begin(115200);
 
-  // 10msec Timer for clock ticktock
+  // 10msec Timer for clock ticktock (Mandatory)
   MsTimer2::set(10, ticktock);
   MsTimer2::start();
+  // DATA pin signal change edge detection. (Mandatory)
+  attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
   
-  // JJYReceiver lib sep.
+  // Optional for debug, light on for LED connection check.
   digitalWrite(MONITORPIN,HIGH);
   delay(1000);
-  jjy.begin();
-  attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
-  jjy.monitor(MONITORPIN);
+  // JJY Library
+  jjy.begin(); // Start JJY Receive
+  jjy.monitor(MONITORPIN); // Optional. Debug LED inidicator.
   jjy.freq(40); // Carrier frequency setting. Default:40
   
   debugSerial.println("JJY Initialized.");
@@ -44,7 +47,6 @@ void ticktock() {  // 10 msec interrupt service routine
 
 void loop() {
   delay(10000);
-  
   time_t now = jjy.get_time();
   time_t lastreceived = jjy.getTime();
 
