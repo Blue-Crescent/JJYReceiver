@@ -1,6 +1,6 @@
 #include <JJYReceiver.h>
 #include <SoftwareSerial.h>
-//#include <MsTimer2.h>
+#include <MsTimer2.h>
 
 #define DATA 2
 #define PON 8
@@ -21,8 +21,8 @@ void setup() {
   debugSerial.begin(115200);
 
   // 10msec Timer for clock ticktock (Mandatory)
-  // MsTimer2::set(10, ticktock);
-  // MsTimer2::start();
+  MsTimer2::set(10, ticktock);
+  MsTimer2::start();
   // DATA pin signal change edge detection. (Mandatory)
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
   

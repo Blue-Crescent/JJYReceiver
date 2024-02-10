@@ -271,7 +271,7 @@ void JJYReceiver::stop(){
   power(false);
 }
 
-int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
+void JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
     // 閏年の場合、2月は29日
@@ -353,7 +353,7 @@ void JJYReceiver::debug(){
 //   pinMode(agc, OUTPUT);
 //   JJYReceiver::datapin = datapin;
 // }
-int JJYReceiver::debug2(){
+void JJYReceiver::debug2(){
        char buf[32];
        for(int i = N - 1; i >= 0; i--){
          sprintf(buf, "%02X", sampling[i]);
@@ -361,7 +361,7 @@ int JJYReceiver::debug2(){
          if(i==0) debugSerial.print(":");
        }
 }
-int JJYReceiver::debug3(){
+void JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADLEN:");
   for(uint8_t i; i < 6; i++)
@@ -378,7 +378,7 @@ int JJYReceiver::debug3(){
     DEBUG_PRINT(jjypayload[i],HEX);
   DEBUG_PRINTLN("");
 }
-int JJYReceiver::debug4(){
+void JJYReceiver::debug4(){
     DEBUG_PRINT(" ");  // Print current localtime.
     String str = String(ctime(&localtime[0]));
     String marker;
