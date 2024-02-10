@@ -43,7 +43,7 @@ time_t JJYReceiver::clock_tick(){
   return globaltime;
 }
 
-int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
+int JJYReceiver::distance(volatile uint8_t* arr1,volatile uint8_t* arr2, int size) {
     int hammingDistance = 0;
     uint8_t temp;
     for (int i = 0; i < size; i++) {
@@ -60,14 +60,14 @@ int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
 int JJYReceiver::max_of_three(uint8_t a, uint8_t b, uint8_t c) {
     return (a > b) ? ((a > c) ? 0 : 2) : ((b > c) ? 1 : 2);
 }
-void JJYReceiver::clear(uint8_t* sampling, int length){
+void JJYReceiver::clear(volatile uint8_t* sampling, int length){
     for (uint8_t i = 0; i < length; i++) {
       sampling[i] = 0;
     }
 }
 
 
-void JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
+void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
   uint8_t carry;
   for (int i = 0; i < length; i++) {
     if(i==0) carry = data;
@@ -179,7 +179,7 @@ void JJYReceiver::delta_tick(){
           DEBUG_PRINTLN("M");
         }else{
           DEBUG_PRINT("P");
-          jjystate = (jjystate + 1) % 6;
+          jjystate = static_cast<JJYSTATE>((jjystate + 1) % 6);
           jjypayloadcnt++;
         }
       quality = PM;
@@ -215,10 +215,10 @@ void JJYReceiver::jjy_receive(){
 
   }
 }
-JJYReceiver::status(){
+STATE JJYReceiver::status(){
   return state;
 }
-JJYReceiver::freq(uint8_t freq){
+uint8_t JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
   if(freq == 40){
     digitalWrite(selpin,LOW);
@@ -231,10 +231,10 @@ JJYReceiver::freq(uint8_t freq){
   return frequency;
 }
 
-JJYReceiver::power(){
+bool JJYReceiver::power(){
   return (digitalRead(ponpin) == HIGH && digitalRead(selpin) == HIGH) ?  false : true;
 }
-JJYReceiver::power(bool power){
+bool JJYReceiver::power(bool power){
   // PDN1(SEL) PDN2(PON)
   // 0 0 freq2 40kHz
   // 0 1 freq2 (non use)
@@ -257,16 +257,16 @@ JJYReceiver::power(bool power){
   }
 }
 
-JJYReceiver::monitor(int monitorpin){
-  pinMode(monitorpin, OUTPUT);
-  JJYReceiver::monitorpin = monitorpin;
+void JJYReceiver::monitor(int pin){
+  pinMode(pin, OUTPUT);
+  monitorpin = pin;
 }
 
-JJYReceiver::begin(){
+void JJYReceiver::begin(){
   init();
 }
 
-JJYReceiver::stop(){
+void JJYReceiver::stop(){
   state = TIMEVALID;
   power(false);
 }
@@ -291,7 +291,7 @@ int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t
 // ***********************************************************************************************
 
 #ifdef DEBUG_BUILD
-JJYReceiver::debug(){
+void JJYReceiver::debug(){
     DEBUG_PRINT(" ");
     //DEBUG_PRINT(jjypayloadcnt);
     //DEBUG_PRINT(":");
@@ -337,7 +337,7 @@ JJYReceiver::debug(){
   DEBUG_PRINT("");
 }
 
-// JJYReceiver::agc(bool activate){
+// void JJYReceiver::agc(bool activate){
 //   if(activate == true){
 //     digitalWrite(agcpin,LOW);
 //     return 1;
@@ -346,7 +346,7 @@ JJYReceiver::debug(){
 //     return 0;
 //   }
 // }
-// JJYReceiver::begin(int datapin,int sel,int pon,int agc){
+// void JJYReceiver::begin(int datapin,int sel,int pon,int agc){
 //   pinMode(datapin, INPUT);
 //   pinMode(sel, OUTPUT);
 //   pinMode(pon, OUTPUT);
