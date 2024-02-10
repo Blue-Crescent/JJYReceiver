@@ -50,31 +50,36 @@ void loop() {
   time_t lastreceived = jjy.getTime();
   tm tm_info;
 
-  localtime_r(&now, &tm_info);
-
   if(lastreceived != -1){
+    localtime_r(&now, &tm_info);
     const char *days[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};  
     String str0 = String(tm_info.tm_year + 1900);
     String str1 = String(tm_info.tm_mon + 1);
     String str2 = String(tm_info.tm_mday);
     String str3 = String(tm_info.tm_hour);
-    String str4 = String(tm_info.tm_min);
-    String str5 = String(tm_info.tm_sec);
+    char buf1[3];
+    sprintf(buf1, "%02d", tm_info.tm_min);
+    char buf2[3];
+    sprintf(buf2, "%02d", tm_info.tm_sec); 
     String strm = String(days[tm_info.tm_wday]);
-    debugSerial.print(str0+"/"+str1+"/"+str2+" "+strm+" "+str3+":"+str4+" "+str5);  // Print current date time.
+    debugSerial.print(str0+"/"+str1+"/"+str2+" "+strm+" "+str3+":"+buf1+" "+buf2);  // Print current date time.
 
     debugSerial.print(" Last received:");    
     String str = String(ctime(&lastreceived));
     debugSerial.println(str);  // Print last received time
-  }
-
-  if((lastreceived - now) > 3600){ // receive from last over an hour.
+    
+  }else{
     String str0 = "Receiving quality:";
     String str1 = String(jjy.quality);
     debugSerial.print(str0 + str1);
     
     String str = String(ctime(&now));
     debugSerial.println(" "+str);
+  }
+  if((now - lastreceived) > 3600){ // receive from last over an hour.
+    jjy.begin();
+
+    
   } 
   delay(1000);
 }
