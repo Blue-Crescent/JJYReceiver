@@ -46,7 +46,6 @@ void ticktock() {  // 10 msec interrupt service routine
 void loop() {
   time_t now = jjy.get_time();
   tm tm;
-
   localtime_r(&now, &tm);
 
   if (tm.tm_min == 0) { // run every an hour. 1時間ごとに受信
