@@ -56,7 +56,7 @@ class JJYReceiver {
     volatile uint8_t rcvcnt = 0;
     volatile enum STATE state = INIT;
     volatile unsigned long fallingtime[2];
-    volatile uint8_t datapin,ponpin = -1 ,selpin = -1;
+    volatile int8_t datapin,ponpin = -1 ,selpin = -1;
     volatile uint8_t frequency;
     // int agcpin;
     volatile uint8_t markercount = 0;
@@ -80,9 +80,6 @@ class JJYReceiver {
     volatile time_t globaltime;
     struct tm timeinfo;
     
-  #ifdef DEBUG_BUILD
-    char buf[32];
-  #endif
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
