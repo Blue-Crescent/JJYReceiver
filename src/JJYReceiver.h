@@ -57,7 +57,8 @@ class JJYReceiver {
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t rcvcnt = 0;
     volatile unsigned long fallingtime[2];
-    volatile int8_t datapin,ponpin = -1 ,selpin = -1;
+    volatile const int8_t datapin,ponpin = -1 ,selpin = -1;
+    volatile int8_t monitorpin = -1;
     volatile uint8_t frequency;
     // int agcpin;
     volatile uint8_t markercount = 0;
@@ -71,11 +72,10 @@ class JJYReceiver {
 
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
-    volatile uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00};
-    volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    int8_t monitorpin = -1;
     volatile time_t localtime[3] = {-111,-222,-333};
     volatile time_t globaltime;
     struct tm timeinfo;
@@ -93,7 +93,7 @@ class JJYReceiver {
     void begin();
     void stop();
     // int agc(bool agc);
-    bool power(bool power);
+    bool power(bool powerstate);
     bool power();
     STATE status();
     uint8_t freq(uint8_t freq);

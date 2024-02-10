@@ -13,23 +13,27 @@
   extern SoftwareSerial debugSerial;
 #endif
 
-JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon){
+JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) : 
+ datapin(pindata), selpin(pinsel), ponpin(pinpon)
+ {
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   pinMode(pinpon, OUTPUT);
-  datapin = pindata;
-  selpin = pinsel;
-  ponpin = pinpon;
+  //datapin = pindata;
+  //selpin = pinsel;
+  //ponpin = pinpon;
 }
-JJYReceiver::JJYReceiver(int pindata,int pinpon){
+JJYReceiver::JJYReceiver(int pindata,int pinpon):
+ datapin(pindata), ponpin(pinpon){
   pinMode(pindata, INPUT);
   pinMode(pinpon, OUTPUT);
-  datapin = pindata;
-  ponpin = pinpon;
+  //datapin = pindata;
+  //ponpin = pinpon;
 }
-JJYReceiver::JJYReceiver(int pindata){
+JJYReceiver::JJYReceiver(int pindata):
+ datapin(pindata){
   pinMode(pindata, INPUT);
-  datapin = pindata;
+  //datapin = pindata;
 }
 
 JJYReceiver::~JJYReceiver(){
@@ -243,7 +247,7 @@ uint8_t JJYReceiver::freq(uint8_t freq){
 bool JJYReceiver::power(){
   return (digitalRead(ponpin) == HIGH && digitalRead(selpin) == HIGH) ?  false : true;
 }
-bool JJYReceiver::power(bool power){
+bool JJYReceiver::power(bool powerstate){
   // PDN1(SEL) PDN2(PON)
   // 0 0 freq2 40kHz
   // 0 1 freq2 (non use)
@@ -253,7 +257,7 @@ bool JJYReceiver::power(bool power){
     DEBUG_PRINTLN(selpin);
     DEBUG_PRINTLN(ponpin);
   if(ponpin == -1) return true;
-  if(power == true){
+  if(powerstate == true){
     digitalWrite(ponpin,LOW);
     if(selpin == -1) return false;
     freq(frequency);
