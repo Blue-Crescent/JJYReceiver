@@ -1,6 +1,6 @@
-# JJYReceiver
+# JJY Receiver
 
-JJY Receiver Library for arduino
+JJY standard radio wave signal receiver library for arduino.
 
 # 機能
 
