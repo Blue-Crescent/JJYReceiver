@@ -19,7 +19,7 @@ extern SoftwareSerial debugSerial;
 # define DEBUG_PRINTLN(fmt,...)
 #endif
 
-#define N 12
+const int N = 12;
 enum STATE {INIT,RECEIVE,TIMEVALID};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
