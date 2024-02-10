@@ -248,6 +248,9 @@ bool JJYReceiver::power(bool power){
   // 0 1 freq2 (non use)
   // 1 0 freq1 60kHz
   // 1 1 power down
+    DEBUG_PRINTLN(frequency);
+    DEBUG_PRINTLN(selpin);
+    DEBUG_PRINTLN(ponpin);
   if(ponpin == -1) return true;
   if(power == true){
     digitalWrite(ponpin,LOW);
@@ -258,9 +261,6 @@ bool JJYReceiver::power(bool power){
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
-    DEBUG_PRINTLN(frequency);
-    DEBUG_PRINTLN(selpin);
-    DEBUG_PRINTLN(ponpin);
     return false;
   }
 }
