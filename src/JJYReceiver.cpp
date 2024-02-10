@@ -131,7 +131,7 @@ void JJYReceiver::delta_tick(){
   sampleindex++;
   if(sampleindex == 100){
     sampleindex = 0;
-    clear(sampling,N);
+    clear(sampling, N);
   }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
     #ifdef DEBUG_BUILD
     debug2();
@@ -355,7 +355,7 @@ void JJYReceiver::debug(){
 // }
 int JJYReceiver::debug2(){
        char buf[32];
-       for(int i=N-1; i>=0; i--){
+       for(int i = N - 1; i >= 0; i--){
          sprintf(buf, "%02X", sampling[i]);
          debugSerial.print(buf);
          if(i==0) debugSerial.print(":");
@@ -364,7 +364,7 @@ int JJYReceiver::debug2(){
 int JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADLEN:");
-  for(uint8_t i;i<6;i++)
+  for(uint8_t i; i < 6; i++)
     DEBUG_PRINT(jjypayloadlen[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADCNT:");
@@ -374,7 +374,7 @@ int JJYReceiver::debug3(){
   //  DEBUG_PRINT(testarray[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOAD:");
-  for(uint8_t i; i<6; i++)
+  for(uint8_t i; i < 6; i++)
     DEBUG_PRINT(jjypayload[i],HEX);
   DEBUG_PRINTLN("");
 }
