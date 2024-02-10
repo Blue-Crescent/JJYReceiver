@@ -1,6 +1,6 @@
 #include <JJYReceiver.h>
 #include <SoftwareSerial.h>
-#include <MsTimer2.h>
+//#include <MsTimer2.h>
 
 #define DATA 2
 #define PON 8
@@ -21,8 +21,8 @@ void setup() {
   debugSerial.begin(115200);
 
   // 10msec Timer for clock ticktock (Mandatory)
-  MsTimer2::set(10, ticktock);
-  MsTimer2::start();
+  // MsTimer2::set(10, ticktock);
+  // MsTimer2::start();
   // DATA pin signal change edge detection. (Mandatory)
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
   
@@ -54,7 +54,7 @@ void loop() {
 
   if(lastreceived != -1){
     const char *days[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};  
-    String str0 = String(tm_info.tm_year);
+    String str0 = String(tm_info.tm_year + 1900);
     String str1 = String(tm_info.tm_mon + 1);
     String str2 = String(tm_info.tm_mday);
     String str3 = String(tm_info.tm_hour);
