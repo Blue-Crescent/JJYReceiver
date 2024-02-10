@@ -37,6 +37,7 @@ JJYReceiver::~JJYReceiver(){
 
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
+  if(state == TIMEVALID) return globaltime;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
@@ -93,18 +94,24 @@ time_t JJYReceiver::getTime() {
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
     if( diff1 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[1];
+      if(state != TIMEVALID){
+        globaltime = localtime[1];
+        stop();
+      }
       state = TIMEVALID;
       return localtime[1];
     }else if(diff2 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[2];
+      if(state != TIMEVALID){
+        globaltime = localtime[2];
+        stop();
+      }
       state = TIMEVALID;
       return localtime[2];
     }else if(diff3 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[0];
+      if(state != TIMEVALID){
+        globaltime = localtime[0];
+        stop();
+      }
       state = TIMEVALID;
       return localtime[0];
     }
@@ -168,7 +175,7 @@ void JJYReceiver::delta_tick(){
             //rotateArray8((jjypayloadcnt),jjypayloadlen,6);
           //}
           #ifdef DEBUG_BUILD
-          debug3();
+          //debug3();
           #endif
           jjypayloadcnt=0;
           jjystate = JJY_MIN;
@@ -185,11 +192,11 @@ void JJYReceiver::delta_tick(){
       quality = PM;
       break;
     }
-    quality = constrain(((((quality * 100) / (N*8)) - 50) <<1),0,100);
+    quality = (uint8_t) (((quality * 100) / (N*8)) - 50) * 2;
     #ifdef DEBUG_BUILD
     debug();
     debug4();
-    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
+    //DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     #endif
     DEBUG_PRINTLN("");
   }
@@ -245,14 +252,13 @@ bool JJYReceiver::power(bool power){
     digitalWrite(ponpin,LOW);
     if(selpin == -1) return false;
     freq(frequency);
+    DEBUG_PRINTLN("POWER ON");
     return true;
   }else{
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
-    DEBUG_PRINTLN(frequency);
-    DEBUG_PRINTLN(selpin);
-    DEBUG_PRINTLN(ponpin);
+    DEBUG_PRINTLN("POWER OFF");
     return false;
   }
 }
@@ -392,7 +398,7 @@ void JJYReceiver::debug4(){
     str = String(ctime(&localtime[2]));
     marker = (rcvcnt == 2) ? "*" : " ";
     DEBUG_PRINT(marker + str);  // Print current localtime.
-    DEBUG_PRINT(" =>");  // Print current localtime.
+    DEBUG_PRINT(" => ");  // Print current localtime.
     str = String(ctime(&globaltime));
     DEBUG_PRINT(str);  // Print current localtime.
 }
