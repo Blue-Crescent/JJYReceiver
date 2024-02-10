@@ -263,11 +263,8 @@ bool JJYReceiver::power(bool power){
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
-<<<<<<< .mine
     DEBUG_PRINTLN("POWER OFF");
-=======
 
->>>>>>> .theirs
     return false;
   }
 }
