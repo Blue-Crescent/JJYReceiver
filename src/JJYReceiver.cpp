@@ -37,6 +37,7 @@ JJYReceiver::~JJYReceiver(){
 
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
+  if(state == TIMEVALID) return;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
@@ -93,18 +94,24 @@ time_t JJYReceiver::getTime() {
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
     if( diff1 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[1];
+      if(state != TIMEVALID){
+        globaltime = localtime[1];
+        stop();
+      }
       state = TIMEVALID;
       return localtime[1];
     }else if(diff2 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[2];
+      if(state != TIMEVALID){
+        globaltime = localtime[2];
+        stop();
+      }
       state = TIMEVALID;
       return localtime[2];
     }else if(diff3 < 2){
-      power(false);
-      if(state != TIMEVALID) globaltime = localtime[0];
+      if(state != TIMEVALID){
+        globaltime = localtime[0];
+        stop();
+      }
       state = TIMEVALID;
       return localtime[0];
     }
@@ -228,6 +235,7 @@ uint8_t JJYReceiver::freq(uint8_t freq){
     delay(300);
   }
   frequency = freq;
+  DEBUG_PRINTLN(frequency);
   return frequency;
 }
 
