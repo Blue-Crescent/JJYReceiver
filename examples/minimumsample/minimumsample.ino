@@ -1,6 +1,5 @@
 #include <JJYReceiver.h>
-#include <SoftwareSerial.h>
-#include <MsTimer2.h>
+#include <MsTimer2.h> // Alternative timer lib can be used.
 
 #define DATA 2
 
@@ -16,6 +15,8 @@ void setup() {
 
   // JJY Library
   jjy.begin(); // Start JJY Receive
+
+  //while(jjy.getTime() == -1) delay(1000); // blocking until time available.
 }
 
 void isr_routine() { // pin change interrupt service routine
