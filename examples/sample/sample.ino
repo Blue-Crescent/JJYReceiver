@@ -76,10 +76,8 @@ void loop() {
     String str = String(ctime(&now));
     debugSerial.println(" "+str);
   }
-  if((now - lastreceived) > 3600){ // receive from last over an hour.
+  if((now - lastreceived) > 3600 && lastreceived != -1){ // receive from last over an hour.
     jjy.begin();
-
-    
   } 
   delay(1000);
 }
