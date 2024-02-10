@@ -53,8 +53,9 @@ class JJYReceiver {
   
 	public:
     JJYData jjydata[VERIFYLOOP];
-    volatile uint8_t rcvcnt = 0;
     volatile enum STATE state = INIT;
+    volatile enum JJYSTATE jjystate = JJY_INIT;
+    volatile uint8_t rcvcnt = 0;
     volatile unsigned long fallingtime[2];
     volatile int8_t datapin,ponpin = -1 ,selpin = -1;
     volatile uint8_t frequency;
@@ -63,9 +64,8 @@ class JJYReceiver {
     volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
-    volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t tick = 0;
-    volatile uint16_t jjypayload[6]; // 8bits bit data between marker
+    volatile uint16_t jjypayload[6]; // 9bits bit data between marker
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
     volatile int8_t jjypayloadcnt = -2;
 
@@ -75,7 +75,7 @@ class JJYReceiver {
     volatile uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    uint8_t monitorpin = -1;
+    int8_t monitorpin = -1;
     volatile time_t localtime[3] = {-111,-222,-333};
     volatile time_t globaltime;
     struct tm timeinfo;
@@ -92,7 +92,6 @@ class JJYReceiver {
     void clear(volatile uint8_t* sampling, int length);
     void begin();
     void stop();
-    // int begin(int datapin,int pon,int sel,int agcpin);
     // int agc(bool agc);
     bool power(bool power);
     bool power();
