@@ -196,6 +196,7 @@ void JJYReceiver::delta_tick(){
     #ifdef DEBUG_BUILD
     debug();
     debug4();
+    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     //DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     #endif
     DEBUG_PRINTLN("");
@@ -235,6 +236,7 @@ uint8_t JJYReceiver::freq(uint8_t freq){
     delay(300);
   }
   frequency = freq;
+  DEBUG_PRINTLN(frequency);
   return frequency;
 }
 
@@ -247,6 +249,9 @@ bool JJYReceiver::power(bool power){
   // 0 1 freq2 (non use)
   // 1 0 freq1 60kHz
   // 1 1 power down
+    DEBUG_PRINTLN(frequency);
+    DEBUG_PRINTLN(selpin);
+    DEBUG_PRINTLN(ponpin);
   if(ponpin == -1) return true;
   if(power == true){
     digitalWrite(ponpin,LOW);
@@ -258,7 +263,11 @@ bool JJYReceiver::power(bool power){
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
+<<<<<<< .mine
     DEBUG_PRINTLN("POWER OFF");
+=======
+
+>>>>>>> .theirs
     return false;
   }
 }
