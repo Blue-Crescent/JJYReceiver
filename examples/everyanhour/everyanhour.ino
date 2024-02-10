@@ -46,12 +46,14 @@ void ticktock() {  // 10 msec interrupt service routine
 void loop() {
   time_t now = jjy.get_time();
   tm tm;
+
   localtime_r(&now, &tm);
+  String str1 = String(tm.tm_hour);
+  String str2 = String(tm.tm_min);
+  String str3 = String(tm.tm_sec);
+  debugSerial.println(str1 + ':' + str2 + ' ' + str3);  // Print current date time.
 
   if (tm.tm_min == 0) { // run every an hour. 1時間ごとに受信
-    String str1 = String(tm.tm_hour);
-    String str2 = String(tm.tm_min);
-    debugSerial.println(str1 + ':' + str2);  // Print current date time.
     jjy.begin();  
   }
   
