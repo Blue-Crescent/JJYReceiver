@@ -10,8 +10,7 @@
 
 SoftwareSerial debugSerial(7, 6); // RX, TX
 
-
-JJYReceiver jjy;
+JJYReceiver jjy(DATA,SEL,PON);
 
 void setup() {
   // For LGT8f328 board setting.
@@ -27,7 +26,7 @@ void setup() {
   // JJYReceiver lib sep.
   digitalWrite(MONITORPIN,HIGH);
   delay(1000);
-  jjy.begin(DATA,SEL,PON);
+  jjy.begin();
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
   jjy.monitor(MONITORPIN);
@@ -56,7 +55,6 @@ void loop() {
     debugSerial.print(" Last received:");    
     str = String(ctime(&lastreceived));
     debugSerial.println(str);  // Print last received time
-
   }else{
     String str = "Receiving:";
     debugSerial.print(str);
