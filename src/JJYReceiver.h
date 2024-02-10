@@ -57,6 +57,7 @@ class JJYReceiver {
     volatile enum STATE state = INIT;
     volatile unsigned long fallingtime[2];
     uint8_t datapin,ponpin = -1 ,selpin = -1;
+    uint8_t frequency;
     // int agcpin;
     volatile uint8_t markercount = 0;
     volatile uint8_t reliability = 0;

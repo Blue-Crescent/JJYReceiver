@@ -206,31 +206,36 @@ JJYReceiver::status(){
   return state;
 }
 JJYReceiver::freq(){
-  return (digitalRead(selpin) == LOW) ?  40 : 60;
+  return frequency;
 }
 JJYReceiver::freq(int freq){
   if(freq == 40){
     digitalWrite(selpin,LOW);
     delay(300);
-    return 40;
   }else if(freq == 60){
     digitalWrite(selpin,HIGH);
     delay(300);
-    return 60;
   }
+  frequency = freq;
+  return frequency;
 }
 
 JJYReceiver::power(){
   return (digitalRead(ponpin) == LOW) ?  true : false;
 }
 JJYReceiver::power(bool power){
+  // PDN1(SEL) PDN2(PON)
+  // 0 0 freq2 40kHz
+  // 0 1 freq2 (non use)
+  // 1 0 freq1 60kHz
+  // 1 1 power down
   if(ponpin == -1) return true;
   if(power == true){
     digitalWrite(ponpin,LOW);
-    delay(300);
     return true;
   }else{
     digitalWrite(ponpin,HIGH);
+    digitalWrite(selpin,HIGH);
     return false;
   }
 }
