@@ -10,12 +10,26 @@
     @brief  Constructor for JJYReceiver
 */
 #ifdef DEBUG_BUILD
-  
   extern SoftwareSerial debugSerial;
 #endif
 
-uint16_t testarray[6] = {0,1,2,3,4,5};
-JJYReceiver::JJYReceiver(){
+JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon){
+  pinMode(pindata, INPUT);
+  pinMode(pinsel, OUTPUT);
+  pinMode(pinpon, OUTPUT);
+  datapin = pindata;
+  selpin = pinsel;
+  ponpin = pinpon;
+}
+JJYReceiver::JJYReceiver(int pindata,int pinsel){
+  pinMode(pindata, INPUT);
+  pinMode(pinsel, OUTPUT);
+  datapin = pindata;
+  selpin = pinsel;
+}
+JJYReceiver::JJYReceiver(int pindata){
+  pinMode(pindata, INPUT);
+  datapin = pindata;
 }
 
 JJYReceiver::~JJYReceiver(){
@@ -205,9 +219,6 @@ void JJYReceiver::jjy_receive(){
 JJYReceiver::status(){
   return state;
 }
-JJYReceiver::freq(){
-  return frequency;
-}
 JJYReceiver::freq(int freq){
   if(freq == 40){
     digitalWrite(selpin,LOW);
@@ -234,8 +245,8 @@ JJYReceiver::power(bool power){
     digitalWrite(ponpin,LOW);
     return true;
   }else{
+    freq(frequency);
     digitalWrite(ponpin,HIGH);
-    digitalWrite(selpin,HIGH);
     return false;
   }
 }
@@ -245,27 +256,10 @@ JJYReceiver::monitor(int monitorpin){
   JJYReceiver::monitorpin = monitorpin;
 }
 
-JJYReceiver::begin(int pindata,int pinsel,int pinpon){
-  pinMode(pindata, INPUT);
-  pinMode(pinsel, OUTPUT);
-  pinMode(pinpon, OUTPUT);
-  datapin = pindata;
-  selpin = pinsel;
-  ponpin = pinpon;
+JJYReceiver::begin(){
   init();
 }
-JJYReceiver::begin(int pindata,int pinsel){
-  pinMode(pindata, INPUT);
-  pinMode(pinsel, OUTPUT);
-  datapin = pindata;
-  selpin = pinsel;
-  init();
-}
-JJYReceiver::begin(int pindata){
-  pinMode(pindata, INPUT);
-  datapin = pindata;
-  init();
-}
+
 JJYReceiver::stop(){
 
 }
@@ -374,9 +368,9 @@ int JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADCNT:");
   DEBUG_PRINTLN((int)jjypayloadcnt);
-  DEBUG_PRINT("TESTARRAY:");
-  for(uint8_t i;i<6;i++)
-    DEBUG_PRINT(testarray[i],HEX);
+  //DEBUG_PRINT("TESTARRAY:");
+  //for(uint8_t i;i<6;i++)
+  //  DEBUG_PRINT(testarray[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOAD:");
   for(uint8_t i; i<6; i++)

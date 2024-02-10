@@ -84,16 +84,16 @@ class JJYReceiver {
     char buf[32];
   #endif
 
-		JJYReceiver();
+    JJYReceiver(int datapin);
+    JJYReceiver(int datapin,int pon);
+    JJYReceiver(int datapin,int pon,int sel);
     ~JJYReceiver();
     void jjy_receive();
     time_t clock_tick();
     void delta_tick();
     int shift_in(uint8_t data, uint8_t* sampling, int length);
     int clear(uint8_t* sampling, int length);
-    int begin(int datapin);
-    int begin(int datapin,int pon);
-    int begin(int datapin,int pon,int sel);
+    int begin();
     int stop();
     // int begin(int datapin,int pon,int sel,int agcpin);
     // int agc(bool agc);
@@ -101,7 +101,6 @@ class JJYReceiver {
     int power();
     int status();
     int freq(int freq);
-    int freq();
     int monitor(int monitor);
 //    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
 //    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
