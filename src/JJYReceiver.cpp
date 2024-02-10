@@ -243,12 +243,14 @@ JJYReceiver::power(bool power){
   // 1 1 power down
   if(ponpin == -1) return true;
   if(power == true){
-    freq(frequency);
     digitalWrite(ponpin,LOW);
+    if(selpin == -1) return false;
+    freq(frequency);
     return true;
   }else{
-    digitalWrite(selpin,HIGH);
     digitalWrite(ponpin,HIGH);
+    if(selpin == -1) return false;
+    digitalWrite(selpin,HIGH);
     return false;
   }
 }
