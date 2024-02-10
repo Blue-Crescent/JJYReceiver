@@ -1,4 +1,4 @@
-[![Arduino Lint](https://github.com/arduino/arduino-lint)](https://github.com/arduino/arduino-lint/actions)
+[![Arduino-lint](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduino-lint.yml/badge.svg)](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduino-lint.yml)
 
 # JJY Receiver
 
