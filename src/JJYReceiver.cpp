@@ -37,14 +37,13 @@ JJYReceiver::~JJYReceiver(){
 
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
-  if(state == TIMEVALID) return;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
   return globaltime;
 }
 
-int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
+int JJYReceiver::distance(volatile uint8_t* arr1,volatile uint8_t* arr2, int size) {
     int hammingDistance = 0;
     uint8_t temp;
     for (int i = 0; i < size; i++) {
@@ -61,14 +60,14 @@ int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
 int JJYReceiver::max_of_three(uint8_t a, uint8_t b, uint8_t c) {
     return (a > b) ? ((a > c) ? 0 : 2) : ((b > c) ? 1 : 2);
 }
-JJYReceiver::clear(uint8_t* sampling, int length){
+void JJYReceiver::clear(volatile uint8_t* sampling, int length){
     for (uint8_t i = 0; i < length; i++) {
       sampling[i] = 0;
     }
 }
 
 
-int JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
+void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
   uint8_t carry;
   for (int i = 0; i < length; i++) {
     if(i==0) carry = data;
@@ -132,7 +131,7 @@ void JJYReceiver::delta_tick(){
   sampleindex++;
   if(sampleindex == 100){
     sampleindex = 0;
-    clear(sampling,N);
+    clear(sampling, N);
   }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
     #ifdef DEBUG_BUILD
     debug2();
@@ -180,7 +179,7 @@ void JJYReceiver::delta_tick(){
           DEBUG_PRINTLN("M");
         }else{
           DEBUG_PRINT("P");
-          jjystate = (jjystate + 1) % 6;
+          jjystate = static_cast<JJYSTATE>((jjystate + 1) % 6);
           jjypayloadcnt++;
         }
       quality = PM;
@@ -216,10 +215,10 @@ void JJYReceiver::jjy_receive(){
 
   }
 }
-JJYReceiver::status(){
+STATE JJYReceiver::status(){
   return state;
 }
-JJYReceiver::freq(int freq){
+uint8_t JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
   if(freq == 40){
     digitalWrite(selpin,LOW);
@@ -232,10 +231,10 @@ JJYReceiver::freq(int freq){
   return frequency;
 }
 
-JJYReceiver::power(){
+bool JJYReceiver::power(){
   return (digitalRead(ponpin) == HIGH && digitalRead(selpin) == HIGH) ?  false : true;
 }
-JJYReceiver::power(bool power){
+bool JJYReceiver::power(bool power){
   // PDN1(SEL) PDN2(PON)
   // 0 0 freq2 40kHz
   // 0 1 freq2 (non use)
@@ -251,24 +250,28 @@ JJYReceiver::power(bool power){
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
+    DEBUG_PRINTLN(frequency);
+    DEBUG_PRINTLN(selpin);
+    DEBUG_PRINTLN(ponpin);
     return false;
   }
 }
 
-JJYReceiver::monitor(int monitorpin){
-  pinMode(monitorpin, OUTPUT);
-  JJYReceiver::monitorpin = monitorpin;
+void JJYReceiver::monitor(int pin){
+  pinMode(pin, OUTPUT);
+  monitorpin = pin;
 }
 
-JJYReceiver::begin(){
+void JJYReceiver::begin(){
   init();
 }
 
-JJYReceiver::stop(){
-
+void JJYReceiver::stop(){
+  state = TIMEVALID;
+  power(false);
 }
 
-int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day) {
+void JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
     // 閏年の場合、2月は29日
@@ -288,7 +291,7 @@ int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month,
 // ***********************************************************************************************
 
 #ifdef DEBUG_BUILD
-JJYReceiver::debug(){
+void JJYReceiver::debug(){
     DEBUG_PRINT(" ");
     //DEBUG_PRINT(jjypayloadcnt);
     //DEBUG_PRINT(":");
@@ -325,14 +328,8 @@ JJYReceiver::debug(){
    case RECEIVE:
      DEBUG_PRINT("RECEIVE");
      break;
-   case DATAVALID:
-     DEBUG_PRINT("DATAVALID");
-     break;
    case TIMEVALID:
      DEBUG_PRINT("TIMEVALID");
-     break;
-   case STOP:
-     DEBUG_PRINT("STOP");
      break;
    }
   DEBUG_PRINT(" ");
@@ -340,7 +337,7 @@ JJYReceiver::debug(){
   DEBUG_PRINT("");
 }
 
-// JJYReceiver::agc(bool activate){
+// void JJYReceiver::agc(bool activate){
 //   if(activate == true){
 //     digitalWrite(agcpin,LOW);
 //     return 1;
@@ -349,25 +346,25 @@ JJYReceiver::debug(){
 //     return 0;
 //   }
 // }
-// JJYReceiver::begin(int datapin,int sel,int pon,int agc){
+// void JJYReceiver::begin(int datapin,int sel,int pon,int agc){
 //   pinMode(datapin, INPUT);
 //   pinMode(sel, OUTPUT);
 //   pinMode(pon, OUTPUT);
 //   pinMode(agc, OUTPUT);
 //   JJYReceiver::datapin = datapin;
 // }
-int JJYReceiver::debug2(){
+void JJYReceiver::debug2(){
        char buf[32];
-       for(int i=N-1; i>=0; i--){
+       for(int i = N - 1; i >= 0; i--){
          sprintf(buf, "%02X", sampling[i]);
          debugSerial.print(buf);
          if(i==0) debugSerial.print(":");
        }
 }
-int JJYReceiver::debug3(){
+void JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADLEN:");
-  for(uint8_t i;i<6;i++)
+  for(uint8_t i; i < 6; i++)
     DEBUG_PRINT(jjypayloadlen[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADCNT:");
@@ -377,11 +374,11 @@ int JJYReceiver::debug3(){
   //  DEBUG_PRINT(testarray[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOAD:");
-  for(uint8_t i; i<6; i++)
+  for(uint8_t i; i < 6; i++)
     DEBUG_PRINT(jjypayload[i],HEX);
   DEBUG_PRINTLN("");
 }
-int JJYReceiver::debug4(){
+void JJYReceiver::debug4(){
     DEBUG_PRINT(" ");  // Print current localtime.
     String str = String(ctime(&localtime[0]));
     String marker;

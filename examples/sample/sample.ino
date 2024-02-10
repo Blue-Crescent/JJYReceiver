@@ -54,7 +54,7 @@ void loop() {
 
   if(lastreceived != -1){
     const char *days[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};  
-    String str0 = String(tm_info.tm_year);
+    String str0 = String(tm_info.tm_year + 1900);
     String str1 = String(tm_info.tm_mon + 1);
     String str2 = String(tm_info.tm_mday);
     String str3 = String(tm_info.tm_hour);
