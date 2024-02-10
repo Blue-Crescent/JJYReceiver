@@ -192,7 +192,7 @@ void JJYReceiver::delta_tick(){
       quality = PM;
       break;
     }
-    quality = constrain(((((quality * 100) / (N*8)) - 50) <<1),0,100);
+    quality = (uint8_t) (((quality * 100) / (N*8)) - 50) *2;
     #ifdef DEBUG_BUILD
     debug();
     debug4();
