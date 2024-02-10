@@ -1,3 +1,5 @@
+[![Arduino Lint](https://github.com/arduino/arduino-lint)](https://github.com/arduino/arduino-lint/actions)
+
 # JJY Receiver
 
 JJY standard radio wave signal receiver library for arduino.
@@ -252,4 +254,4 @@ https://www.nict.go.jp/sts/jjy_signal.html
 
 バグ修正・エンハンスを歓迎します。パッチは受け付けていませんので、プルリクエストをお送りください。
 
-GitHubの利用は初めてですので、お作法等ご容赦ください。
+GitHubの利用は初めてですので、お作法等ご容赦ください
