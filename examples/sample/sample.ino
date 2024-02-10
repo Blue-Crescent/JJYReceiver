@@ -48,19 +48,33 @@ void ticktock() {  // 10 msec interrupt service routine
 void loop() {
   time_t now = jjy.get_time();
   time_t lastreceived = jjy.getTime();
+  tm tm_info;
+
+  localtime_r(&now, &tm_info);
 
   if(lastreceived != -1){
-    String str = String(ctime(&now));
-    debugSerial.print(str);  // Print current date time.
+    const char *days[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};  
+    String str0 = String(tm_info.tm_year);
+    String str1 = String(tm_info.tm_mon + 1);
+    String str2 = String(tm_info.tm_mday);
+    String str3 = String(tm_info.tm_hour);
+    String str4 = String(tm_info.tm_min);
+    String str5 = String(tm_info.tm_sec);
+    String strm = String(days[tm_info.tm_wday]);
+    debugSerial.print(str0+"/"+str1+"/"+str2+" "+strm+" "+str3+":"+str4+" "+str5);  // Print current date time.
 
     debugSerial.print(" Last received:");    
-    str = String(ctime(&lastreceived));
+    String str = String(ctime(&lastreceived));
     debugSerial.println(str);  // Print last received time
-  }else{
-    String str = "Receiving:";
-    debugSerial.print(str);
-    str = String(ctime(&now));
-    debugSerial.println(str);
+  }
+
+  if((lastreceived - now) > 3600){ // receive from last over an hour.
+    String str0 = "Receiving quality:";
+    String str1 = String(jjy.quality);
+    debugSerial.print(str0 + str1);
+    
+    String str = String(ctime(&now));
+    debugSerial.println(" "+str);
   } 
-  delay(10000);
+  delay(1000);
 }
