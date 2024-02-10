@@ -20,7 +20,7 @@ extern SoftwareSerial debugSerial;
 #endif
 
 #define N 12
-enum STATE {INIT,RECEIVE,DATAVALID,TIMEVALID,STOP};
+enum STATE {INIT,RECEIVE,TIMEVALID};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
     uint8_t datetime[8];
@@ -56,8 +56,8 @@ class JJYReceiver {
     volatile uint8_t rcvcnt = 0;
     volatile enum STATE state = INIT;
     volatile unsigned long fallingtime[2];
-    uint8_t datapin,ponpin = -1 ,selpin = -1;
-    uint8_t frequency;
+    volatile uint8_t datapin,ponpin = -1 ,selpin = -1;
+    volatile uint8_t frequency;
     // int agcpin;
     volatile uint8_t markercount = 0;
     volatile uint8_t reliability = 0;
@@ -78,7 +78,7 @@ class JJYReceiver {
     uint8_t monitorpin = -1;
     volatile time_t localtime[3] = {-111,-222,-333};
     volatile time_t globaltime;
-    volatile struct tm timeinfo;
+    struct tm timeinfo;
     
   #ifdef DEBUG_BUILD
     char buf[32];
@@ -91,8 +91,8 @@ class JJYReceiver {
     void jjy_receive();
     time_t clock_tick();
     void delta_tick();
-    int shift_in(uint8_t data, uint8_t* sampling, int length);
-    int clear(uint8_t* sampling, int length);
+    void shift_in(uint8_t data, uint8_t* sampling, int length);
+    void clear(uint8_t* sampling, int length);
     int begin();
     int stop();
     // int begin(int datapin,int pon,int sel,int agcpin);
@@ -100,11 +100,11 @@ class JJYReceiver {
     int power(bool power);
     int power();
     int status();
-    int freq(int freq);
+    int freq(uint8_t freq);
     int monitor(int monitor);
 //    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
 //    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
-    int calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day);
+    int calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
     int distance(uint8_t* arr1, uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
@@ -130,7 +130,7 @@ class JJYReceiver {
         timeinfo.tm_year  = year - 1900; // 年      
         //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
         uint16_t yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
-        calculateDate(year, yday ,&timeinfo.tm_mon, &timeinfo.tm_mday);
+        calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
         timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
         timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 1;          // 分
         timeinfo.tm_sec   = 1;           // 秒
@@ -146,7 +146,7 @@ class JJYReceiver {
       }
       power(true);
     }
-    bool lencheck(uint8_t arr[]) {
+    bool lencheck(volatile uint8_t* arr) {
         if (arr[0] != 8) {
             return false;
         }

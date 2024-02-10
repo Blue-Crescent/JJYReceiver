@@ -37,7 +37,6 @@ JJYReceiver::~JJYReceiver(){
 
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
-  if(state == TIMEVALID) return;
   for(uint8_t index = 0; index < VERIFYLOOP; index++){
     localtime[index] = localtime[index] + 1;
   }
@@ -61,14 +60,14 @@ int JJYReceiver::distance(uint8_t* arr1, uint8_t* arr2, int size) {
 int JJYReceiver::max_of_three(uint8_t a, uint8_t b, uint8_t c) {
     return (a > b) ? ((a > c) ? 0 : 2) : ((b > c) ? 1 : 2);
 }
-JJYReceiver::clear(uint8_t* sampling, int length){
+void JJYReceiver::clear(uint8_t* sampling, int length){
     for (uint8_t i = 0; i < length; i++) {
       sampling[i] = 0;
     }
 }
 
 
-int JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
+void JJYReceiver::shift_in(uint8_t data, uint8_t* sampling, int length){
   uint8_t carry;
   for (int i = 0; i < length; i++) {
     if(i==0) carry = data;
@@ -219,7 +218,7 @@ void JJYReceiver::jjy_receive(){
 JJYReceiver::status(){
   return state;
 }
-JJYReceiver::freq(int freq){
+JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
   if(freq == 40){
     digitalWrite(selpin,LOW);
@@ -251,6 +250,9 @@ JJYReceiver::power(bool power){
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
+    DEBUG_PRINTLN(frequency);
+    DEBUG_PRINTLN(selpin);
+    DEBUG_PRINTLN(ponpin);
     return false;
   }
 }
@@ -265,10 +267,11 @@ JJYReceiver::begin(){
 }
 
 JJYReceiver::stop(){
-
+  state = TIMEVALID;
+  power(false);
 }
 
-int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear, uint8_t *month, uint8_t *day) {
+int JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
     // 閏年の場合、2月は29日
@@ -325,14 +328,8 @@ JJYReceiver::debug(){
    case RECEIVE:
      DEBUG_PRINT("RECEIVE");
      break;
-   case DATAVALID:
-     DEBUG_PRINT("DATAVALID");
-     break;
    case TIMEVALID:
      DEBUG_PRINT("TIMEVALID");
-     break;
-   case STOP:
-     DEBUG_PRINT("STOP");
      break;
    }
   DEBUG_PRINT(" ");
