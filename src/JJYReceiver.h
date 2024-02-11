@@ -125,16 +125,18 @@ class JJYReceiver {
         jjydata.bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
         jjydata.bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
         jjydata.bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
+        
+        memset(&timeinfo, 0x00, sizeof(struct tm));
 
         uint16_t year = (((jjydata.bits.year & 0xf0) >> 4) * 10 + (jjydata.bits.year & 0x0f)) + 2000;
         timeinfo.tm_year  = year - 1900; // 年      
         ////timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
-        //uint16_t yday = ((((jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata.bits.doyh & 0x000f)) * 10) + jjydata.bits.doyl;
-        //calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
+        uint16_t yday = ((((jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata.bits.doyh & 0x000f)) * 10) + jjydata.bits.doyl;
+        calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
         timeinfo.tm_hour  = ((jjydata.bits.hour >> 5) & 0x3) * 10 + (jjydata.bits.hour & 0x0f) ;         // 時
         timeinfo.tm_min   = ((jjydata.bits.min >> 5) & 0x7)  * 10 + (jjydata.bits.min & 0x0f) + 1;          // 分
         timeinfo.tm_sec   = 1;           // 秒
-        //localtime[index]= mktime(&timeinfo);
+        localtime[index]= mktime(&timeinfo);
         DEBUG_PRINTLN("SETTIME");
         return true;
       }
