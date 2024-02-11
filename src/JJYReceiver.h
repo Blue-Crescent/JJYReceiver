@@ -8,12 +8,20 @@
 #include <stdint.h>
 
 //#define DEBUG_BUILD
+//#define DEBUG_ESP32
 
 #ifdef DEBUG_BUILD
-#include <SoftwareSerial.h>
-extern SoftwareSerial debugSerial;
-# define DEBUG_PRINT(...)  debugSerial.print(__VA_ARGS__);
-# define DEBUG_PRINTLN(...) debugSerial.println(__VA_ARGS__);
+# define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
+# define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
+
+#ifndef DEBUG_ESP32
+// For LGT8F328P
+//#include <SoftwareSerial.h>
+//extern SoftwareSerial Serial;
+# define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
+# define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
+#endif
+//HardwareSerial& Serial = Serial0;
 #else
 # define DEBUG_PRINT(fmt,...)
 # define DEBUG_PRINTLN(fmt,...)

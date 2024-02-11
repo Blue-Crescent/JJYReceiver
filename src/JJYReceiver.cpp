@@ -1,7 +1,5 @@
 #include <JJYReceiver.h>
 
-//#include <sys/time.h>
-
 // Reference:
 //https://www.nict.go.jp/sts/jjy_signal.html
 //https://captain-cocco.com/time-h-c-standart-library/#toc8
@@ -10,7 +8,9 @@
     @brief  Constructor for JJYReceiver
 */
 #ifdef DEBUG_BUILD
-  extern SoftwareSerial debugSerial;
+#ifndef DEBUG_ESP32
+  //extern SoftwareSerial Serial;
+#endif
 #endif
 
 JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) : 
@@ -198,8 +198,8 @@ void JJYReceiver::delta_tick(){
     }
     quality = (uint8_t) (((quality * 100) / (N*8)) - 50) * 2;
     #ifdef DEBUG_BUILD
-    debug();
-    debug4();
+    //debug();
+    //debug4();
     DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     //DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     #endif
@@ -373,8 +373,8 @@ void JJYReceiver::debug2(){
        char buf[32];
        for(int i = N - 1; i >= 0; i--){
          sprintf(buf, "%02X", sampling[i]);
-         debugSerial.print(buf);
-         if(i==0) debugSerial.print(":");
+         Serial.print(buf);
+         if(i==0) Serial.print(":");
        }
 }
 void JJYReceiver::debug3(){
@@ -396,20 +396,28 @@ void JJYReceiver::debug3(){
 }
 void JJYReceiver::debug4(){
     DEBUG_PRINT(" ");  // Print current localtime.
-    String str = String(ctime(&localtime[0]));
+//    String str = String(ctime(&localtime[0]));
+    String str = String(ctime((const time_t*)&localtime[0]));
+
     String marker;
     marker = (rcvcnt == 0) ? "*" : " ";
     DEBUG_PRINT(marker + str);  // Print current localtime.
     DEBUG_PRINT(" ");  // Print current localtime.
-    str = String(ctime(&localtime[1]));
+//    str = String(ctime(&localtime[1]));
+    str = String(ctime((const time_t*)&localtime[1]));
+
     marker = (rcvcnt == 1) ? "*" : " ";
     DEBUG_PRINT(marker + str);  // Print current localtime.
     DEBUG_PRINT(" ");  // Print current localtime.
-    str = String(ctime(&localtime[2]));
+//    str = String(ctime(&localtime[2]));
+    str = String(ctime((const time_t*)&localtime[2]));
+
     marker = (rcvcnt == 2) ? "*" : " ";
     DEBUG_PRINT(marker + str);  // Print current localtime.
     DEBUG_PRINT(" => ");  // Print current localtime.
-    str = String(ctime(&globaltime));
+//    str = String(ctime(&globaltime));
+    str = String(ctime((const time_t*)&globaltime));
+
     DEBUG_PRINT(str);  // Print current localtime.
 }
 #endif
