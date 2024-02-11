@@ -21,12 +21,12 @@ JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) :
   pinMode(pinpon, OUTPUT);
 }
 JJYReceiver::JJYReceiver(int pindata,int pinpon):
- datapin(pindata), ponpin(pinpon){
+  datapin(pindata),selpin(-1),ponpin(pinpon){
   pinMode(pindata, INPUT);
   pinMode(pinpon, OUTPUT);
 }
 JJYReceiver::JJYReceiver(int pindata):
- datapin(pindata){
+  datapin(pindata),selpin(-1),ponpin(-1){
   pinMode(pindata, INPUT);
 }
 
@@ -345,7 +345,7 @@ void JJYReceiver::debug2(){
 void JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADLEN:");
-  for(uint8_t i; i < 6; i++)
+  for(uint8_t i=0; i < 6; i++)
     DEBUG_PRINT(jjypayloadlen[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADCNT:");
@@ -355,7 +355,7 @@ void JJYReceiver::debug3(){
   //  DEBUG_PRINT(testarray[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOAD:");
-  for(uint8_t i; i < 6; i++)
+  for(uint8_t i=0; i < 6; i++)
     DEBUG_PRINT(jjypayload[i],HEX);
   DEBUG_PRINTLN("");
 }
