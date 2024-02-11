@@ -48,7 +48,7 @@ time_t JJYReceiver::clock_tick(){
   return globaltime;
 }
 
-int JJYReceiver::distance(volatile uint8_t* arr1,volatile uint8_t* arr2, int size) {
+int JJYReceiver::distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size) {
     int hammingDistance = 0;
     uint8_t temp;
     for (int i = 0; i < size; i++) {

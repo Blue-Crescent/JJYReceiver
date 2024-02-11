@@ -101,7 +101,7 @@ class JJYReceiver {
 //    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
 //    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
     void calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
-    int distance(volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
+    int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
     time_t getTime();
