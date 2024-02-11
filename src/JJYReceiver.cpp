@@ -19,21 +19,15 @@ JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) :
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   pinMode(pinpon, OUTPUT);
-  //datapin = pindata;
-  //selpin = pinsel;
-  //ponpin = pinpon;
 }
 JJYReceiver::JJYReceiver(int pindata,int pinpon):
  datapin(pindata), ponpin(pinpon){
   pinMode(pindata, INPUT);
   pinMode(pinpon, OUTPUT);
-  //datapin = pindata;
-  //ponpin = pinpon;
 }
 JJYReceiver::JJYReceiver(int pindata):
  datapin(pindata){
   pinMode(pindata, INPUT);
-  //datapin = pindata;
 }
 
 JJYReceiver::~JJYReceiver(){
@@ -82,39 +76,31 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
     sampling[i] = temp & 0xFF;
   }
 }
-
-//int JJYReceiver::rotateArray16(int8_t shift, uint16_t* array, uint8_t size) {
-//  for (uint8_t i = 0; i < size; i++) {
-//    array[i] = (array[i] + shift + size) % size;
-//  }
-//}
-//int JJYReceiver::rotateArray8(int8_t shift, uint8_t* array, uint8_t size) {
-//  for (uint8_t i = 0; i < size; i++) {
-//    array[i] = (array[i] + shift + size) % size;
-//  }
-//}
 time_t JJYReceiver::getTime() {
     time_t diff1 = labs(localtime[0] - localtime[1]);
     time_t diff2 = labs(localtime[1] - localtime[2]);
     time_t diff3 = labs(localtime[2] - localtime[0]);
     if( diff1 < 2){
       if(state != TIMEVALID){
+        DEBUG_PRINTLN("TIMEVALID.1");
         globaltime = localtime[1];
-        stop();
+        //stop();
       }
       state = TIMEVALID;
       return localtime[1];
     }else if(diff2 < 2){
       if(state != TIMEVALID){
+        DEBUG_PRINTLN("TIMEVALID.2");
         globaltime = localtime[2];
-        stop();
+        //stop();
       }
       state = TIMEVALID;
       return localtime[2];
     }else if(diff3 < 2){
       if(state != TIMEVALID){
+        DEBUG_PRINTLN("TIMEVALID.0");
         globaltime = localtime[0];
-        stop();
+        //stop();
       }
       state = TIMEVALID;
       return localtime[0];
@@ -173,11 +159,7 @@ void JJYReceiver::delta_tick(){
           if(settime(rcvcnt)){
             rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
             getTime();
-          }//else{
-            //rotateArray16((jjypayloadcnt),testarray,6);
-            //rotateArray16((jjypayloadcnt),jjypayload,6);
-            //rotateArray8((jjypayloadcnt),jjypayloadlen,6);
-          //}
+          }
           #ifdef DEBUG_BUILD
           //debug3();
           #endif
@@ -198,7 +180,7 @@ void JJYReceiver::delta_tick(){
     }
     quality = (uint8_t) (((quality * 100) / (N*8)) - 50) * 2;
     #ifdef DEBUG_BUILD
-    //debug();
+    debug();
     //debug4();
     DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     //DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
@@ -352,23 +334,6 @@ void JJYReceiver::debug(){
   DEBUG_PRINT((int)jjypayloadlen[jjystate]);
   DEBUG_PRINT("");
 }
-
-// void JJYReceiver::agc(bool activate){
-//   if(activate == true){
-//     digitalWrite(agcpin,LOW);
-//     return 1;
-//   }else{
-//     digitalWrite(agcpin,HIGH);
-//     return 0;
-//   }
-// }
-// void JJYReceiver::begin(int datapin,int sel,int pon,int agc){
-//   pinMode(datapin, INPUT);
-//   pinMode(sel, OUTPUT);
-//   pinMode(pon, OUTPUT);
-//   pinMode(agc, OUTPUT);
-//   JJYReceiver::datapin = datapin;
-// }
 void JJYReceiver::debug2(){
        char buf[32];
        for(int i = N - 1; i >= 0; i--){
@@ -395,6 +360,7 @@ void JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
 }
 void JJYReceiver::debug4(){
+
     DEBUG_PRINT(" ");  // Print current localtime.
 //    String str = String(ctime(&localtime[0]));
     String str = String(ctime((const time_t*)&localtime[0]));

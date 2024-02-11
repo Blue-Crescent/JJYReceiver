@@ -60,6 +60,7 @@ typedef union {
 class JJYReceiver {
   
 	public:
+    volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
     JJYData jjydata[VERIFYLOOP];
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
@@ -67,15 +68,13 @@ class JJYReceiver {
     volatile unsigned long fallingtime[2];
     volatile const int8_t datapin,ponpin = -1 ,selpin = -1;
     volatile int8_t monitorpin = -1;
-    volatile uint8_t frequency;
-    // int agcpin;
+    volatile uint8_t frequency = 0;
     volatile uint8_t markercount = 0;
     volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
     volatile uint8_t tick = 0;
     volatile uint16_t jjypayload[6]; // 9bits bit data between marker
-    volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
     volatile int8_t jjypayloadcnt = -2;
 
     volatile uint8_t sampleindex = 0;
@@ -85,7 +84,7 @@ class JJYReceiver {
     volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t localtime[3] = {-111,-222,-333};
-    volatile time_t globaltime;
+    volatile time_t globaltime = 0;
     struct tm timeinfo;
     
 
@@ -100,14 +99,11 @@ class JJYReceiver {
     void clear(volatile uint8_t* sampling, int length);
     void begin();
     void stop();
-    // int agc(bool agc);
     bool power(bool powerstate);
     bool power();
     STATE status();
     uint8_t freq(uint8_t freq);
     void monitor(int pin);
-//    int rotateArray16(int8_t shift, uint16_t* array, uint8_t size);
-//    int rotateArray8(int8_t shift, uint8_t* array, uint8_t size);
     void calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
     int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
@@ -145,6 +141,7 @@ class JJYReceiver {
      }
     void init(){
       state = RECEIVE;
+      clear(sampling,N);
       for(uint8_t index = 0; index < VERIFYLOOP; index++){
         localtime[index] = index * -100;
       }
