@@ -56,11 +56,22 @@ void loop() {
     String str1 = String(jjy.quality);
     Serial.print(str0 + str1);
     
-    String str = String(ctime(&now));
+    String str = String(ctime(&now)); str.trim();
     Serial.print(" "+str);
+    
+    for(int i=0; i<6; i++)
+      str = String(jjy.jjypayloadlen[i]);
+
+    str = String(ctime((const time_t*)&jjy.localtime[0])); str.trim();
+    Serial.print(" "+str);
+    str = String(ctime((const time_t*)&jjy.localtime[1])); str.trim();
+    Serial.print(" "+str);
+    str = String(ctime((const time_t*)&jjy.localtime[2])); str.trim();
+    Serial.println(" "+str);
   }
+
   if((now - lastreceived) > 3600 && lastreceived != -1){ // receive from last over an hour.
     jjy.begin();
   } 
-  delay(1000);
+  delay(10000);
 }
