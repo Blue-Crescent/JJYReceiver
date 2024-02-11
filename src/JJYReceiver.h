@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD
 //#define DEBUG_ESP32
 
 #ifdef DEBUG_BUILD
@@ -83,7 +83,7 @@ class JJYReceiver {
     volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    volatile time_t localtime[3] = {-111,-222,-333};
+    volatile time_t localtime[VERIFYLOOP] = {-111,-222,-333};
     volatile time_t globaltime = 0;
     struct tm timeinfo;
     
@@ -143,7 +143,7 @@ class JJYReceiver {
       state = RECEIVE;
       clear(sampling,N);
       for(uint8_t index = 0; index < VERIFYLOOP; index++){
-        localtime[index] = index * -100;
+        localtime[index] = index * (-100);
       }
       power(true);
     }

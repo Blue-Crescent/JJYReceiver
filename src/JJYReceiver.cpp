@@ -156,8 +156,8 @@ void JJYReceiver::delta_tick(){
       case 2: // PM
         markercount++;
         if(markercount==2){
+          rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
           if(settime(rcvcnt)){
-            rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
             getTime();
           }
           #ifdef DEBUG_BUILD
@@ -169,7 +169,7 @@ void JJYReceiver::delta_tick(){
             jjypayload[i]=0;
             jjypayloadlen[i]=0;
           }
-          DEBUG_PRINTLN("M");
+          DEBUG_PRINT("M");
         }else{
           DEBUG_PRINT("P");
           jjystate = static_cast<JJYSTATE>((jjystate + 1) % 6);
