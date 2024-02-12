@@ -89,14 +89,56 @@ https://ja.aliexpress.com/item/1005005254051736.html
 ## 基本的な使い方
 
 ```
-  jjy.begin(); // 受信開始
-  while(jjy.getTime() == -1){ // 受信するまで待ち
-    delay(1000);
-  }
-  time_t now = get_time(); // 時間の利用
-  time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
-```
+#include <JJYReceiver.h>
 
+#define DATA 39
+#define PON 33
+#define SEL 25
+
+JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
+// JJYReceiver jjy(DATA); // 1pinにする場合
+
+void setup() {
+  // 10msec Timer for clock ticktock (Mandatory)
+  タイマーの設定。ライブラリやレジスタ等を設定。
+  ticktock()関数をタイマ呼び出しハンドラに登録
+  
+  // DATA pin 入力変化割り込み　(Mandatory)
+  attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
+
+  // JJY Library
+  jjy.freq(40); // 受信周波数の設定
+　jjy.begin(); // 受信の開始
+  
+  while(jjy.getTime() == -1) delay(1000); // 受信が終わるまで次を実行させない場合に書く
+}
+
+void isr_routine() { // 入力信号変化割り込みで呼び出すハンドラ
+  jjy.jjy_receive(); 
+}
+void ticktock() {  // 10 msecタイマで呼び出すハンドラ
+  jjy.delta_tick();
+}
+
+void loop() {
+  time_t now = get_time(); // 時間の利用。呼び出したときの現在時刻を取得
+  time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
+  delay(10000);
+}
+
+```
+## サンプルスケッチ
+
+[サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
+
+- minimumsample
+  
+  - 最低限の記述の例です。MSTimer2ライブラリの部分はお使いのマイコンのアーキテクチャのタイマーを設定して10msecを作ってください。
+
+- lgt8f328pで確認しています。
+
+- _esp32が付いている名称のものは、ESP32で確認しているサンプルです。
+  
 ## 関数
 
 ### JJYReceiver(ピン番号)
@@ -211,17 +253,7 @@ if(jjy.quality > 80){
 
 - 60:60kHz
 
-## サンプルスケッチ
 
-[サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
-
-- minimumsample
-  
-  - 最低限の記述の例です。MSTimer2ライブラリの部分はお使いのマイコンのアーキテクチャのタイマーを設定して10msecを作ってください。
-
-- lgt8f328pで確認しています。
-
-- _esp32が付いている名称のものは、ESP32で確認しているサンプルです。
 
 # デバッグモード
 
