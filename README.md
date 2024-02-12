@@ -50,15 +50,19 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 ![](img/IMG_5776.jpeg)
 ![](img/IMG_5781.jpeg)
 
-| 基板シルク | 機能                                                                                                              | MAS6181B端子 | ライブラリコンストラクタ |
-| ----- | --------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
-| SEL   | L: 40kHz<br/>H: 60kHz                                                                                           | PDN1       | pinsel       |
-| OUT   | JJYデータ出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
-| PON   | L: 動作<br/> H: 停止                                                                                                | PDN2       | pinpon       |
-| GND   | 基準電位                                                                                                            | VSS        | -            |
-| VDD   | 1.1~3.3 v                                                                                                       | VDD        | -            |
+| 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------- | ------------ |
+| SEL                             | L: 40kHz<br/>H: 60kHz                                                                                              | PDN1       | pinsel       |
+| OUT<br/>T、TN、TCOなどと書かれている場合もあり。 | JJYデータ負論理出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
+| PON                             | L: 動作<br/> H: 停止                                                                                                   | PDN2       | pinpon       |
+| GND                             | 基準電位                                                                                                               | VSS        | -            |
+| VDD                             | 1.1~3.3 v                                                                                                          | VDD        | -            |
 
 負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
+
+
+
+
 
 ![1](img/wave%20(2).jpeg)
 
@@ -81,8 +85,19 @@ lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されま
 
 ![](img/IMG_5779.jpeg)
 
+入手先:
+
+[JJY - aitendo](https://www.aitendo.com/product-list?keyword=JJY&Submit=%E6%A4%9C%E7%B4%A2)
+
+[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
+
+
+
 入手元:
+
 https://ja.aliexpress.com/item/1005005254051736.html
+
+
 
 # ソフトウェア
 
@@ -102,14 +117,14 @@ void setup() {
   // 10msec Timer for clock ticktock (Mandatory)
   タイマーの設定。ライブラリやレジスタ等を設定。
   ticktock()関数をタイマ呼び出しハンドラに登録
-  
+
   // DATA pin 入力変化割り込み　(Mandatory)
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
   // JJY Library
   jjy.freq(40); // 受信周波数の設定
 　jjy.begin(); // 受信の開始
-  
+
   while(jjy.getTime() == -1) delay(1000); // 受信が終わるまで次を実行させない場合に書く
 }
 
@@ -125,8 +140,8 @@ void loop() {
   time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
   delay(10000);
 }
-
 ```
+
 ## サンプルスケッチ
 
 [サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
@@ -138,7 +153,7 @@ void loop() {
 - lgt8f328pで確認しています。
 
 - _esp32が付いている名称のものは、ESP32で確認しているサンプルです。
-  
+
 ## 関数
 
 ### JJYReceiver(ピン番号)
@@ -252,8 +267,6 @@ if(jjy.quality > 80){
 - 40:40kHz
 
 - 60:60kHz
-
-
 
 # デバッグモード
 
