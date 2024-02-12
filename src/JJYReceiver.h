@@ -28,7 +28,7 @@
 #endif
 
 const int N = 12;
-enum STATE {INIT,RECEIVE,TIMEVALID};
+enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
 enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
     uint8_t datetime[8];
@@ -61,7 +61,8 @@ class JJYReceiver {
   
 	public:
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
-    JJYData jjydata;
+    JJYData jjydata[VERIFYLOOP];
+    JJYData last_jjydata;
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t rcvcnt = 0;
@@ -83,8 +84,9 @@ class JJYReceiver {
     volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    volatile time_t localtime[VERIFYLOOP] = {-111,-222,-333};
+    //volatile time_t localtime[VERIFYLOOP] = {-111,-222,-333};
     volatile time_t globaltime = 0;
+    volatile time_t received_time = -1;
     struct tm timeinfo;
     
 
@@ -108,8 +110,10 @@ class JJYReceiver {
     int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
+    bool timeCheck();
     time_t getTime();
     time_t get_time();
+    time_t get_time(uint8_t index);
     #ifdef DEBUG_BUILD
     void debug();
     void debug2();
@@ -119,35 +123,54 @@ class JJYReceiver {
 
   private:
     bool settime(uint8_t index){
-      if(lencheck(jjypayloadlen)){
-        jjydata.bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
-        jjydata.bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
-        jjydata.bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
-        jjydata.bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
-        jjydata.bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
-        
-        memset(&timeinfo, 0x00, sizeof(struct tm));
+      //if(lencheck(jjypayloadlen == false)){
+       //   return false;
+      //}
+        jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
+        jjydata[index].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
+        jjydata[index].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
+        jjydata[index].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
+        jjydata[index].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
+        //DEBUG_PRINTLN("SETTIME0");
+        //DEBUG_PRINTLN(jjypayload[JJY_YEAR]);
+        //DEBUG_PRINTLN(jjypayload[JJY_DOYH]);
+        //DEBUG_PRINTLN(jjypayload[JJY_DOYL]);
+        //DEBUG_PRINTLN(jjypayload[JJY_HOUR]);
+        //DEBUG_PRINTLN(jjypayload[JJY_MIN]);
 
-        uint16_t year = (((jjydata.bits.year & 0xf0) >> 4) * 10 + (jjydata.bits.year & 0x0f)) + 2000;
-        timeinfo.tm_year  = year - 1900; // 年      
-        ////timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
-        uint16_t yday = ((((jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata.bits.doyh & 0x000f)) * 10) + jjydata.bits.doyl;
-        calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
-        timeinfo.tm_hour  = ((jjydata.bits.hour >> 5) & 0x3) * 10 + (jjydata.bits.hour & 0x0f) ;         // 時
-        timeinfo.tm_min   = ((jjydata.bits.min >> 5) & 0x7)  * 10 + (jjydata.bits.min & 0x0f) + 1;          // 分
+        //uint16_t year = (((jjydata.bits.year & 0xf0) >> 4) * 10 + (jjydata.bits.year & 0x0f)) + 2000;
+        //timeinfo.tm_year  = year - 1900; // 年      
+        //////timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
+        //uint16_t yday = ((((jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata.bits.doyh & 0x000f)) * 10) + jjydata.bits.doyl;
+        ////timeinfo.tm_yday = yday; // Day of the year is not implmented in Arduino time.h
+        //calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
+        //timeinfo.tm_hour  = ((jjydata.bits.hour >> 5) & 0x3) * 10 + (jjydata.bits.hour & 0x0f) ;         // 時
+        //timeinfo.tm_min   = ((jjydata.bits.min >> 5) & 0x7)  * 10 + (jjydata.bits.min & 0x0f) + 1;          // 分
         timeinfo.tm_sec   = 1;           // 秒
-        localtime[index]= mktime(&timeinfo);
-        DEBUG_PRINTLN("SETTIME");
+
+        //timeinfo.tm_year  = 2024 - 1900; // 年      
+        //timeinfo.tm_mday  = 12;
+        //timeinfo.tm_mon  = 2;
+        //timeinfo.tm_hour  = 8;
+        //timeinfo.tm_min   = 50;
+        //timeinfo.tm_sec   = 1;           // 秒
+
+        //DEBUG_PRINTLN("SETTIME");
+        //DEBUG_PRINTLN(timeinfo.tm_year);
+        //DEBUG_PRINTLN(timeinfo.tm_mon);
+        //DEBUG_PRINTLN(timeinfo.tm_mday);
+        //DEBUG_PRINTLN(timeinfo.tm_hour);
+        //DEBUG_PRINTLN(timeinfo.tm_min);
+        //DEBUG_PRINTLN(timeinfo.tm_sec);
+        //localtime[index] = mktime(&timeinfo);
         return true;
-      }
-      return false;
      }
     void init(){
       state = RECEIVE;
       clear(sampling,N);
-      for(uint8_t index = 0; index < VERIFYLOOP; index++){
-        localtime[index] = index * (-100);
-      }
+      //for(uint8_t index = 0; index < VERIFYLOOP; index++){
+      //  localtime[index] = index * (-100);
+      //}
       power(true);
     }
     bool lencheck(volatile uint8_t* arr) {

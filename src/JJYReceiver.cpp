@@ -34,11 +34,12 @@ JJYReceiver::~JJYReceiver(){
 }
 
 time_t JJYReceiver::clock_tick(){
+  timeinfo.tm_sec = (timeinfo.tm_sec + 1) % 60;           // 秒
   globaltime = globaltime + 1;
-  if(state == TIMEVALID) return globaltime;
-  for(uint8_t index = 0; index < VERIFYLOOP; index++){
-    localtime[index] = localtime[index] + 1;
-  }
+  //if(state == TIMEVALID) return globaltime;
+  //for(uint8_t index = 0; index < VERIFYLOOP; index++){
+  //  localtime[index] = localtime[index] + 1;
+  //}
   return globaltime;
 }
 
@@ -76,43 +77,61 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
     sampling[i] = temp & 0xFF;
   }
 }
-time_t JJYReceiver::getTime() {
-    time_t diff1 = labs(localtime[0] - localtime[1]);
-    time_t diff2 = labs(localtime[1] - localtime[2]);
-    time_t diff3 = labs(localtime[2] - localtime[0]);
-    if( diff1 < 2){
-      if(state != TIMEVALID){
-        DEBUG_PRINTLN("TIMEVALID.1");
-        globaltime = localtime[1];
-        //stop();
-      }
-      state = TIMEVALID;
-      return localtime[1];
-    }else if(diff2 < 2){
-      if(state != TIMEVALID){
-        DEBUG_PRINTLN("TIMEVALID.2");
-        globaltime = localtime[2];
-        //stop();
-      }
-      state = TIMEVALID;
-      return localtime[2];
-    }else if(diff3 < 2){
-      if(state != TIMEVALID){
-        DEBUG_PRINTLN("TIMEVALID.0");
-        globaltime = localtime[0];
-        //stop();
-      }
-      state = TIMEVALID;
-      return localtime[0];
+
+bool JJYReceiver::timeCheck(){
+    for (int i = 0; i < 3; i++) {
+        int next = (i + 1) % 3;
+        if (jjydata[i].bits.year != jjydata[next].bits.year ||
+            jjydata[i].bits.doyh != jjydata[next].bits.doyh ||
+            jjydata[i].bits.doyl != jjydata[next].bits.doyl ||
+            jjydata[i].bits.hour != jjydata[next].bits.hour ||
+            jjydata[i].bits.min != ((jjydata[next].bits.min - 1) % 60)) {
+            return false;
+        }
     }
-    //DEBUG_PRINT(diff1);
-    //DEBUG_PRINT(" ");
-    //DEBUG_PRINT(diff2);
-    //DEBUG_PRINT(" ");
-    //DEBUG_PRINTLN(diff3);
-    return -1;
+    last_jjydata = jjydata[0];
+    state = TIMEVALID;
+    return true;
+}
+
+time_t JJYReceiver::getTime() {
+  return received_time;
+}
+time_t JJYReceiver::get_time(uint8_t index) {
+  uint16_t year,yday;
+  time_t temptime;
+  year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
+  timeinfo.tm_year  = year - 1900; // 年      
+  //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
+  yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
+  calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
+  timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
+  timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 1;          // 分
+  temptime = mktime(&timeinfo);
+  return temptime;
 }
 time_t JJYReceiver::get_time() {
+  uint16_t year,yday;
+  switch(state){
+   case INIT:
+    return -1;
+   case RECEIVE:
+    return -1;
+   case TIMEVALID:
+    year = (((last_jjydata.bits.year & 0xf0) >> 4) * 10 + (last_jjydata.bits.year & 0x0f)) + 2000;
+    timeinfo.tm_year  = year - 1900; // 年      
+    //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
+    yday = ((((last_jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((last_jjydata.bits.doyh & 0x000f)) * 10) + last_jjydata.bits.doyl;
+    calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
+    timeinfo.tm_hour  = ((last_jjydata.bits.hour >> 5) & 0x3) * 10 + (last_jjydata.bits.hour & 0x0f) ;         // 時
+    timeinfo.tm_min   = ((last_jjydata.bits.min >> 5) & 0x7)  * 10 + (last_jjydata.bits.min & 0x0f) + 1;          // 分
+    globaltime = mktime(&timeinfo);
+    state = TIMETICK;
+    received_time = globaltime;
+    return globaltime;
+   case TIMETICK:
+    return globaltime;
+  }
   return globaltime;
 }
 
@@ -158,7 +177,7 @@ void JJYReceiver::delta_tick(){
         if(markercount==2){
           rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
           if(settime(rcvcnt)){
-            getTime();
+            timeCheck();
           }
           #ifdef DEBUG_BUILD
           //debug3();
@@ -359,31 +378,31 @@ void JJYReceiver::debug3(){
     DEBUG_PRINT(jjypayload[i],HEX);
   DEBUG_PRINTLN("");
 }
-void JJYReceiver::debug4(){
-
-    DEBUG_PRINT(" ");  // Print current localtime.
-//    String str = String(ctime(&localtime[0]));
-    String str = String(ctime((const time_t*)&localtime[0]));
-
-    String marker;
-    marker = (rcvcnt == 0) ? "*" : " ";
-    DEBUG_PRINT(marker + str);  // Print current localtime.
-    DEBUG_PRINT(" ");  // Print current localtime.
-//    str = String(ctime(&localtime[1]));
-    str = String(ctime((const time_t*)&localtime[1]));
-
-    marker = (rcvcnt == 1) ? "*" : " ";
-    DEBUG_PRINT(marker + str);  // Print current localtime.
-    DEBUG_PRINT(" ");  // Print current localtime.
-//    str = String(ctime(&localtime[2]));
-    str = String(ctime((const time_t*)&localtime[2]));
-
-    marker = (rcvcnt == 2) ? "*" : " ";
-    DEBUG_PRINT(marker + str);  // Print current localtime.
-    DEBUG_PRINT(" => ");  // Print current localtime.
-//    str = String(ctime(&globaltime));
-    str = String(ctime((const time_t*)&globaltime));
-
-    DEBUG_PRINT(str);  // Print current localtime.
-}
+//void JJYReceiver::debug4(){
+//
+//    DEBUG_PRINT(" ");  // Print current localtime.
+////    String str = String(ctime(&localtime[0]));
+//    String str = String(ctime((const time_t*)&localtime[0]));
+//
+//    String marker;
+//    marker = (rcvcnt == 0) ? "*" : " ";
+//    DEBUG_PRINT(marker + str);  // Print current localtime.
+//    DEBUG_PRINT(" ");  // Print current localtime.
+////    str = String(ctime(&localtime[1]));
+//    str = String(ctime((const time_t*)&localtime[1]));
+//
+//    marker = (rcvcnt == 1) ? "*" : " ";
+//    DEBUG_PRINT(marker + str);  // Print current localtime.
+//    DEBUG_PRINT(" ");  // Print current localtime.
+////    str = String(ctime(&localtime[2]));
+//    str = String(ctime((const time_t*)&localtime[2]));
+//
+//    marker = (rcvcnt == 2) ? "*" : " ";
+//    DEBUG_PRINT(marker + str);  // Print current localtime.
+//    DEBUG_PRINT(" => ");  // Print current localtime.
+////    str = String(ctime(&globaltime));
+//    str = String(ctime((const time_t*)&globaltime));
+//
+//    DEBUG_PRINT(str);  // Print current localtime.
+//}
 #endif
