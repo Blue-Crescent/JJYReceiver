@@ -81,7 +81,7 @@ class JJYReceiver {
 
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
-    volatile uint8_t timeavailable [N];
+    volatile int8_t timeavailable = -1;
     volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00};
     volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
@@ -137,7 +137,6 @@ class JJYReceiver {
     void init(){
       state = RECEIVE;
       clear(sampling,N);
-      clear(timeavailable,3);
       jjydata[0].bits.hour = 25;
       jjydata[1].bits.hour = 26;
       jjydata[2].bits.hour = 27;

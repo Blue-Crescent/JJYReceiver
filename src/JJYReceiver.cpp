@@ -89,7 +89,6 @@ bool JJYReceiver::timeCheck(){
           }else{
             last_jjydata = jjydata[compare[i][1]];
           }
-          timeavailable[compare[i][1]] = 1;
           state = TIMEVALID;
           stop();
           return true;
@@ -106,7 +105,6 @@ time_t JJYReceiver::get_time(uint8_t index) {
   time_t temptime;
   year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
   timeinfo.tm_year  = year - 1900; // 年      
-  //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
   yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
   calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
   timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
@@ -119,7 +117,16 @@ time_t JJYReceiver::getTime() {
   switch(state){
    case INIT:
     return -1;
-   case RECEIVE:
+   case RECEIVE: // Intermediate update (1st receive update)
+    if(timeavailable == -1) return -1;
+    year = (((jjydata[timeavailable].bits.year & 0xf0) >> 4) * 10 + (jjydata[timeavailable].bits.year & 0x0f)) + 2000;
+    timeinfo.tm_year  = year - 1900; // 年      
+    yday = ((((jjydata[timeavailable].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[timeavailable].bits.doyh & 0x000f)) * 10) + jjydata[timeavailable].bits.doyl;
+    calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
+    timeinfo.tm_hour  = ((jjydata[timeavailable].bits.hour >> 5) & 0x3) * 10 + (jjydata[timeavailable].bits.hour & 0x0f) ;         // 時
+    timeinfo.tm_min   = ((jjydata[timeavailable].bits.min >> 5) & 0x7)  * 10 + (jjydata[timeavailable].bits.min & 0x0f) + 2;          // 分
+    globaltime = mktime(&timeinfo);
+    timeavailable = -1;
     return -1;
    case TIMEVALID:
     year = (((last_jjydata.bits.year & 0xf0) >> 4) * 10 + (last_jjydata.bits.year & 0x0f)) + 2000;
@@ -128,7 +135,7 @@ time_t JJYReceiver::getTime() {
     yday = ((((last_jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((last_jjydata.bits.doyh & 0x000f)) * 10) + last_jjydata.bits.doyl;
     calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
     timeinfo.tm_hour  = ((last_jjydata.bits.hour >> 5) & 0x3) * 10 + (last_jjydata.bits.hour & 0x0f) ;         // 時
-    timeinfo.tm_min   = ((last_jjydata.bits.min >> 5) & 0x7)  * 10 + (last_jjydata.bits.min & 0x0f) + 1;          // 分
+    timeinfo.tm_min   = ((last_jjydata.bits.min >> 5) & 0x7)  * 10 + (last_jjydata.bits.min & 0x0f) + 2;          // 分
     globaltime = mktime(&timeinfo);
     state = TIMETICK;
     received_time = globaltime;
@@ -179,6 +186,7 @@ void JJYReceiver::delta_tick(){
           rcvcnt = (rcvcnt + 1) % VERIFYLOOP;
           if(settime(rcvcnt)){
             timeCheck();
+            timeavailable = rcvcnt;
           }
           #ifdef DEBUG_BUILD
           debug3();
