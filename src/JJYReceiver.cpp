@@ -124,7 +124,6 @@ time_t JJYReceiver::getTime() {
     globaltime = mktime(&timeinfo);
     state = TIMETICK;
     received_time = globaltime;
-    localtime[rcvcnt] = globaltime;
   }
   return received_time;
 }
