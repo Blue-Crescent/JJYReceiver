@@ -87,6 +87,7 @@ bool JJYReceiver::timeCheck(){
             min1 == min2)
         {
             last_jjydata = jjydata[compare[i][1]];
+            timeavailable[compare[i][1]] = 1;
             state = TIMEVALID;
             return true;
         }
