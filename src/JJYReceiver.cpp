@@ -274,7 +274,6 @@ void JJYReceiver::begin(){
 }
 
 void JJYReceiver::stop(){
-  state = TIMEVALID;
   power(false);
 }
 
