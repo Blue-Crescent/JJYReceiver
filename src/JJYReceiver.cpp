@@ -18,8 +18,6 @@ JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) :
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   pinMode(pinpon, OUTPUT);
-
-
 }
 JJYReceiver::JJYReceiver(int pindata,int pinpon):
   datapin(pindata),selpin(-1),ponpin(pinpon){
@@ -87,7 +85,9 @@ bool JJYReceiver::timeCheck(){
             min1 == min2)
         {
             last_jjydata = jjydata[compare[i][1]];
+            timeavailable[compare[i][1]] = 1;
             state = TIMEVALID;
+            stop();
             return true;
         }
     }
@@ -274,7 +274,6 @@ void JJYReceiver::begin(){
 }
 
 void JJYReceiver::stop(){
-  state = TIMEVALID;
   power(false);
 }
 
