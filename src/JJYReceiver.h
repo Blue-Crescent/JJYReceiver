@@ -123,47 +123,16 @@ class JJYReceiver {
 
   private:
     bool settime(uint8_t index){
-      //if(lencheck(jjypayloadlen == false)){
-       //   return false;
-      //}
-        jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
-        jjydata[index].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
-        jjydata[index].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
-        jjydata[index].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
-        jjydata[index].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
-        //DEBUG_PRINTLN("SETTIME0");
-        //DEBUG_PRINTLN(jjypayload[JJY_YEAR]);
-        //DEBUG_PRINTLN(jjypayload[JJY_DOYH]);
-        //DEBUG_PRINTLN(jjypayload[JJY_DOYL]);
-        //DEBUG_PRINTLN(jjypayload[JJY_HOUR]);
-        //DEBUG_PRINTLN(jjypayload[JJY_MIN]);
-
-        //uint16_t year = (((jjydata.bits.year & 0xf0) >> 4) * 10 + (jjydata.bits.year & 0x0f)) + 2000;
-        //timeinfo.tm_year  = year - 1900; // 年      
-        //////timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
-        //uint16_t yday = ((((jjydata.bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata.bits.doyh & 0x000f)) * 10) + jjydata.bits.doyl;
-        ////timeinfo.tm_yday = yday; // Day of the year is not implmented in Arduino time.h
-        //calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
-        //timeinfo.tm_hour  = ((jjydata.bits.hour >> 5) & 0x3) * 10 + (jjydata.bits.hour & 0x0f) ;         // 時
-        //timeinfo.tm_min   = ((jjydata.bits.min >> 5) & 0x7)  * 10 + (jjydata.bits.min & 0x0f) + 1;          // 分
-        timeinfo.tm_sec   = 1;           // 秒
-
-        //timeinfo.tm_year  = 2024 - 1900; // 年      
-        //timeinfo.tm_mday  = 12;
-        //timeinfo.tm_mon  = 2;
-        //timeinfo.tm_hour  = 8;
-        //timeinfo.tm_min   = 50;
-        //timeinfo.tm_sec   = 1;           // 秒
-
-        //DEBUG_PRINTLN("SETTIME");
-        //DEBUG_PRINTLN(timeinfo.tm_year);
-        //DEBUG_PRINTLN(timeinfo.tm_mon);
-        //DEBUG_PRINTLN(timeinfo.tm_mday);
-        //DEBUG_PRINTLN(timeinfo.tm_hour);
-        //DEBUG_PRINTLN(timeinfo.tm_min);
-        //DEBUG_PRINTLN(timeinfo.tm_sec);
-        //localtime[index] = mktime(&timeinfo);
-        return true;
+      if(lencheck(jjypayloadlen) == false){
+         return false;
+      }
+      jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
+      jjydata[index].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
+      jjydata[index].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
+      jjydata[index].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
+      jjydata[index].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
+      timeinfo.tm_sec   = 1;           // 秒
+      return true;
      }
     void init(){
       state = RECEIVE;
