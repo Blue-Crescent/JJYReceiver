@@ -36,10 +36,6 @@ JJYReceiver::~JJYReceiver(){
 time_t JJYReceiver::clock_tick(){
   timeinfo.tm_sec = (timeinfo.tm_sec + 1) % 60;           // 秒
   globaltime = globaltime + 1;
-  //if(state == TIMEVALID) return globaltime;
-  //for(uint8_t index = 0; index < VERIFYLOOP; index++){
-  //  localtime[index] = localtime[index] + 1;
-  //}
   return globaltime;
 }
 
@@ -79,19 +75,19 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
 }
 
 bool JJYReceiver::timeCheck(){
-    for (int i = 0; i < 3; i++) {
-        int next = (i + 1) % 3;
-        if (jjydata[i].bits.year != jjydata[next].bits.year ||
-            jjydata[i].bits.doyh != jjydata[next].bits.doyh ||
-            jjydata[i].bits.doyl != jjydata[next].bits.doyl ||
-            jjydata[i].bits.hour != jjydata[next].bits.hour ||
-            jjydata[i].bits.min != ((jjydata[next].bits.min - 1) % 60)) {
-            return false;
+    int compare[6][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
+    for (int i = 0; i < 6; i++) {
+        if (jjydata[compare[i][0]].bits.year == jjydata[compare[i][1]].bits.year && 
+            jjydata[compare[i][0]].bits.doyh == jjydata[compare[i][1]].bits.doyh && 
+            jjydata[compare[i][0]].bits.doyl == jjydata[compare[i][1]].bits.doyl && 
+            jjydata[compare[i][0]].bits.hour == jjydata[compare[i][1]].bits.hour && 
+            ((jjydata[compare[i][0]].bits.min + 1) % 60) == jjydata[compare[i][1]].bits.min) {
+            last_jjydata = jjydata[compare[i][1]];
+            state = TIMEVALID;
+            return true;
         }
     }
-    last_jjydata = jjydata[0];
-    state = TIMEVALID;
-    return true;
+    return false;
 }
 
 time_t JJYReceiver::get_time() {
@@ -176,8 +172,9 @@ void JJYReceiver::delta_tick(){
           if(settime(rcvcnt)){
             timeCheck();
           }
+          quality = 100;
           #ifdef DEBUG_BUILD
-          //debug3();
+          debug3();
           #endif
           jjypayloadcnt=0;
           jjystate = JJY_MIN;
@@ -198,7 +195,6 @@ void JJYReceiver::delta_tick(){
     #ifdef DEBUG_BUILD
     debug();
     DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
-    //DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
     #endif
     DEBUG_PRINTLN("");
   }
@@ -237,6 +233,7 @@ uint8_t JJYReceiver::freq(uint8_t freq){
     delay(300);
   }
   frequency = freq;
+  DEBUG_PRINT("FREQ:");
   DEBUG_PRINTLN(frequency);
   return frequency;
 }
@@ -250,21 +247,18 @@ bool JJYReceiver::power(bool powerstate){
   // 0 1 freq2 (non use)
   // 1 0 freq1 60kHz
   // 1 1 power down
-    DEBUG_PRINTLN(frequency);
-    DEBUG_PRINTLN(selpin);
-    DEBUG_PRINTLN(ponpin);
   if(ponpin == -1) return true;
   if(powerstate == true){
     digitalWrite(ponpin,LOW);
     if(selpin == -1) return false;
     freq(frequency);
-    DEBUG_PRINTLN("POWER ON");
+    DEBUG_PRINTLN("POWER:ON");
     return true;
   }else{
     digitalWrite(ponpin,HIGH);
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
-    DEBUG_PRINTLN("POWER OFF");
+    DEBUG_PRINTLN("POWER:OFF");
 
     return false;
   }
@@ -353,8 +347,8 @@ void JJYReceiver::debug2(){
        char buf[32];
        for(int i = N - 1; i >= 0; i--){
          sprintf(buf, "%02X", sampling[i]);
-         Serial.print(buf);
-         if(i==0) Serial.print(":");
+         DEBUG_PRINT(buf);
+         if(i==0) DEBUG_PRINT(":");
        }
 }
 void JJYReceiver::debug3(){
@@ -365,9 +359,6 @@ void JJYReceiver::debug3(){
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOADCNT:");
   DEBUG_PRINTLN((int)jjypayloadcnt);
-  //DEBUG_PRINT("TESTARRAY:");
-  //for(uint8_t i;i<6;i++)
-  //  DEBUG_PRINT(testarray[i],HEX);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOAD:");
   for(uint8_t i=0; i < 6; i++)

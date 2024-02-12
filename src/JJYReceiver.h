@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #define DEBUG_BUILD
-//#define DEBUG_ESP32
+#define DEBUG_ESP32
 
 #ifdef DEBUG_BUILD
 # define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
@@ -17,9 +17,9 @@
 #ifndef DEBUG_ESP32
 // For LGT8F328P
 //#include <SoftwareSerial.h>
-//extern SoftwareSerial Serial;
-# define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
-# define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
+//extern SoftwareSerial debugSerial;
+# define DEBUG_PRINT(...)  debugSerial.print(__VA_ARGS__);
+# define DEBUG_PRINTLN(...) debugSerial.println(__VA_ARGS__);
 #endif
 //HardwareSerial& Serial = Serial0;
 #else
@@ -60,7 +60,7 @@ typedef union {
 class JJYReceiver {
   
 	public:
-    volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0}; // 
+    volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
     JJYData jjydata[VERIFYLOOP];
     JJYData last_jjydata;
     volatile enum STATE state = INIT;
@@ -84,7 +84,6 @@ class JJYReceiver {
     volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    //volatile time_t localtime[VERIFYLOOP] = {-111,-222,-333};
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
     struct tm timeinfo;
@@ -137,9 +136,9 @@ class JJYReceiver {
     void init(){
       state = RECEIVE;
       clear(sampling,N);
-      //for(uint8_t index = 0; index < VERIFYLOOP; index++){
-      //  localtime[index] = index * (-100);
-      //}
+      jjydata[0].bits.hour = 25;
+      jjydata[1].bits.hour = 26;
+      jjydata[2].bits.hour = 27;
       power(true);
     }
     bool lencheck(volatile uint8_t* arr) {
