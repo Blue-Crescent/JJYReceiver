@@ -18,6 +18,8 @@ JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) :
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   pinMode(pinpon, OUTPUT);
+
+
 }
 JJYReceiver::JJYReceiver(int pindata,int pinpon):
   datapin(pindata),selpin(-1),ponpin(pinpon){
@@ -34,11 +36,6 @@ JJYReceiver::~JJYReceiver(){
 
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
-  if(state == TIMETICK) return globaltime;
-  timeinfo.tm_sec = (timeinfo.tm_sec + 1) % 60;           // 秒
-  if(timeinfo.tm_sec == 0){
-    timeinfo.tm_sec = (timeinfo.tm_min + 1 ) % 60;
-  }
   return globaltime;
 }
 
@@ -79,12 +76,16 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
 
 bool JJYReceiver::timeCheck(){
     int compare[6][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
+    uint8_t min1,min2;
     for (int i = 0; i < 6; i++) {
+        min1 = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 1;
+        min2 = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 2;
         if (jjydata[compare[i][0]].bits.year == jjydata[compare[i][1]].bits.year && 
             jjydata[compare[i][0]].bits.doyh == jjydata[compare[i][1]].bits.doyh && 
             jjydata[compare[i][0]].bits.doyl == jjydata[compare[i][1]].bits.doyl && 
-            jjydata[compare[i][0]].bits.hour == jjydata[compare[i][1]].bits.hour && 
-            ((jjydata[compare[i][0]].bits.min + 1) % 60) == jjydata[compare[i][1]].bits.min) {
+            jjydata[compare[i][0]].bits.hour == jjydata[compare[i][1]].bits.hour &&
+            min1 == min2)
+        {
             last_jjydata = jjydata[compare[i][1]];
             state = TIMEVALID;
             return true;
