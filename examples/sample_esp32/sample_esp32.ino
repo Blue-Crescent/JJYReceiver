@@ -20,8 +20,7 @@ void isr_routine() { // pin change interrupt service routine
 void setup() {
   // Debug print
   Serial.begin(115200);
-  delay(1000);
-
+  
   // 10msec Timer for clock ticktock (Mandatory)
   timer = timerBegin(0, 80, true);  // タイマー0, 分周比80（これにより1カウントが1マイクロ秒になる）
   timerAttachInterrupt(timer, &ticktock, true);  // 割り込み関数をアタッチ
@@ -42,36 +41,39 @@ void setup() {
 void loop() {
   time_t now = jjy.get_time();
   time_t lastreceived = jjy.getTime();
-  tm tm_info;
 
   if(lastreceived != -1){
-    String str = String(ctime(&now));
+    String str = String(ctime(&now));str.trim();
     Serial.println(" "+str); // Print current date time.
 
     Serial.print(" Last received:");    
-    str = String(ctime(&lastreceived));
-    Serial.print(str);  // Print last received time
+    str = String(ctime(&lastreceived)); str.trim();
+    Serial.println(str);  // Print last received time
   }else{
-    String str0 = "Receiving quality:";
+    String str0 = "Receiving... Quality:";
     String str1 = String(jjy.quality);
-    Serial.print(str0 + str1);
+    Serial.println(str0 + str1);
     
     String str = String(ctime(&now)); str.trim();
-    Serial.print(" "+str);
-    
-    for(int i=0; i<6; i++)
-      str = String(jjy.jjypayloadlen[i]);
-
-    str = String(ctime((const time_t*)&jjy.localtime[0])); str.trim();
-    Serial.print(" "+str);
-    str = String(ctime((const time_t*)&jjy.localtime[1])); str.trim();
-    Serial.print(" "+str);
-    str = String(ctime((const time_t*)&jjy.localtime[2])); str.trim();
     Serial.println(" "+str);
+
+    // Belows are for debug. Accessing intermediate JJY time.
+    String local[3];
+    time_t temp = jjy.get_time(0);
+    local[0] = String(ctime(&temp)); local[0].trim(); // debug print of 1st received time 
+    Serial.println(" "+local[0]);
+
+    temp = jjy.get_time(1);
+    local[1] = String(ctime(&temp)); local[1].trim(); // debug print of 2nd received time 
+    Serial.println(" "+local[1]);
+
+    temp = jjy.get_time(2);
+    local[2] = String(ctime(&temp)); local[2].trim(); // debug print of 3rd received time
+    Serial.println(" "+local[2]);
   }
 
   if((now - lastreceived) > 3600 && lastreceived != -1){ // receive from last over an hour.
     jjy.begin();
   } 
-  delay(10000);
+  delay(1000);
 }

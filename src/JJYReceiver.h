@@ -28,8 +28,6 @@
 #endif
 
 const int N = 12;
-enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
-enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
 typedef union {
     uint8_t datetime[8];
     struct {
@@ -58,6 +56,8 @@ typedef union {
 } JJYData;
 
 class JJYReceiver {
+    enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
+    enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
   
 	public:
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
@@ -102,7 +102,6 @@ class JJYReceiver {
     void stop();
     bool power(bool powerstate);
     bool power();
-    STATE status();
     uint8_t freq(uint8_t freq);
     void monitor(int pin);
     void calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);

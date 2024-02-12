@@ -172,7 +172,6 @@ void JJYReceiver::delta_tick(){
           if(settime(rcvcnt)){
             timeCheck();
           }
-          quality = 100;
           #ifdef DEBUG_BUILD
           debug3();
           #endif
@@ -219,9 +218,6 @@ void JJYReceiver::jjy_receive(){
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
 
   }
-}
-STATE JJYReceiver::status(){
-  return state;
 }
 uint8_t JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
