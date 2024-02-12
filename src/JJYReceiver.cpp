@@ -14,8 +14,7 @@
 #endif
 
 JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) : 
- datapin(pindata), selpin(pinsel), ponpin(pinpon)
- {
+ datapin(pindata), selpin(pinsel), ponpin(pinpon) {
   pinMode(pindata, INPUT);
   pinMode(pinsel, OUTPUT);
   pinMode(pinpon, OUTPUT);
@@ -35,7 +34,11 @@ JJYReceiver::~JJYReceiver(){
 
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
+  if(state == TIMETICK) return globaltime;
   timeinfo.tm_sec = (timeinfo.tm_sec + 1) % 60;           // 秒
+  if(timeinfo.tm_sec == 0){
+    timeinfo.tm_sec = (timeinfo.tm_min + 1 ) % 60;
+  }
   return globaltime;
 }
 
