@@ -2,7 +2,7 @@
 
 # JJY Receiver
 
-JJY standard radio wave signal receiver library for arduino.
+JJY standard radio wave signal receiver library for arduino. arudinoの日本標準時受信モジュール用ライブラリ
 
 # 機能
 
@@ -10,7 +10,7 @@ JJYの日本標準時刻データを受信します。C言語標準のtime_t型�
 
 電波時計モジュールをarduinoで利用しやすい形のJJY受信ライブラリ的なものがWebに見つけられなかったので作ってみました。
 
-電波時計やデータロガーの日時情報など、低電力やインターネット未接続環境での時刻情報の利用ができます
+電波時計の制作やデータロガーの日時情報など、低電力や屋外でのインターネット未接続環境での時刻情報の利用ができます。
 
 # ハードウェア要件
 
