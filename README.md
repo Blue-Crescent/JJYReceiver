@@ -2,7 +2,7 @@
 
 # JJY Receiver
 
-JJY standard radio wave signal receiver library for arduino.
+JJY standard radio wave signal receiver library for arduino. arudinoの日本標準時受信モジュール用ライブラリ
 
 # 機能
 
@@ -10,7 +10,7 @@ JJYの日本標準時刻データを受信します。C言語標準のtime_t型�
 
 電波時計モジュールをarduinoで利用しやすい形のJJY受信ライブラリ的なものがWebに見つけられなかったので作ってみました。
 
-電波時計やデータロガーの日時情報など、低電力やインターネット未接続環境での時刻情報の利用ができます
+電波時計の制作やデータロガーの日時情報など、Wifiを利用せずとも電池駆動可能な低電力でインターネット未接続環境での時刻情報の利用ができます。
 
 # ハードウェア要件
 
@@ -37,7 +37,7 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 ### JJY受信IC
 
-写真には黄色のコンデンサがついていますが不要です。JJY受信モジュールはおおむねどれも似たようなインタフェースかと思いますが、負論理と正論理のものがあり手元にあるものは負論理モジュールでしたので、負論理と正論理の出力がある場合は負論理出力をつないでください。
+写真には黄色のコンデンサがついていますが不要です。JJY受信モジュールはおおむねどれも似たようなインタフェースかと思いますが、負論理と正論理のものがあり手元にあるものは負論理モジュールでしたので、負論理と正論理の出力がある場合は負論理出力をつないでください。正論理モジュールの場合はおそらく、トランジスタを使って反転させるか、TODOに書いてある変更を加えると動作すると思われます。
 
 利用したモジュールの参考：
 
@@ -89,14 +89,56 @@ https://ja.aliexpress.com/item/1005005254051736.html
 ## 基本的な使い方
 
 ```
-  jjy.begin(); // 受信開始
-  while(jjy.getTime() == -1){ // 受信するまで待ち
-    delay(1000);
-  }
-  time_t now = get_time(); // 時間の利用
-  time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
-```
+#include <JJYReceiver.h>
 
+#define DATA 39
+#define PON 33
+#define SEL 25
+
+JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
+// JJYReceiver jjy(DATA); // 1pinにする場合
+
+void setup() {
+  // 10msec Timer for clock ticktock (Mandatory)
+  タイマーの設定。ライブラリやレジスタ等を設定。
+  ticktock()関数をタイマ呼び出しハンドラに登録
+  
+  // DATA pin 入力変化割り込み　(Mandatory)
+  attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
+
+  // JJY Library
+  jjy.freq(40); // 受信周波数の設定
+　jjy.begin(); // 受信の開始
+  
+  while(jjy.getTime() == -1) delay(1000); // 受信が終わるまで次を実行させない場合に書く
+}
+
+void isr_routine() { // 入力信号変化割り込みで呼び出すハンドラ
+  jjy.jjy_receive(); 
+}
+void ticktock() {  // 10 msecタイマで呼び出すハンドラ
+  jjy.delta_tick();
+}
+
+void loop() {
+  time_t now = get_time(); // 時間の利用。呼び出したときの現在時刻を取得
+  time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
+  delay(10000);
+}
+
+```
+## サンプルスケッチ
+
+[サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
+
+- minimumsample
+  
+  - 最低限の記述の例です。MSTimer2ライブラリの部分はお使いのマイコンのアーキテクチャのタイマーを設定して10msecを作ってください。
+
+- lgt8f328pで確認しています。
+
+- _esp32が付いている名称のものは、ESP32で確認しているサンプルです。
+  
 ## 関数
 
 ### JJYReceiver(ピン番号)
@@ -151,11 +193,15 @@ JJY受信モジュールのデータ出力をマイコンの端子変化割り�
 
 受信が完了しているかの確認に使用します。受信時刻を取得します。時刻が受信できていない場合は-1を返します。
 
-getTime()が戻り値を返すには最低2つの内部の時刻受信データが一致する必要があります。JJYは1分かけて時刻情報を送信していますので、受信には最低2分かかります。良好な状態で3分程度、ノイズがある環境だと数分～受信不可となります。
+getTime()が戻り値を返すには最低2つの内部の時刻受信データが一致する必要があります(3分ぶんのバッファ)。JJYは1分かけて時刻情報を送信していますので、受信には最低2分かかります。良好な状態で3分程度、ノイズがある環境だと数分～受信不可となります。
 
 v0.6.0より
 
 begin()により受信が成功後のgetTime()の初回呼び出し時にJJY受信データの変換が行われて時刻が校正され、内部管理時刻に反映されます。(esp32では割り込みハンドラ内でmktime計算が実行できないため、変換処理は外部から呼び出す必要がある。受信完了後、すぐ呼び出さないと内部管理時刻への反映遅れによりずれます)
+
+v0.7.0より
+
+1回目の受信データのデータ長が一致していた場合、受信できた時刻をget_time()が返す時刻として仮反映する。この時の戻り値は-1。2回受信できた時点で確定し、最終受信時刻を返す。
 
 [Note] v0.6.0より動作変更
 
@@ -207,17 +253,7 @@ if(jjy.quality > 80){
 
 - 60:60kHz
 
-## サンプルスケッチ
 
-[サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
-
-- minimumsample
-  
-  - 最低限の記述の例です。MSTimer2ライブラリの部分はお使いのマイコンのアーキテクチャのタイマーを設定して10msecを作ってください。
-
-- lgt8f328pで確認しています。
-
-- _esp32が付いている名称のものは、ESP32で確認しているサンプルです。
 
 # デバッグモード
 
@@ -228,23 +264,23 @@ SoftwareSerialなどのシリアル通信ライブラリを有効にすること
 データ判定結果が:の後にP,L,Hで表示され、それぞれマーカ、L、Hとなります。
 そのあとにマーカの区間、受信状態を表示します。
 
-受信中の中間データはlocaltime[0],localtime[1],localtime[2]のデータに格納されます。*は更新対象の時刻です。
+受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビット数を格納します。
 
 Q:の手前の三つの数字はL,H,Pのマーカーとのハミング距離です。最大値96。サンプリングデータとCONST_L,CONST_H,CONST_PMそれぞれの配列との相関ですので、配列の内容を調整することで最適化できます。
 
 Q:は受信品質を示します。ハミング距離から50%(ランダム一致を考慮)を差し引いた値からの一致具合の割合です。
 
 ```
-0000000000000FFFFFFFFFFF:H MIN:RECEIVE 3 *Sat Feb 10 11:55:01 2024  Sun Feb 18 11:55:03 2024  Sat Feb 10 11:55:04 2024 =>Sat Jan 01 00:08:42 2000 68:92:72 Q:90
-00000000000000000000FFFF:L MIN:RECEIVE 4 *Sat Feb 10 11:55:02 2024  Sun Feb 18 11:55:04 2024  Sat Feb 10 11:55:05 2024 =>Sat Jan 01 00:08:43 2000 96:72:44 Q:100
-0000000000000000001FFFFF:L MIN:RECEIVE 5 *Sat Feb 10 11:55:03 2024  Sun Feb 18 11:55:05 2024  Sat Feb 10 11:55:06 2024 =>Sat Jan 01 00:08:44 2000 91:77:49 Q:88
-000000000003FFFFFFFFFFFF:H MIN:RECEIVE 6 *Sat Feb 10 11:55:04 2024  Sun Feb 18 11:55:06 2024  Sat Feb 10 11:55:07 2024 =>Sat Jan 01 00:08:45 2000 62:86:78 Q:78
-0000000000000000000FFFFF:L MIN:RECEIVE 7 *Sat Feb 10 11:55:05 2024  Sun Feb 18 11:55:07 2024  Sat Feb 10 11:55:08 2024 =>Sat Jan 01 00:08:46 2000 92:76:48 Q:90
-0000000000001FFFFFFFFFFF:H MIN:RECEIVE 8 *Sat Feb 10 11:55:06 2024  Sun Feb 18 11:55:08 2024  Sat Feb 10 11:55:09 2024 =>Sat Jan 01 00:08:47 2000 67:91:73 Q:88
-000007FFFFFFFFFFFFFFFFFF:P HOUR:RECEIVE 0 *Sat Feb 10 11:55:07 2024  Sun Feb 18 11:55:09 2024  Sat Feb 10 11:55:10 2024 =>Sat Jan 01 00:08:48 2000 37:61:89 Q:84
-000000000000000000001FFF:L HOUR:RECEIVE 1 *Sat Feb 10 11:55:08 2024  Sun Feb 18 11:55:10 2024  Sat Feb 10 11:55:11 2024 =>Sat Jan 01 00:08:49 2000 93:69:41 Q:92
-0000000000007FE000001FFF:L HOUR:RECEIVE 2 *Sat Feb 10 11:55:09 2024  Sun Feb 18 11:55:11 2024  Sat Feb 10 11:55:12 2024 =>Sat Jan 01 00:08:50 2000 83:65:51 Q:72
-000000000000000000003FFF:L HOUR:RECEIVE 3 *Sat Feb 10 11:55:10 2024  Sun Feb 18 11:55:12 2024  Sat Feb 10 11:55:13 2024 =>Sat Jan 01 00:08:51 2000 94:70:42 Q:94
+[2024-02-12 11:00:51.722] 00000000000001FFFC01FFFF:H MIN:RECEIVE 10 80:86:60 Q:78
+[2024-02-12 11:00:52.722] 00000000007FFFFFFFFFFFFF:P HOUR:RECEIVE 9 57:81:83 Q:72
+[2024-02-12 11:00:53.643] 0000000000000000000000FF:L HOUR:RECEIVE 10 88:64:36 Q:82
+[2024-02-12 11:00:54.831] 00000000000000003FFFFFFF:H HOUR:RECEIVE 11 82:86:58 Q:78
+[2024-02-12 11:00:55.832] 0000000000000000FFFFFFE0:H HOUR:RECEIVE 12 75:83:55 Q:72
+[2024-02-12 11:00:56.832] 0000000000FFFFF03FFFFF00:P DOYH:RECEIVE 6 54:66:70 Q:44
+[2024-02-12 11:00:57.832] 0000003FF800000000FFFF00:L DOYH:RECEIVE 7 69:61:47 Q:42
+[2024-02-12 11:00:58.832] 000000000000000003FFFFFF:L DOYH:RECEIVE 8 86:82:54 Q:78
+[2024-02-12 11:00:59.802] 00FFFFFFFFFFFFFFFFFFFFFF:P DOYL:RECEIVE 4 24:48:76 Q:58
+[2024-02-12 11:01:00.803] 0001FFFFFFFFFFFFFFFFFFE0:M MIN:RECEIVE 0 26:50:78 Q:62
 ```
 
 # アルゴリズム
@@ -269,7 +305,7 @@ https://www.nict.go.jp/sts/jjy_signal.html
 
 受信は3回分の受信データを保持しており、同一の時刻を2つ観測した段階で正式時刻として採用します。
 2つデータが揃わない場合は2つ揃うまでデータを巡回して上書きしていきます。
-時刻データはtime.hのtimeinfo構造体を利用して、JJYデータからUTC時刻に変換しtime_t型で管理します
+時刻データはtime.hのtm構造体を利用して、JJYデータからUTC時刻に変換しtime_t型で管理します
 
 40KHzでの動作確認をしています。
 
@@ -283,6 +319,7 @@ https://www.nict.go.jp/sts/jjy_signal.html
 未定
 
 - 本家Arduinoボード動作確認。未所持 Uno R4欲しいな～
+- 正論理出力への対応。原理的にはjjy_receive()をposedgeにしてconst_L,const_H,const_PMの1と0を反対にすればいけるはず。モジュールが入手できない
 
 # 受信
 

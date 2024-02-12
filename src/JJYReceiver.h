@@ -63,7 +63,7 @@ class JJYReceiver {
 	public:
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
     JJYData jjydata[VERIFYLOOP];
-    JJYData last_jjydata;
+    JJYData last_jjydata[1];
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t rcvcnt = 0;
@@ -111,6 +111,7 @@ class JJYReceiver {
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
     bool timeCheck();
+    //time_t updateTimeInfo(JJYData jjydata*, int8_t index, int8_t offset);
     time_t getTime();
     time_t get_time();
     time_t get_time(uint8_t index);
@@ -134,6 +135,17 @@ class JJYReceiver {
       timeinfo.tm_sec   = 1;           // 秒
       return true;
      }
+    time_t updateTimeInfo(JJYData* jjydata, int8_t index, int8_t offset) {
+        int year, yday;
+        year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
+        timeinfo.tm_year  = year - 1900; // 年      
+        yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
+        calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
+        timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
+        timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + offset;          // 分
+        time_t temp = mktime(&timeinfo);
+        return temp;
+    }
     void init(){
       state = RECEIVE;
       clear(sampling,N);
