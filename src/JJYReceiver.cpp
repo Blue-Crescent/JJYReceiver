@@ -90,8 +90,6 @@ bool JJYReceiver::timeCheck(){
             state = TIMEVALID;
             return true;
         }
-        DEBUG_PRINT(min1);
-        DEBUG_PRINTLN(min2);
     }
     return false;
 }
