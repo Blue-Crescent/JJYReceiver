@@ -36,7 +36,6 @@ JJYReceiver::~JJYReceiver(){
 time_t JJYReceiver::clock_tick(){
   globaltime = globaltime + 1;
   timeinfo.tm_sec = (timeinfo.tm_sec + 1) % 60;           // 秒
-  if(timeinfo.tm_sec = 0) timeinfo.tm_mon = (timeinfo.tm_mon + 1) % 60; // 分
   return globaltime;
 }
 
@@ -125,6 +124,7 @@ time_t JJYReceiver::getTime() {
     globaltime = mktime(&timeinfo);
     state = TIMETICK;
     received_time = globaltime;
+    localtime[rcvcnt] = globaltime;
   }
   return received_time;
 }
