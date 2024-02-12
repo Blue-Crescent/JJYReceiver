@@ -8,7 +8,7 @@
 
 #define MONITORPIN LED_BUILTIN
 
-SoftwareSerial debugSerial(7, 6); // RX, TX
+//SoftwareSerial Serial(7, 6); // RX, TX
 
 JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
 
@@ -18,7 +18,7 @@ void setup() {
   pinMode(9, INPUT); // PON
 
   // Debug print
-  debugSerial.begin(115200);
+  Serial.begin(115200);
 
   // 10msec Timer for clock ticktock (Mandatory)
   MsTimer2::set(10, ticktock);
@@ -35,7 +35,7 @@ void setup() {
   jjy.monitor(MONITORPIN); // Optional. Debug LED inidicator.
   jjy.freq(40); // Carrier frequency setting. Default:40
   
-  debugSerial.println("JJY Initialized.");
+  Serial.println("JJY Initialized.");
 }
 
 void isr_routine() { // pin change interrupt service routine
@@ -62,19 +62,19 @@ void loop() {
     char buf2[3];
     sprintf(buf2, "%02d", tm_info.tm_sec); 
     String strm = String(days[tm_info.tm_wday]);
-    debugSerial.print(str0+"/"+str1+"/"+str2+" "+strm+" "+str3+":"+buf1+" "+buf2);  // Print current date time.
+    Serial.print(str0+"/"+str1+"/"+str2+" "+strm+" "+str3+":"+buf1+" "+buf2);  // Print current date time.
 
-    debugSerial.print(" Last received:");    
+    Serial.print(" Last received:");    
     String str = String(ctime(&lastreceived));
-    debugSerial.println(str);  // Print last received time
+    Serial.println(str);  // Print last received time
     
   }else{
     String str0 = "Receiving quality:";
     String str1 = String(jjy.quality);
-    debugSerial.print(str0 + str1);
+    Serial.print(str0 + str1);
     
     String str = String(ctime(&now));
-    debugSerial.println(" "+str);
+    Serial.println(" "+str);
   }
   if((now - lastreceived) > 3600 && lastreceived != -1){ // receive from last over an hour.
     jjy.begin();

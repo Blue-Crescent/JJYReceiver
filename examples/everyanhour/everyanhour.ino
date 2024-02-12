@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <JJYReceiver.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <MsTimer2.h>
 
 #define DATA 2
@@ -17,7 +17,7 @@ void setup() {
   pinMode(9, INPUT); // PON
 
   // Debug print
-  debugSerial.begin(115200);
+  Serial.begin(115200);
 
   // 10msec Timer for clock ticktock (Mandatory)
   MsTimer2::set(10, ticktock);
@@ -29,7 +29,7 @@ void setup() {
   jjy.begin(); // Start JJY Receive
   jjy.freq(40); // Carrier frequency setting. Default:40
   
-  debugSerial.println("JJY Initialized.");
+  Serial.println("JJY Initialized.");
 
   while(jjy.getTime() == -1){
     delay(1000); // wait until time available. 受信するまで待ち
@@ -51,7 +51,7 @@ void loop() {
   String str1 = String(tm.tm_hour);
   String str2 = String(tm.tm_min);
   String str3 = String(tm.tm_sec);
-  debugSerial.println(str1 + ':' + str2 + ' ' + str3);  // Print current date time.
+  Serial.println(str1 + ':' + str2 + ' ' + str3);  // Print current date time.
 
   if (tm.tm_min == 0) { // run every an hour. 1時間ごとに受信
     jjy.begin();  
