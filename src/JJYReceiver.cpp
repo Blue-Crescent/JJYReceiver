@@ -94,8 +94,8 @@ bool JJYReceiver::timeCheck(){
     return true;
 }
 
-time_t JJYReceiver::getTime() {
-  return received_time;
+time_t JJYReceiver::get_time() {
+  return globaltime;
 }
 time_t JJYReceiver::get_time(uint8_t index) {
   uint16_t year,yday;
@@ -110,7 +110,7 @@ time_t JJYReceiver::get_time(uint8_t index) {
   temptime = mktime(&timeinfo);
   return temptime;
 }
-time_t JJYReceiver::get_time() {
+time_t JJYReceiver::getTime() {
   uint16_t year,yday;
   switch(state){
    case INIT:
@@ -128,11 +128,8 @@ time_t JJYReceiver::get_time() {
     globaltime = mktime(&timeinfo);
     state = TIMETICK;
     received_time = globaltime;
-    return globaltime;
-   case TIMETICK:
-    return globaltime;
   }
-  return globaltime;
+  return received_time;
 }
 
 void JJYReceiver::delta_tick(){
