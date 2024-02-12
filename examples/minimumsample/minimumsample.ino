@@ -15,6 +15,7 @@ void setup() {
 
   // JJY Library
   jjy.begin(); // Start JJY Receive
+  jjy.freq(40); // Set frequency 40kHz
 
   //while(jjy.getTime() == -1) delay(1000); // blocking until time available.
 }
