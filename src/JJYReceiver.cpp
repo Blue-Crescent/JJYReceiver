@@ -84,11 +84,15 @@ bool JJYReceiver::timeCheck(){
             jjydata[compare[i][0]].bits.hour == jjydata[compare[i][1]].bits.hour &&
             min1 == min2)
         {
+          if(min1 > min2){
+            last_jjydata = jjydata[compare[i][0]];
+          }else{
             last_jjydata = jjydata[compare[i][1]];
-            timeavailable[compare[i][1]] = 1;
-            state = TIMEVALID;
-            stop();
-            return true;
+          }
+          timeavailable[compare[i][1]] = 1;
+          state = TIMEVALID;
+          stop();
+          return true;
         }
     }
     return false;
@@ -106,7 +110,7 @@ time_t JJYReceiver::get_time(uint8_t index) {
   yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
   calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
   timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
-  timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 2;          // 分
+  timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + 1;          // 分
   temptime = mktime(&timeinfo);
   return temptime;
 }
