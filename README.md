@@ -53,7 +53,6 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 ![](img/IMG_5781.jpeg)
 
-
 | 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------- | ------------ |
 | SEL                             | L: 40kHz<br/>H: 60kHz                                                                                              | PDN1       | pinsel       |
@@ -63,10 +62,6 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 | VDD                             | 1.1~3.3 v                                                                                                          | VDD        | -            |
 
 負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
-
-
-
-
 
 ![1](img/wave%20(2).jpeg)
 
@@ -95,13 +90,9 @@ lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されま
 
 [JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
 
-
-
 入手元:
 
 https://ja.aliexpress.com/item/1005005254051736.html
-
-
 
 # ソフトウェア
 
@@ -149,7 +140,6 @@ void loop() {
 # 動作Demo
 
 [![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
-
 
 ## サンプルスケッチ
 
@@ -330,6 +320,25 @@ https://www.nict.go.jp/sts/jjy_signal.html
 時刻データはtime.hのtm構造体を利用して、JJYデータからUTC時刻に変換しtime_t型で管理します
 
 40KHzでの動作確認をしています。
+
+
+
+DEBUG_BUILD有効時のサンプル：
+
+```
+[2024-02-12 11:00:51.722] 00000000000001FFFC01FFFF:H MIN:RECEIVE 10 80:86:60 Q:78
+[2024-02-12 11:00:52.722] 00000000007FFFFFFFFFFFFF:P HOUR:RECEIVE 9 57:81:83 Q:72
+[2024-02-12 11:00:53.643] 0000000000000000000000FF:L HOUR:RECEIVE 10 88:64:36 Q:82
+[2024-02-12 11:00:54.831] 00000000000000003FFFFFFF:H HOUR:RECEIVE 11 82:86:58 Q:78
+[2024-02-12 11:00:55.832] 0000000000000000FFFFFFE0:H HOUR:RECEIVE 12 75:83:55 Q:72
+[2024-02-12 11:00:56.832] 0000000000FFFFF03FFFFF00:P DOYH:RECEIVE 6 54:66:70 Q:44
+[2024-02-12 11:00:57.832] 0000003FF800000000FFFF00:L DOYH:RECEIVE 7 69:61:47 Q:42
+[2024-02-12 11:00:58.832] 000000000000000003FFFFFF:L DOYH:RECEIVE 8 86:82:54 Q:78
+[2024-02-12 11:00:59.802] 00FFFFFFFFFFFFFFFFFFFFFF:P DOYL:RECEIVE 4 24:48:76 Q:58
+[2024-02-12 11:01:00.803] 0001FFFFFFFFFFFFFFFFFFE0:M MIN:RECEIVE 0 26:50:78 Q:62
+```
+
+
 
 # TODOメモ
 
