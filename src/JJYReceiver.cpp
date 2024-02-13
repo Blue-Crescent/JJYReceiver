@@ -1,8 +1,30 @@
-#include <JJYReceiver.h>
+// MIT License
+// 
+// Copyright (c) 2024 Blue-Crescent <ick40195+github@gmail.com>
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 // Reference:
 //https://www.nict.go.jp/sts/jjy_signal.html
 //https://captain-cocco.com/time-h-c-standart-library/#toc8
+
+#include <JJYReceiver.h>
 
 /*!
     @brief  Constructor for JJYReceiver
@@ -73,9 +95,9 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
 }
 
 bool JJYReceiver::timeCheck(){
-    int compare[6][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
+    int compare[4][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 2} };
     uint8_t min1,min2;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 4; i++) {
         min1 = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][0]].bits.min & 0x0f) + 1;
         min2 = ((jjydata[compare[i][1]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 2;
         if (jjydata[compare[i][0]].bits.year == jjydata[compare[i][1]].bits.year && 
@@ -98,7 +120,6 @@ time_t JJYReceiver::get_time() {
 }
 
 time_t JJYReceiver::get_time(uint8_t index) {
-  uint16_t year,yday;
   return updateTimeInfo(jjydata,index,1);
 }
 time_t JJYReceiver::getTime() {
@@ -182,7 +203,7 @@ void JJYReceiver::delta_tick(){
       quality = PM;
       break;
     }
-    quality = (uint8_t) (((quality * 100) / (N*8)) - 50) * 2;
+    quality = (uint8_t) constrain((((quality * 100) / (N*8)) - 50) * 2,0,100);
     #ifdef DEBUG_BUILD
     debug();
     DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
@@ -263,8 +284,10 @@ void JJYReceiver::begin(){
 
 void JJYReceiver::stop(){
   power(false);
+  state = TIMETICK;
 }
 
+//timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
 void JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
@@ -277,7 +300,6 @@ void JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_
     (*month)++;
   }
   *day = dayOfYear;
-  //(*month)++;
 }
 
 // ***********************************************************************************************
