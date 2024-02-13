@@ -142,6 +142,11 @@ void loop() {
 }
 ```
 
+# 動作Demo
+
+https://youtu.be/QVjbMRq6WlM
+
+
 ## サンプルスケッチ
 
 [サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
