@@ -284,7 +284,6 @@ void JJYReceiver::begin(){
 
 void JJYReceiver::stop(){
   power(false);
-  state = TIMETICK;
 }
 
 //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
