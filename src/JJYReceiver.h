@@ -93,6 +93,7 @@ class JJYReceiver {
     volatile int8_t monitorpin = -1;
     volatile uint8_t frequency = 0;
     volatile uint8_t markercount = 0;
+    volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
     volatile uint8_t tick = 0;

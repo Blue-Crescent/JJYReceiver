@@ -122,13 +122,19 @@ time_t JJYReceiver::get_time(uint8_t index) {
   return updateTimeInfo(jjydata,index,1);
 }
 time_t JJYReceiver::getTime() {
+  time_t temp_time;
   switch(state){
    case INIT:
     return -1;
    case RECEIVE: // Intermediate update (1st receive update)
     if(timeavailable == -1) return -1;
-    globaltime = updateTimeInfo(jjydata,timeavailable,1);
+    temp_time = updateTimeInfo(jjydata,timeavailable,1);
     timeavailable = -1;
+    switch(reliability){
+      case 1:
+        return temp_time;
+      break;
+    }
     return -1;
    case TIMEVALID:
     globaltime = updateTimeInfo(last_jjydata,0,1);
