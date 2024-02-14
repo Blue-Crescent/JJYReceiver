@@ -1,3 +1,4 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Arduino-lint](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduinolint.yml/badge.svg)](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduinolint.yml)
 
 # JJY Receiver
