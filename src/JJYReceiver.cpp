@@ -62,9 +62,9 @@ time_t JJYReceiver::clock_tick(){
 int JJYReceiver::distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size) {
     int hammingDistance = 0;
     uint8_t temp;
-    for (int i = 0; i < size; i++) {
+    for (uint8_t i = 0; i < size; i++) {
       temp = ~(arr1[i] ^ arr2[i]);
-      for(int j = 0; j < 8; j++){
+      for(uint8_t j = 0; j < 8; j++){
         if (((temp >> j) & 0x1) == 1) {
             hammingDistance++;
         }
@@ -95,9 +95,9 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
 }
 
 bool JJYReceiver::timeCheck(){
-    int compare[4][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 2} };
+    int compare[3][2] = {{0, 1}, {0, 2}, {1, 2} };
     uint8_t min1,min2;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
         min1 = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][0]].bits.min & 0x0f) + 1;
         min2 = ((jjydata[compare[i][1]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 2;
         if (jjydata[compare[i][0]].bits.year == jjydata[compare[i][1]].bits.year && 
@@ -108,7 +108,7 @@ bool JJYReceiver::timeCheck(){
         {
           last_jjydata[0] = (min2 > min1) ? jjydata[compare[i][1]] : jjydata[compare[i][0]];
           state = TIMEVALID;
-          stop();
+          power(false);
           return true;
         }
     }
@@ -123,7 +123,6 @@ time_t JJYReceiver::get_time(uint8_t index) {
   return updateTimeInfo(jjydata,index,1);
 }
 time_t JJYReceiver::getTime() {
-  uint16_t year,yday;
   switch(state){
    case INIT:
     return -1;
@@ -284,6 +283,7 @@ void JJYReceiver::begin(){
 
 void JJYReceiver::stop(){
   power(false);
+  state = TIMETICK;
 }
 
 //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
