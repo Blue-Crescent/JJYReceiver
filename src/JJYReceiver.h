@@ -79,7 +79,6 @@ typedef union {
 
 class JJYReceiver {
     enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
-    enum RCVSTATE {NONE=0,TIMEVALID0,TIMEVALID1,TIMEVALID2};
     enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
   
 	public:
@@ -94,7 +93,6 @@ class JJYReceiver {
     volatile int8_t monitorpin = -1;
     volatile uint8_t frequency = 0;
     volatile uint8_t markercount = 0;
-    volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
     volatile uint8_t tick = 0;
@@ -133,7 +131,6 @@ class JJYReceiver {
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
     bool timeCheck();
-    //time_t updateTimeInfo(JJYData jjydata*, int8_t index, int8_t offset);
     time_t getTime();
     time_t get_time();
     time_t get_time(uint8_t index);
@@ -165,8 +162,7 @@ class JJYReceiver {
         calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
         timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
         timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + offset;          // 分
-        time_t temp = mktime(&timeinfo);
-        return temp;
+        return mktime(&timeinfo);
     }
     void init(){
       state = RECEIVE;
