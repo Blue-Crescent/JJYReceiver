@@ -22,7 +22,6 @@
 
 // Reference:
 //https://www.nict.go.jp/sts/jjy_signal.html
-//https://captain-cocco.com/time-h-c-standart-library/#toc8
 
 #include <JJYReceiver.h>
 
