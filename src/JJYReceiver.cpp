@@ -103,7 +103,7 @@ bool JJYReceiver::timeCheck(){
             jjydata[compare[i][0]].bits.doyh == jjydata[compare[i][1]].bits.doyh && 
             jjydata[compare[i][0]].bits.doyl == jjydata[compare[i][1]].bits.doyl && 
             jjydata[compare[i][0]].bits.hour == jjydata[compare[i][1]].bits.hour &&
-            abs(min1 - min2) <= 2)
+            (abs((min2 - min1 + 60) % 60) <= 2))
         {
           last_jjydata[0] = (min2 > min1) ? jjydata[compare[i][1]] : jjydata[compare[i][0]];
           state = TIMEVALID;
