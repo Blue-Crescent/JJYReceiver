@@ -143,6 +143,11 @@ void loop() {
 
 [![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
+## インストール
+
+
+![](https://github.com/Blue-Crescent/JJYReceiver/blob/main/img/IDE.png)
+
 ## サンプルスケッチ
 
 [サンプル](https://github.com/Blue-Crescent/JJYReceiver/tree/main/examples)
