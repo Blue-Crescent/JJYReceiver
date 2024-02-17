@@ -8,6 +8,8 @@ JJY standard radio wave signal receiver library for Arduino.
 
 Ardinoの日本標準時受信モジュール用ライブラリ
 
+https://www.nict.go.jp/sts/jjy_signal.html
+
 # 機能
 
 JJYの日本標準時刻データを受信します。C言語標準のtime_t型のUTC基準＋9で時刻を返します。受信後は、タイマにより時刻を刻み維持することもできます。
@@ -333,8 +335,6 @@ lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリング�
 上記のデバッグモードを有効化して電波状態が良い時にシリアルログなどを保存しておき、最も頻出しているパターンを調べて調整を行うと良いと思います
 
 信号幅を測定したりする方法も実装してみましたが、ノイズが多く受信が困難だったためこの方式にしています。
-
-https://www.nict.go.jp/sts/jjy_signal.html
 
 ## データ長のチェック
 
