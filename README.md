@@ -43,6 +43,16 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 写真には黄色のコンデンサがついていますが不要です。JJY受信モジュールはおおむねどれも似たようなインタフェースかと思いますが、負論理と正論理のものがあり手元にあるものは負論理モジュールでしたので、負論理と正論理の出力がある場合は負論理出力をつないでください。正論理モジュールの場合はおそらく、トランジスタを使って反転させるか、TODOに書いてある変更を加えると動作すると思われます。
 
+## 調達先
+
+[電波時計モジュール - aitendo](https://www.aitendo.com/product-list?keyword=電波時計モジュール)
+
+[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
+
+入手元:
+
+https://ja.aliexpress.com/item/1005005254051736.html
+
 利用したモジュールの参考：
 
 - 製品番号: JJY-1060N-MAS
@@ -95,16 +105,6 @@ P,M
 lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されます。この受信モジュールは3.6Vが絶対最大定格ですので、書き込み時は受信モジュールを外すか、電圧レギュレーターをライタとの間に設けて保護してください。3.3Vでも書き込めました。
 
 ![](img/IMG_5779.jpeg)
-
-入手先:
-
-[電波時計モジュール - aitendo](https://www.aitendo.com/product-list?keyword=電波時計モジュール)
-
-[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
-
-入手元:
-
-https://ja.aliexpress.com/item/1005005254051736.html
 
 # ソフトウェア
 
