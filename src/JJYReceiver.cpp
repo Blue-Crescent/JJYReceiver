@@ -290,7 +290,7 @@ void JJYReceiver::monitor(int pin){
 }
 
 void JJYReceiver::begin(uint8_t updatemode){
-  mode = updatemode;
+  mode = static_cast<MODE>(updatemode);
   init();
 }
 void JJYReceiver::begin(){
