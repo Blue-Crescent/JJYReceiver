@@ -76,7 +76,7 @@ P,M
 3.3V Normal Connection以外は確認したわけではありませんが、考えうる参考例です。
 
 ![](img/Circuit3.png)
-![](img/Circuit2.png)
+
 ![](img/Circuit1.png)
 
 | 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
