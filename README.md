@@ -239,9 +239,36 @@ delta_tick()が受信後も供給されている場合は、マイコンのク�
 
 ```
 time_t now = jjy.get_time();
-String str = String(ctime(&now));
+String str = String(ctime(&now));  // Sat Feb 17 18:45:40 2024\n
 Serial.println(str);
+
+
+
+
 ```
+
+```
+time_t now = jjy.get_time();
+tm tm_info;
+localtime_r(&now, &tm_info);
+char buf1[24];
+strftime(buf1, sizeof(buf1), "%Y/%m/%d(%a) %H:%M:%S", &tm_info); // 2024/02/17(Sat) 18:45:40
+
+
+```
+
+```
+time_t now = jjy.get_time();
+tm tm_info;
+localtime_r(&now, &tm_info);
+if(tm_info.tm_min == 0){
+// 毎正時 00分に実行
+}
+```
+
+
+
+
 
 [Note]v0.2.0より追加
 
