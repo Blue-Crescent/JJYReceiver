@@ -88,7 +88,7 @@ lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されま
 
 入手先:
 
-[JJY - aitendo](https://www.aitendo.com/product-list?keyword=JJY&Submit=%E6%A4%9C%E7%B4%A2)
+[電波時計モジュール - aitendo](https://www.aitendo.com/product-list?keyword=電波時計モジュール)
 
 [JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
 
@@ -142,6 +142,11 @@ void loop() {
 # 動作Demo
 
 [![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
+
+## インストール
+
+
+![](https://github.com/Blue-Crescent/JJYReceiver/blob/main/img/IDE.png)
 
 ## サンプルスケッチ
 
@@ -288,6 +293,8 @@ Q:の手前の三つの数字はL,H,Pのマーカーとのハミング距離で�
 
 Q:は受信品質を示します。ハミング距離から50%(ランダム一致を考慮)を差し引いた値からの一致具合の割合です。
 
+DEBUG_BUILD有効時のサンプル：
+
 ```
 [2024-02-12 11:00:51.722] 00000000000001FFFC01FFFF:H MIN:RECEIVE 10 80:86:60 Q:78
 [2024-02-12 11:00:52.722] 00000000007FFFFFFFFFFFFF:P HOUR:RECEIVE 9 57:81:83 Q:72
@@ -326,21 +333,6 @@ https://www.nict.go.jp/sts/jjy_signal.html
 時刻データはtime.hのtm構造体を利用して、JJYデータからUTC時刻に変換しtime_t型で管理します
 
 40KHzでの動作確認をしています。
-
-DEBUG_BUILD有効時のサンプル：
-
-```
-[2024-02-12 11:00:51.722] 00000000000001FFFC01FFFF:H MIN:RECEIVE 10 80:86:60 Q:78
-[2024-02-12 11:00:52.722] 00000000007FFFFFFFFFFFFF:P HOUR:RECEIVE 9 57:81:83 Q:72
-[2024-02-12 11:00:53.643] 0000000000000000000000FF:L HOUR:RECEIVE 10 88:64:36 Q:82
-[2024-02-12 11:00:54.831] 00000000000000003FFFFFFF:H HOUR:RECEIVE 11 82:86:58 Q:78
-[2024-02-12 11:00:55.832] 0000000000000000FFFFFFE0:H HOUR:RECEIVE 12 75:83:55 Q:72
-[2024-02-12 11:00:56.832] 0000000000FFFFF03FFFFF00:P DOYH:RECEIVE 6 54:66:70 Q:44
-[2024-02-12 11:00:57.832] 0000003FF800000000FFFF00:L DOYH:RECEIVE 7 69:61:47 Q:42
-[2024-02-12 11:00:58.832] 000000000000000003FFFFFF:L DOYH:RECEIVE 8 86:82:54 Q:78
-[2024-02-12 11:00:59.802] 00FFFFFFFFFFFFFFFFFFFFFF:P DOYL:RECEIVE 4 24:48:76 Q:58
-[2024-02-12 11:01:00.803] 0001FFFFFFFFFFFFFFFFFFE0:M MIN:RECEIVE 0 26:50:78 Q:62
-```
 
 # TODOメモ
 
