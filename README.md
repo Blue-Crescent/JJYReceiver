@@ -249,6 +249,7 @@ tm tm_info;
 localtime_r(&now, &tm_info);
 char buf1[24];
 strftime(buf1, sizeof(buf1), "%Y/%m/%d(%a) %H:%M:%S", &tm_info); // 2024/02/17(Sat) 18:45:40
+Serial.println(buf1);
 ```
 
 ```
