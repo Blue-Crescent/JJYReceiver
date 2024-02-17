@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+k[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Arduino-lint](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduinolint.yml/badge.svg)](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduinolint.yml)
 [![PlatformIO Registry](https://badges.registry.platformio.org/packages/blue-crescent/library/JJYReceiver.svg)](https://registry.platformio.org/libraries/blue-crescent/JJYReceiver)
 
@@ -302,7 +302,7 @@ SoftwareSerialなどのシリアル通信ライブラリを有効にすること
 データ判定結果が:の後にP,L,Hで表示され、それぞれマーカ、L、Hとなります。
 そのあとにマーカの区間、受信状態を表示します。
 
-受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビット数を格納します。
+受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビットを格納します。
 
 Q:の手前の三つの数字はL,H,Pのマーカーとのハミング距離です。最大値96。サンプリングデータとCONST_L,CONST_H,CONST_PMそれぞれの配列との相関ですので、配列の内容を調整することで最適化できます。
 
@@ -328,7 +328,7 @@ DEBUG_BUILD有効時のサンプル：
 ## ハミング距離によるデータ判定
 
 JJYのビットデータを10msec毎にサンプリングします。サンプリングの開始インデックスはJJYの信号変化でリセットされます。(負論理出力のモジュールの場合は立下りエッジ)
-lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリングではな90サンプリング程度取得段階でハミング距離を計算しH,L,マーカのいずれかを判定します。
+lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリングではなく90サンプリング程度取得段階でハミング距離を計算しH,L,マーカのいずれかを判定します。
 この辺の揺らぎはJJY受信モジュールのAGC自動ゲイン調整やノイズからくると推測されます。モジュールの癖なので、CONST_L,CONST_H,CONST_PMなどのHとLの期間調整を行うと最適化出来ます。
 上記のデバッグモードを有効化して電波状態が良い時にシリアルログなどを保存しておき、最も頻出しているパターンを調べて調整を行うと良いと思います
 
