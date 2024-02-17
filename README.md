@@ -73,7 +73,7 @@ P,M
 
 ## 回路
 
-確認したわけではありませんが、考えうる参考例です。
+3.3V Normal Connection以外は確認したわけではありませんが、考えうる参考例です。
 
 ![](img/Circuit3.png)
 ![](img/Circuit2.png)
