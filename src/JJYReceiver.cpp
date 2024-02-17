@@ -133,9 +133,12 @@ time_t JJYReceiver::getTime() {
     if(timeavailable == -1) return -1;
     temp_time = updateTimeInfo(jjydata,timeavailable,1);
     timeavailable = -1;
-    switch(reliability){
-      case 1:
-        globaltime = updateTimeInfo(jjydata,rcvcnt,1);
+    switch(mode){
+      case HASTY:
+        if(operation == BOOT){
+          temp_time = updateTimeInfo(jjydata,rcvcnt,1);
+          globaltime = temp_time;
+        }
         return temp_time;
       break;
     }
@@ -286,8 +289,12 @@ void JJYReceiver::monitor(int pin){
   monitorpin = pin;
 }
 
-void JJYReceiver::begin(){
+void JJYReceiver::begin(uint8_t updatemode){
+  mode = updatemode;
   init();
+}
+void JJYReceiver::begin(){
+  begin(NORMAL);
 }
 
 void JJYReceiver::stop(){

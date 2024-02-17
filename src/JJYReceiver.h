@@ -78,6 +78,8 @@ typedef union {
 } JJYData;
 
 class JJYReceiver {
+    enum OPERATION {BOOT,OPERATION};
+    enum MODE {HASTY,NORMAL,CONSERVATIVE};
     enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
     enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
   
@@ -87,13 +89,15 @@ class JJYReceiver {
     JJYData last_jjydata[1];
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
+    volatile enum OPERATION operation = BOOT;
+    //volatile enum MODE mode = NORMAL;
+    volatile enum MODE mode = HASTY;
     volatile uint8_t rcvcnt = 0;
     volatile unsigned long fallingtime[2];
     volatile const int8_t datapin,selpin,ponpin;
     volatile int8_t monitorpin = -1;
     volatile uint8_t frequency = 0;
     volatile uint8_t markercount = 0;
-    volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
     volatile uint8_t tick = 0;
@@ -122,6 +126,7 @@ class JJYReceiver {
     void shift_in(uint8_t data,volatile uint8_t* sampling, int length);
     void clear(volatile uint8_t* sampling, int length);
     void begin();
+    void begin(uint8_t mode);
     void stop();
     bool power(bool powerstate);
     bool power();
