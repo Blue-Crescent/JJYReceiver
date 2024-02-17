@@ -77,6 +77,8 @@ P,M
 
 ![](img/Circuit3.png)
 
+![](img/Circuit2.png)
+
 ![](img/Circuit1.png)
 
 | 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
@@ -260,10 +262,6 @@ if(tm_info.tm_min == 0){
 // 毎正時 00分に実行
 }
 ```
-
-
-
-
 
 [Note]v0.2.0より追加
 
