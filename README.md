@@ -73,6 +73,8 @@ P,M
 
 ## 回路
 
+確認したわけではありませんが、考えうる参考例です。
+
 ![](img/Circuit3.png)
 ![](img/Circuit2.png)
 ![](img/Circuit1.png)
@@ -272,8 +274,6 @@ if(jjy.quality > 80){
 - 40:40kHz
 
 - 60:60kHz
-
- 
 
 # デバッグモード
 
