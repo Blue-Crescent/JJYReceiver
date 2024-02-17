@@ -95,17 +95,20 @@ void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
 
 bool JJYReceiver::timeCheck(){
     int compare[6][2] = {{0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
-    uint8_t min1,min2;
+    uint8_t min[2];
+    uint8_t hour00[2];
     for (int i = 0; i < 6; i++) {
-        min1 = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][0]].bits.min & 0x0f) + 1;
-        min2 = ((jjydata[compare[i][1]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 2;
+        min[0] = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][0]].bits.min & 0x0f) + 1;
+        min[1] = ((jjydata[compare[i][1]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 2;
+        hour00[0] = min[0] ? 1 : 0;
+        hour00[1] = min[1] ? 1 : 0;
         if (jjydata[compare[i][0]].bits.year == jjydata[compare[i][1]].bits.year && 
             jjydata[compare[i][0]].bits.doyh == jjydata[compare[i][1]].bits.doyh && 
             jjydata[compare[i][0]].bits.doyl == jjydata[compare[i][1]].bits.doyl && 
-            jjydata[compare[i][0]].bits.hour == jjydata[compare[i][1]].bits.hour &&
-            (abs((min2 - min1 + 60) % 60) <= 2))
+            (jjydata[compare[i][0]].bits.hour + hour00[0]) == (jjydata[compare[i][1]].bits.hour + hour00[1]) &&
+            (abs((min[1] - min[0] + 60) % 60) <= 2))
         {
-          last_jjydata[0] = (min2 > min1) ? jjydata[compare[i][1]] : jjydata[compare[i][0]];
+          last_jjydata[0] = (min[1] > min[0]) ? jjydata[compare[i][1]] : jjydata[compare[i][0]];
           state = TIMEVALID;
           power(false);
           return true;
@@ -132,6 +135,7 @@ time_t JJYReceiver::getTime() {
     timeavailable = -1;
     switch(reliability){
       case 1:
+        globaltime = updateTimeInfo(jjydata,rcvcnt,1);
         return temp_time;
       break;
     }
