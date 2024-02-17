@@ -88,7 +88,7 @@ lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されま
 
 入手先:
 
-[JJY - aitendo](https://www.aitendo.com/product-list?keyword=JJY&Submit=%E6%A4%9C%E7%B4%A2)
+[電波時計モジュール - aitendo](https://www.aitendo.com/product-list?keyword=電波時計モジュール)
 
 [JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
 
