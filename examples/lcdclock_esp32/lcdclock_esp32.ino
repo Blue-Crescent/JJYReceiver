@@ -72,7 +72,7 @@ void loop()
   }
 
   delay(1000);
-  if(tm_info.tm_min == 0 && lastreceived != -1){ // receive from last over an hour.
+  if(tm_info.tm_min == 0 && lastreceived != -1){ // Receive start on the hour 
     jjy.begin();
   } 
 }
