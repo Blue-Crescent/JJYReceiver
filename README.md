@@ -379,6 +379,6 @@ lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリング�
 GitHubの利用は初めてですので、お作法等ご容赦ください
 
 Please feel free to send pull request about this library. If you have any enhancements or bugfix.
-It seems same time code format uses WWVB. It may be also works with WWWVB protocol.
+It seems same time code format uses WWVB. It may be also works with WWVB protocol.
 I don't implement parity check functionality due to that.
 
