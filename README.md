@@ -4,9 +4,14 @@
 
 # JJY Receiver
 
-JJY standard radio wave signal receiver library for Arduino. 
+Arduinoの日本標準時受信モジュール用ライブラリ
 
-Ardinoの日本標準時受信モジュール用ライブラリ
+JJY standard radio wave signal receiver library for Arduino. 
+It might be also works with WWVB by editing small modification.
+
+https://www.nict.go.jp/sts/jjy_signal.html
+
+[![atomicclock](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
 # 機能
 
@@ -15,6 +20,8 @@ JJYの日本標準時刻データを受信します。C言語標準のtime_t型�
 電波時計モジュールをArduinoで利用しやすい形のJJY受信ライブラリ的なものがWebに見つけられなかったので作ってみました。
 
 電波時計の制作やデータロガーの日時情報など、Wifiを利用せずとも電池駆動可能な低電力でインターネット未接続環境での時刻情報の利用ができます。
+
+This library returns UTC date time of time_t type. Negative logic output type JJY receiver supported. Tested with JJY receiver IC MAS6181B with lgt8f328p/esp32.
 
 # ハードウェア要件
 
@@ -141,13 +148,9 @@ void ticktock() {  // 10 msecタイマで呼び出すハンドラ
 void loop() {
   time_t now = get_time(); // 時間の利用。呼び出したときの現在時刻を取得
   time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
-  delay(10000);
+  delay(1000);
 }
 ```
-
-# 動作Demo
-
-[![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
 ## インストール
 
@@ -223,7 +226,7 @@ getTime()が戻り値を返すには最低2つの内部の時刻受信データ�
 
 v0.6.0より
 
-begin()により受信が成功後のgetTime()の初回呼び出し時にJJY受信データの変換が行われて時刻が校正され、内部管理時刻に反映されます。(esp32では割り込みハンドラ内でmktime計算が実行できないため、変換処理は外部から呼び出す必要がある。受信完了後、すぐ呼び出さないと内部管理時刻への反映遅れによりずれます)
+begin()により受信が成功後のgetTime()の初回呼び出し時にJJY受信データの変換が行われて時刻が校正され、内部管理時刻に反映されます。(esp32では割り込みハンドラ内でmktime計算が実行できないため、変換処理は外部から呼び出す必要がある。受信完了後、すぐ呼び出さないと内部管理時刻への反映遅れによりずれます。-1以外の値が変えるまで1秒以内のループ文中で読み出して下さい)
 
 [Note] v0.6.0より動作変更
 
@@ -302,7 +305,7 @@ SoftwareSerialなどのシリアル通信ライブラリを有効にすること
 データ判定結果が:の後にP,L,Hで表示され、それぞれマーカ、L、Hとなります。
 そのあとにマーカの区間、受信状態を表示します。
 
-受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビット数を格納します。
+受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビットを格納します。
 
 Q:の手前の三つの数字はL,H,Pのマーカーとのハミング距離です。最大値96。サンプリングデータとCONST_L,CONST_H,CONST_PMそれぞれの配列との相関ですので、配列の内容を調整することで最適化できます。
 
@@ -328,11 +331,11 @@ DEBUG_BUILD有効時のサンプル：
 ## ハミング距離によるデータ判定
 
 JJYのビットデータを10msec毎にサンプリングします。サンプリングの開始インデックスはJJYの信号変化でリセットされます。(負論理出力のモジュールの場合は立下りエッジ)
-lgt8f328の場合は+-60msec程度揺らぐので、100サンプリングではな90サンプリング程度取得段階でハミング距離を計算しH,L,マーカのいずれかを判定します。
+lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリングではなく90サンプリング程度取得段階でハミング距離を計算しH,L,マーカのいずれかを判定します。
+この辺の揺らぎはJJY受信モジュールのAGC自動ゲイン調整やノイズからくると推測されます。モジュールの癖なので、CONST_L,CONST_H,CONST_PMなどのHとLの期間調整を行うと最適化出来ます。
+上記のデバッグモードを有効化して電波状態が良い時にシリアルログなどを保存しておき、最も頻出しているパターンを調べて調整を行うと良いと思います
 
 信号幅を測定したりする方法も実装してみましたが、ノイズが多く受信が困難だったためこの方式にしています。
-
-https://www.nict.go.jp/sts/jjy_signal.html
 
 ## データ長のチェック
 
@@ -374,3 +377,7 @@ https://www.nict.go.jp/sts/jjy_signal.html
 バグ修正・エンハンスを歓迎します。パッチは受け付けていませんので、プルリクエストをお送りください。
 
 GitHubの利用は初めてですので、お作法等ご容赦ください
+
+Please feel free to send pull request about this library. If you have any enhancements or bugfix.
+It seems similar time code format uses WWVB. It may be also works with WWVB protocol by making small modification. I don't implement parity check functionality due to that.
+
