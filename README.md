@@ -11,10 +11,7 @@ It might be also works with WWVB by editing small modification.
 
 https://www.nict.go.jp/sts/jjy_signal.html
 
-
-![atomic_clock](
-https://github.com/Blue-Crescent/JJYReceiver/blob/main/examples/lcdclock_esp32/IMG_4453.jpg)
-
+[![atomicclock](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
 # 機能
 
@@ -354,9 +351,6 @@ lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリング�
 時刻データはtime.hのtm構造体を利用して、JJYデータからUTC時刻に変換しtime_t型で管理します
 
 40KHzでの動作確認をしています。
-
-# 動作Demo
-[![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
 # TODOメモ
 
