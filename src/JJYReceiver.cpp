@@ -143,6 +143,9 @@ time_t JJYReceiver::getTime() {
     globaltime = updateTimeInfo(last_jjydata,0,1);
     state = TIMETICK;
     received_time = globaltime;
+    break;
+   default:
+    return -1;
   }
   return received_time;
 }
