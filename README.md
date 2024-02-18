@@ -19,6 +19,8 @@ JJYの日本標準時刻データを受信します。C言語標準のtime_t型�
 
 電波時計の制作やデータロガーの日時情報など、Wifiを利用せずとも電池駆動可能な低電力でインターネット未接続環境での時刻情報の利用ができます。
 
+This library returns UTC date time of time_t type. Negative logic output type JJY receiver supported. Tested with JJY receiver IC MAS6181B with lgt8f328p/esp32.
+
 # ハードウェア要件
 
 - 10msecのタイマ
