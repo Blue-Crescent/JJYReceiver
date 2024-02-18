@@ -8,7 +8,7 @@ Arduinoの日本標準時受信モジュール用ライブラリ
 
 JJY standard radio wave signal receiver library for Arduino. 
 
-- For WWVB user, See bottom of this page.
+For WWVB user, See bottom of this page.
 It might be also works with WWVB by editing small modification. 
 
 https://www.nict.go.jp/sts/jjy_signal.html
