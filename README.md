@@ -11,6 +11,11 @@ It might be also works with WWVB by editing small modification.
 
 https://www.nict.go.jp/sts/jjy_signal.html
 
+
+![](
+https://github.com/Blue-Crescent/JJYReceiver/blob/main/examples/lcdclock_esp32/IMG_4453.jpg)
+
+# 動作Demo
 [![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
 # 機能
