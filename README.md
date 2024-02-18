@@ -11,6 +11,9 @@ It might be also works with WWVB by editing small modification.
 
 https://www.nict.go.jp/sts/jjy_signal.html
 
+![](
+https://github.com/Blue-Crescent/JJYReceiver/blob/main/examples/lcdclock_esp32/IMG_4453.jpg)
+
 # 機能
 
 JJYの日本標準時刻データを受信します。C言語標準のtime_t型のUTC基準＋9で時刻を返します。受信後は、タイマにより時刻を刻み維持することもできます。
