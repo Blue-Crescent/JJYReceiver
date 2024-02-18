@@ -145,7 +145,7 @@ time_t JJYReceiver::getTime() {
     received_time = globaltime;
     break;
    default:
-    return -1;
+    return received_time;
   }
   return received_time;
 }
