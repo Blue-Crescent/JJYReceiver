@@ -383,7 +383,7 @@ GitHubの利用は初めてですので、お作法等ご容赦ください
 Please feel free to send pull request about this library. If you have any enhancements or bugfix.
 It seems similar time code format uses WWVB. It may be also works with WWVB protocol by making small modification. I don't implement parity check functionality due to that.
 
-I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb, "See WWVB Branch")
+I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
 
