@@ -12,7 +12,7 @@ It might be also works with WWVB by editing small modification.
 https://www.nict.go.jp/sts/jjy_signal.html
 
 
-![](
+![atomic_clock](
 https://github.com/Blue-Crescent/JJYReceiver/blob/main/examples/lcdclock_esp32/IMG_4453.jpg)
 
 # 動作Demo
