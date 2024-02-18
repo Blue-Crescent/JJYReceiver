@@ -147,7 +147,12 @@ class JJYReceiver {
       if(lencheck(jjypayloadlen) == false){
          return false;
       }
-      jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
+      // For JJY
+      //jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
+
+      // For WWVB
+      jjydata[index].bits.year =(uint8_t) (0x000F & jjypayload[JJY_YEAR] << 4)| (0x01E0 & jjypayload[JJY_WEEK] >> 5); 
+
       jjydata[index].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
       jjydata[index].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
       jjydata[index].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
@@ -157,7 +162,9 @@ class JJYReceiver {
      }
     time_t updateTimeInfo(JJYData* jjydata, int8_t index, int8_t offset) {
         int year, yday;
+        // For JJY
         year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
+
         timeinfo.tm_year  = year - 1900; // 年      
         yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
         calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
@@ -177,7 +184,8 @@ class JJYReceiver {
         if (arr[0] != 8) {
             return false;
         }
-        for (int i = 1; i < 5; i++) { // except WEEK
+        //for (int i = 1; i < 5; i++) { // except WEEK
+        for (int i = 1; i < 6; i++) { // For WWVB
             if (arr[i] != 9) {
                 return false;
             }
