@@ -7,7 +7,9 @@
 Arduinoの日本標準時受信モジュール用ライブラリ
 
 JJY standard radio wave signal receiver library for Arduino. 
-It might be also works with WWVB by editing small modification.
+
+- For WWVB user, See bottom of this page.
+It might be also works with WWVB by editing small modification. 
 
 https://www.nict.go.jp/sts/jjy_signal.html
 
@@ -380,4 +382,8 @@ GitHubの利用は初めてですので、お作法等ご容赦ください
 
 Please feel free to send pull request about this library. If you have any enhancements or bugfix.
 It seems similar time code format uses WWVB. It may be also works with WWVB protocol by making small modification. I don't implement parity check functionality due to that.
+
+I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb, "See WWVB Branch")
+I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
+If somebody report me it works or not, I might support it. If someone need my library. :D
 
