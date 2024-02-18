@@ -4,10 +4,10 @@
 
 # JJY Receiver
 
+Arduinoの日本標準時受信モジュール用ライブラリ
+
 JJY standard radio wave signal receiver library for Arduino. 
 It might be also works with WWVB.
-
-Ardinoの日本標準時受信モジュール用ライブラリ
 
 https://www.nict.go.jp/sts/jjy_signal.html
 
