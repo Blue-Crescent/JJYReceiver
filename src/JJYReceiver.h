@@ -29,8 +29,8 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#define DEBUG_BUILD
-#define DEBUG_ESP32
+//#define DEBUG_BUILD
+//#define DEBUG_ESP32
 
 #ifdef DEBUG_BUILD
 # define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
