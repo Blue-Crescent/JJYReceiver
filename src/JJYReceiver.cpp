@@ -100,8 +100,8 @@ bool JJYReceiver::timeCheck(){
     for (int i = 0; i < 6; i++) {
         min[0] = ((jjydata[compare[i][0]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][0]].bits.min & 0x0f) + 1;
         min[1] = ((jjydata[compare[i][1]].bits.min >> 5) & 0x7)  * 10 + (jjydata[compare[i][1]].bits.min & 0x0f) + 2;
-        hour00[0] = min[0] ? 1 : 0;
-        hour00[1] = min[1] ? 1 : 0;
+        hour00[0] = ( min[0] == 0 ) ? 1 : 0;
+        hour00[1] = ( min[1] == 0 ) ? 1 : 0;
         if (jjydata[compare[i][0]].bits.year == jjydata[compare[i][1]].bits.year && 
             jjydata[compare[i][0]].bits.doyh == jjydata[compare[i][1]].bits.doyh && 
             jjydata[compare[i][0]].bits.doyl == jjydata[compare[i][1]].bits.doyl && 
@@ -133,12 +133,8 @@ time_t JJYReceiver::getTime() {
     if(timeavailable == -1) return -1;
     temp_time = updateTimeInfo(jjydata,timeavailable,1);
     timeavailable = -1;
-    switch(mode){
-      case HASTY:
-        if(operation == BOOT){
-          temp_time = updateTimeInfo(jjydata,rcvcnt,1);
-          globaltime = temp_time;
-        }
+    switch(reliability){
+      case 1:
         return temp_time;
       break;
     }
@@ -147,6 +143,9 @@ time_t JJYReceiver::getTime() {
     globaltime = updateTimeInfo(last_jjydata,0,1);
     state = TIMETICK;
     received_time = globaltime;
+    break;
+   default:
+    return received_time;
   }
   return received_time;
 }
@@ -161,10 +160,10 @@ void JJYReceiver::delta_tick(){
   data = digitalRead(datapin)==HIGH ? 1 : 0;  
   shift_in(data, sampling, N);
   sampleindex++;
-  if(sampleindex == 100){
+  if(95 < sampleindex){
     sampleindex = 0;
     clear(sampling, N);
-  }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
+  }else if(sampleindex == 95){ 
     #ifdef DEBUG_BUILD
     debug2();
     #endif
@@ -225,22 +224,16 @@ void JJYReceiver::delta_tick(){
 }
 
 void JJYReceiver::jjy_receive(){
-  unsigned long time = millis();
-  unsigned long window;
   if(state == TIMEVALID) return;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
   if (data == LOW) {
     if(monitorpin != -1) digitalWrite(monitorpin,LOW);
-    window = time - fallingtime[0];
-    if(990 < window){
+    if(sampleindex < 20){
       sampleindex = 0;
       clear(sampling,N);
     }
-    fallingtime[1] = fallingtime[0];
-    fallingtime[0] = time;
   }else{
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
-
   }
 }
 uint8_t JJYReceiver::freq(uint8_t freq){
@@ -289,12 +282,8 @@ void JJYReceiver::monitor(int pin){
   monitorpin = pin;
 }
 
-void JJYReceiver::begin(uint8_t updatemode){
-  mode = static_cast<MODE>(updatemode);
-  init();
-}
 void JJYReceiver::begin(){
-  begin(NORMAL);
+    init();
 }
 
 void JJYReceiver::stop(){
@@ -362,6 +351,8 @@ void JJYReceiver::debug(){
    case TIMEVALID:
      DEBUG_PRINT("TIMEVALID");
      break;
+   default:
+      break;
    }
   DEBUG_PRINT(" ");
   DEBUG_PRINT((int)jjypayloadlen[jjystate]);
