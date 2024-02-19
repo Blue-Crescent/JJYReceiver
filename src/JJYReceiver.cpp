@@ -160,10 +160,10 @@ void JJYReceiver::delta_tick(){
   data = digitalRead(datapin)==HIGH ? 1 : 0;  
   shift_in(data, sampling, N);
   sampleindex++;
-  if(sampleindex == 100){
+  if(95 < sampleindex){
     sampleindex = 0;
     clear(sampling, N);
-  }else if(sampleindex == 90){ // クロックが揺らぐので100sampleしっかりないため少し間引く
+  }else if(sampleindex == 95){ 
     #ifdef DEBUG_BUILD
     debug2();
     #endif
@@ -224,22 +224,16 @@ void JJYReceiver::delta_tick(){
 }
 
 void JJYReceiver::jjy_receive(){
-  unsigned long time = millis();
-  unsigned long window;
   if(state == TIMEVALID) return;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
   if (data == LOW) {
     if(monitorpin != -1) digitalWrite(monitorpin,LOW);
-    window = time - fallingtime[0];
-    if(990 < window){
+    if(sampleindex < 20){
       sampleindex = 0;
       clear(sampling,N);
     }
-    fallingtime[1] = fallingtime[0];
-    fallingtime[0] = time;
   }else{
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
-
   }
 }
 uint8_t JJYReceiver::freq(uint8_t freq){
@@ -289,7 +283,7 @@ void JJYReceiver::monitor(int pin){
 }
 
 void JJYReceiver::begin(){
-  init();
+    init();
 }
 
 void JJYReceiver::stop(){
@@ -357,6 +351,8 @@ void JJYReceiver::debug(){
    case TIMEVALID:
      DEBUG_PRINT("TIMEVALID");
      break;
+   default:
+      break;
    }
   DEBUG_PRINT(" ");
   DEBUG_PRINT((int)jjypayloadlen[jjystate]);
