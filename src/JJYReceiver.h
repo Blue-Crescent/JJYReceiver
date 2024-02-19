@@ -87,7 +87,7 @@ class JJYReceiver {
     JJYData last_jjydata[1];
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
-        volatile uint8_t rcvcnt = 0;
+    volatile uint8_t rcvcnt = 0;
     volatile unsigned long fallingtime[2];
     volatile const int8_t datapin,selpin,ponpin;
     volatile int8_t monitorpin = -1;
