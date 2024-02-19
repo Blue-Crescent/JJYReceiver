@@ -28,8 +28,8 @@
 /*!
     @brief  Constructor for JJYReceiver
 */
-#ifdef DEBUG_BUILD
-#ifndef DEBUG_ESP32
+//#ifdef DEBUG_BUILD
+//#ifndef DEBUG_ESP32
   //extern SoftwareSerial Serial;
 #endif
 #endif
@@ -350,6 +350,9 @@ void JJYReceiver::debug(){
      break;
    case TIMEVALID:
      DEBUG_PRINT("TIMEVALID");
+     break;
+   case TIMETICK:
+     DEBUG_PRINT("TIMETICK");
      break;
    default:
       break;
