@@ -29,8 +29,8 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//#define DEBUG_BUILD
-//#define DEBUG_ESP32
+#define DEBUG_BUILD
+#define DEBUG_ESP32
 
 #ifdef DEBUG_BUILD
 # define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
@@ -78,9 +78,7 @@ typedef union {
 } JJYData;
 
 class JJYReceiver {
-    enum OPERATION {BOOT,OPERATION};
-    enum MODE {HASTY=1,NORMAL=0,CONSERVATIVE=2};
-    enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
+        enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
     enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
   
 	public:
@@ -89,15 +87,13 @@ class JJYReceiver {
     JJYData last_jjydata[1];
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
-    volatile enum OPERATION operation = BOOT;
-    //volatile enum MODE mode = NORMAL;
-    volatile enum MODE mode = HASTY;
-    volatile uint8_t rcvcnt = 0;
+        volatile uint8_t rcvcnt = 0;
     volatile unsigned long fallingtime[2];
     volatile const int8_t datapin,selpin,ponpin;
     volatile int8_t monitorpin = -1;
     volatile uint8_t frequency = 0;
     volatile uint8_t markercount = 0;
+    volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
     volatile uint8_t tick = 0;
@@ -107,9 +103,9 @@ class JJYReceiver {
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
-    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0xF0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
@@ -126,7 +122,6 @@ class JJYReceiver {
     void shift_in(uint8_t data,volatile uint8_t* sampling, int length);
     void clear(volatile uint8_t* sampling, int length);
     void begin();
-    void begin(uint8_t mode);
     void stop();
     bool power(bool powerstate);
     bool power();
