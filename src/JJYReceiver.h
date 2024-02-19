@@ -29,8 +29,8 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#define DEBUG_BUILD
-#define DEBUG_ESP32
+//#define DEBUG_BUILD
+//#define DEBUG_ESP32
 
 #ifdef DEBUG_BUILD
 # define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
@@ -88,7 +88,6 @@ class JJYReceiver {
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t rcvcnt = 0;
-    volatile unsigned long fallingtime[2];
     volatile const int8_t datapin,selpin,ponpin;
     volatile int8_t monitorpin = -1;
     volatile uint8_t frequency = 0;
