@@ -351,6 +351,9 @@ void JJYReceiver::debug(){
    case TIMEVALID:
      DEBUG_PRINT("TIMEVALID");
      break;
+   case TIMETICK:
+     DEBUG_PRINT("TIMETICK");
+     break;
    default:
       break;
    }
