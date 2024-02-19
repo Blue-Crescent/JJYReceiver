@@ -4,7 +4,16 @@
 
 # JJY Receiver
 
-JJY standard radio wave signal receiver library for Arduino. Ardinoの日本標準時受信モジュール用ライブラリ
+Arduinoの日本標準時受信モジュール用ライブラリ
+
+JJY standard radio wave signal receiver library for Arduino. 
+
+For WWVB user, See bottom of this page.
+It might be also works with WWVB by editing small modification. 
+
+https://www.nict.go.jp/sts/jjy_signal.html
+
+[![atomicclock](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
 # 機能
 
@@ -13,6 +22,8 @@ JJYの日本標準時刻データを受信します。C言語標準のtime_t型�
 電波時計モジュールをArduinoで利用しやすい形のJJY受信ライブラリ的なものがWebに見つけられなかったので作ってみました。
 
 電波時計の制作やデータロガーの日時情報など、Wifiを利用せずとも電池駆動可能な低電力でインターネット未接続環境での時刻情報の利用ができます。
+
+This library returns UTC date time of time_t type. Negative logic output type JJY receiver supported. Tested with JJY receiver IC MAS6181B with lgt8f328p/esp32.
 
 # ハードウェア要件
 
@@ -41,6 +52,12 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 写真には黄色のコンデンサがついていますが不要です。JJY受信モジュールはおおむねどれも似たようなインタフェースかと思いますが、負論理と正論理のものがあり手元にあるものは負論理モジュールでしたので、負論理と正論理の出力がある場合は負論理出力をつないでください。正論理モジュールの場合はおそらく、トランジスタを使って反転させるか、TODOに書いてある変更を加えると動作すると思われます。
 
+#### 調達先
+
+[電波時計モジュール - aitendo](https://www.aitendo.com/product-list?keyword=電波時計モジュール)
+
+[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
+
 利用したモジュールの参考：
 
 - 製品番号: JJY-1060N-MAS
@@ -51,17 +68,7 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 ![](img/IMG_5777.jpeg)
 
-![](img/IMG_5776.jpeg)
-
 ![](img/IMG_5781.jpeg)
-
-| 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------- | ------------ |
-| SEL                             | L: 40kHz<br/>H: 60kHz                                                                                              | PDN1       | pinsel       |
-| OUT<br/>T、TN、TCOなどと書かれている場合もあり。 | JJYデータ負論理出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
-| PON                             | L: 動作<br/> H: 停止                                                                                                   | PDN2       | pinpon       |
-| GND                             | 基準電位                                                                                                               | VSS        | -            |
-| VDD                             | 1.1~3.3 v                                                                                                          | VDD        | -            |
 
 負論理出力でした。JJY信号の波形の立下りが1秒幅になります。
 
@@ -81,20 +88,28 @@ L
 
 P,M
 
+# 回路
+
+3.3V Normal Connection以外は確認したわけではありませんが、考えうる参考例です。
+
+![](img/Circuit3.png)
+
+![](img/Circuit2.png)
+
+![](img/Circuit1.png)
+
+| 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------- | ------------ |
+| SEL                             | L: 40kHz<br/>H: 60kHz                                                                                              | PDN1       | pinsel       |
+| OUT<br/>T、TN、TCOなどと書かれている場合もあり。 | JJYデータ負論理出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
+| PON                             | L: 動作<br/> H: 停止                                                                                                   | PDN2       | pinpon       |
+| GND                             | 基準電位                                                                                                               | VSS        | -            |
+| VDD                             | 1.1~3.3 v                                                                                                          | VDD        | -            |
+
 補足
 lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されます。この受信モジュールは3.6Vが絶対最大定格ですので、書き込み時は受信モジュールを外すか、電圧レギュレーターをライタとの間に設けて保護してください。3.3Vでも書き込めました。
 
 ![](img/IMG_5779.jpeg)
-
-入手先:
-
-[JJY - aitendo](https://www.aitendo.com/product-list?keyword=JJY&Submit=%E6%A4%9C%E7%B4%A2)
-
-[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
-
-入手元:
-
-https://ja.aliexpress.com/item/1005005254051736.html
 
 # ソフトウェア
 
@@ -135,13 +150,13 @@ void ticktock() {  // 10 msecタイマで呼び出すハンドラ
 void loop() {
   time_t now = get_time(); // 時間の利用。呼び出したときの現在時刻を取得
   time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
-  delay(10000);
+  delay(1000);
 }
 ```
 
-# 動作Demo
+## インストール
 
-[![](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
+![](https://github.com/Blue-Crescent/JJYReceiver/blob/main/img/IDE.png)
 
 ## サンプルスケッチ
 
@@ -213,11 +228,7 @@ getTime()が戻り値を返すには最低2つの内部の時刻受信データ�
 
 v0.6.0より
 
-begin()により受信が成功後のgetTime()の初回呼び出し時にJJY受信データの変換が行われて時刻が校正され、内部管理時刻に反映されます。(esp32では割り込みハンドラ内でmktime計算が実行できないため、変換処理は外部から呼び出す必要がある。受信完了後、すぐ呼び出さないと内部管理時刻への反映遅れによりずれます)
-
-v0.7.2より
-
-1回目の受信データのデータ長が一致していた場合、受信時刻として返せるreliability変数を導入。
+begin()により受信が成功後のgetTime()の初回呼び出し時にJJY受信データの変換が行われて時刻が校正され、内部管理時刻に反映されます。(esp32では割り込みハンドラ内でmktime計算が実行できないため、変換処理は外部から呼び出す必要がある。受信完了後、すぐ呼び出さないと内部管理時刻への反映遅れによりずれます。-1以外の値が変えるまで1秒以内のループ文中で読み出して下さい)
 
 [Note] v0.6.0より動作変更
 
@@ -233,8 +244,26 @@ delta_tick()が受信後も供給されている場合は、マイコンのク�
 
 ```
 time_t now = jjy.get_time();
-String str = String(ctime(&now));
+String str = String(ctime(&now));  // Sat Feb 17 18:45:40 2024\n
 Serial.println(str);
+```
+
+```
+time_t now = jjy.get_time();
+tm tm_info;
+localtime_r(&now, &tm_info);
+char buf1[24];
+strftime(buf1, sizeof(buf1), "%Y/%m/%d(%a) %H:%M:%S", &tm_info); // 2024/02/17(Sat) 18:45:40
+Serial.println(buf1);
+```
+
+```
+time_t now = jjy.get_time();
+tm tm_info;
+localtime_r(&now, &tm_info);
+if(tm_info.tm_min == 0){
+// 毎正時 00分に実行
+}
 ```
 
 [Note]v0.2.0より追加
@@ -269,10 +298,6 @@ if(jjy.quality > 80){
 
 - 60:60kHz
 
-# 
-
-
-
 # デバッグモード
 
 SoftwareSerialなどのシリアル通信ライブラリを有効にすることで、文字出力されます。
@@ -282,11 +307,13 @@ SoftwareSerialなどのシリアル通信ライブラリを有効にすること
 データ判定結果が:の後にP,L,Hで表示され、それぞれマーカ、L、Hとなります。
 そのあとにマーカの区間、受信状態を表示します。
 
-受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビット数を格納します。
+受信中の中間データはjjydata配列に格納されます。jjypayload配列に各マーカー間のビットを格納します。
 
 Q:の手前の三つの数字はL,H,Pのマーカーとのハミング距離です。最大値96。サンプリングデータとCONST_L,CONST_H,CONST_PMそれぞれの配列との相関ですので、配列の内容を調整することで最適化できます。
 
 Q:は受信品質を示します。ハミング距離から50%(ランダム一致を考慮)を差し引いた値からの一致具合の割合です。
+
+DEBUG_BUILD有効時のサンプル：
 
 ```
 [2024-02-12 11:00:51.722] 00000000000001FFFC01FFFF:H MIN:RECEIVE 10 80:86:60 Q:78
@@ -306,11 +333,11 @@ Q:は受信品質を示します。ハミング距離から50%(ランダム一�
 ## ハミング距離によるデータ判定
 
 JJYのビットデータを10msec毎にサンプリングします。サンプリングの開始インデックスはJJYの信号変化でリセットされます。(負論理出力のモジュールの場合は立下りエッジ)
-lgt8f328の場合は+-60msec程度揺らぐので、100サンプリングではな90サンプリング程度取得段階でハミング距離を計算しH,L,マーカのいずれかを判定します。
+lgt8f328で観ていると+-60msec程度揺らぐので、100サンプリングではなく90サンプリング程度取得段階でハミング距離を計算しH,L,マーカのいずれかを判定します。
+この辺の揺らぎはJJY受信モジュールのAGC自動ゲイン調整やノイズからくると推測されます。モジュールの癖なので、CONST_L,CONST_H,CONST_PMなどのHとLの期間調整を行うと最適化出来ます。
+上記のデバッグモードを有効化して電波状態が良い時にシリアルログなどを保存しておき、最も頻出しているパターンを調べて調整を行うと良いと思います
 
 信号幅を測定したりする方法も実装してみましたが、ノイズが多く受信が困難だったためこの方式にしています。
-
-https://www.nict.go.jp/sts/jjy_signal.html
 
 ## データ長のチェック
 
@@ -327,21 +354,6 @@ https://www.nict.go.jp/sts/jjy_signal.html
 
 40KHzでの動作確認をしています。
 
-DEBUG_BUILD有効時のサンプル：
-
-```
-[2024-02-12 11:00:51.722] 00000000000001FFFC01FFFF:H MIN:RECEIVE 10 80:86:60 Q:78
-[2024-02-12 11:00:52.722] 00000000007FFFFFFFFFFFFF:P HOUR:RECEIVE 9 57:81:83 Q:72
-[2024-02-12 11:00:53.643] 0000000000000000000000FF:L HOUR:RECEIVE 10 88:64:36 Q:82
-[2024-02-12 11:00:54.831] 00000000000000003FFFFFFF:H HOUR:RECEIVE 11 82:86:58 Q:78
-[2024-02-12 11:00:55.832] 0000000000000000FFFFFFE0:H HOUR:RECEIVE 12 75:83:55 Q:72
-[2024-02-12 11:00:56.832] 0000000000FFFFF03FFFFF00:P DOYH:RECEIVE 6 54:66:70 Q:44
-[2024-02-12 11:00:57.832] 0000003FF800000000FFFF00:L DOYH:RECEIVE 7 69:61:47 Q:42
-[2024-02-12 11:00:58.832] 000000000000000003FFFFFF:L DOYH:RECEIVE 8 86:82:54 Q:78
-[2024-02-12 11:00:59.802] 00FFFFFFFFFFFFFFFFFFFFFF:P DOYL:RECEIVE 4 24:48:76 Q:58
-[2024-02-12 11:01:00.803] 0001FFFFFFFFFFFFFFFFFFE0:M MIN:RECEIVE 0 26:50:78 Q:62
-```
-
 # TODOメモ
 
 いつかやるかもしれない
@@ -356,7 +368,7 @@ DEBUG_BUILD有効時のサンプル：
 
 # 受信
 
-受信のコツ
+受信のコツ。アンテナはなるべく回路のようなノイズ源から離しましょう。
 
 ![](img/slide1.png)　![](img/slide2.png)
 
@@ -367,3 +379,11 @@ DEBUG_BUILD有効時のサンプル：
 バグ修正・エンハンスを歓迎します。パッチは受け付けていませんので、プルリクエストをお送りください。
 
 GitHubの利用は初めてですので、お作法等ご容赦ください
+
+Please feel free to send pull request about this library. If you have any enhancements or bugfix.
+It seems similar time code format uses WWVB. It may be also works with WWVB protocol by making small modification. I don't implement parity check functionality due to that.
+
+I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
+I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
+If somebody report me it works or not, I might support it. If someone need my library. :D
+
