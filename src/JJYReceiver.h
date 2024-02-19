@@ -78,7 +78,7 @@ typedef union {
 } JJYData;
 
 class JJYReceiver {
-        enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
+    enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
     enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
   
 	public:
