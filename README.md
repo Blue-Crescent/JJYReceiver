@@ -5,3 +5,6 @@
 # JJY Receiver
 
 This is a branch for WWVB version.
+
+https://github.com/Blue-Crescent/JJYReceiver/archive/refs/heads/wwvb.zip
+
