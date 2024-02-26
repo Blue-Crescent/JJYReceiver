@@ -292,7 +292,7 @@ void JJYReceiver::stop(){
 }
 
 //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
-void JJYReceiver::calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
+void JJYReceiver::calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
     // 閏年の場合、2月は29日

@@ -126,7 +126,7 @@ class JJYReceiver {
     bool power();
     uint8_t freq(uint8_t freq);
     void monitor(int pin);
-    void calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
+    void calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
     int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
@@ -155,7 +155,7 @@ class JJYReceiver {
       return true;
      }
     time_t updateTimeInfo(JJYData* jjydata, int8_t index, int8_t offset) {
-        int year, yday;
+        uint16_t year, yday;
         year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
         timeinfo.tm_year  = year - 1900; // 年      
         yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
