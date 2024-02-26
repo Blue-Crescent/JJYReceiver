@@ -88,8 +88,7 @@ class JJYReceiver {
     volatile enum STATE state = INIT;
     volatile enum JJYSTATE jjystate = JJY_INIT;
     volatile uint8_t rcvcnt = 0;
-    volatile unsigned long fallingtime[2];
-    volatile const int8_t datapin,selpin,ponpin;
+        volatile const int8_t datapin,selpin,ponpin;
     volatile int8_t monitorpin = -1;
     volatile uint8_t frequency = 0;
     volatile uint8_t markercount = 0;
@@ -103,8 +102,8 @@ class JJYReceiver {
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
-    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0xF0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
@@ -127,7 +126,7 @@ class JJYReceiver {
     bool power();
     uint8_t freq(uint8_t freq);
     void monitor(int pin);
-    void calculateDate(uint16_t year, uint8_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
+    void calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
     int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
@@ -161,7 +160,7 @@ class JJYReceiver {
       return true;
      }
     time_t updateTimeInfo(JJYData* jjydata, int8_t index, int8_t offset) {
-        int year, yday;
+        uint16_t year, yday;
                 year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
         timeinfo.tm_year  = year - 1900; // 年      
         yday = ((((jjydata[index].bits.doyh >> 5) & 0x0002)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
