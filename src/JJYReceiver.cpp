@@ -226,14 +226,14 @@ void JJYReceiver::delta_tick(){
 void JJYReceiver::jjy_receive(){
     if(state == TIMEVALID) return;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
-  if (data == LOW) {
-    if(monitorpin != -1) digitalWrite(monitorpin,LOW);
+  if (data == HIGH) {
+    if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
     if(sampleindex < 20){
       sampleindex = 0;
       clear(sampling,N);
     }
       }else{
-    if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
+    if(monitorpin != -1) digitalWrite(monitorpin,LOW);
   }
 }
 uint8_t JJYReceiver::freq(uint8_t freq){
