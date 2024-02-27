@@ -8,3 +8,4 @@ This is a branch for WWVB version.
 
 https://github.com/Blue-Crescent/JJYReceiver/archive/refs/heads/wwvb.zip
 
+Let me know via Issues if you tried about this WWVB version. If not worked, please give me debug output message as well. Once confirmed worked, I will merge functionality in main code so that it can be used in Arduino IDE.
