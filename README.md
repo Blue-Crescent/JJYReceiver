@@ -135,7 +135,7 @@ void setup() {
 
   // JJY Library
   jjy.freq(40); // 受信周波数の設定
-　jjy.begin(); // 受信の開始
+  jjy.begin(); // 受信の開始
 
   while(jjy.getTime() == -1); // 受信が終わるまで次を実行させない場合に書く
 }
