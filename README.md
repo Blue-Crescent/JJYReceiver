@@ -137,7 +137,7 @@ void setup() {
   jjy.freq(40); // 受信周波数の設定
 　jjy.begin(); // 受信の開始
 
-  while(jjy.getTime() == -1) delay(1000); // 受信が終わるまで次を実行させない場合に書く
+  while(jjy.getTime() == -1); // 受信が終わるまで次を実行させない場合に書く
 }
 
 void isr_routine() { // 入力信号変化割り込みで呼び出すハンドラ
@@ -150,7 +150,7 @@ void ticktock() {  // 10 msecタイマで呼び出すハンドラ
 void loop() {
   time_t now = get_time(); // 時間の利用。呼び出したときの現在時刻を取得
   time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
-  delay(1000);
+  delay(100);
 }
 ```
 
