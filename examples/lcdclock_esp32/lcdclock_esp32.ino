@@ -46,10 +46,10 @@ void loop()
   tm tm_info;
   tm tm_lastinfo;
 
-  lcd.clear();
   localtime_r(&now, &tm_info);
   localtime_r(&lastreceived, &tm_lastinfo);
-
+  
+  lcd.clear();
   lcd.setCursor(0,0);
   char buf1[16];
   if(lastreceived==-1){
@@ -71,7 +71,7 @@ void loop()
     lcd.print(buf3);
   }
 
-  delay(1000);
+  delay(100);
   if(tm_info.tm_min == 0 && lastreceived != -1){ // Receive start on the hour 
     jjy.begin();
   } 
