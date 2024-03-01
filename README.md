@@ -148,7 +148,7 @@ void ticktock() {  // 10 msecタイマで呼び出すハンドラ
 }
 
 void loop() {
-  time_t now = get_time(); // 時間の利用。呼び出したときの現在時刻を取得
+  time_t now = jjy.get_time(); // 時間の利用。呼び出したときの現在時刻を取得
   time_t receive_time = jjy.getTime(); // 最後に電波を受信した時点の時刻の取得
   delay(100);
 }
