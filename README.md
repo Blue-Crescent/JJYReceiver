@@ -135,7 +135,7 @@ lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されま
 ## 基本的な使い方
 
 ```
-//#define SWAPFREQ.  //周波数選択の出力論理を反転させる場合アンコメント
+//#define SWAPFREQ  //周波数選択の出力論理を反転させる場合アンコメント
 #include <JJYReceiver.h>
 
 #define DATA 39
