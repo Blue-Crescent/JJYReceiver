@@ -240,10 +240,18 @@ void JJYReceiver::jjy_receive(){
 uint8_t JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
   if(freq == 40){
+    #ifdef SWAPFREQ
+    digitalWrite(selpin,HIGH);
+    #else
     digitalWrite(selpin,LOW);
+    #endif
     delay(300);
   }else if(freq == 60){
+    #ifdef SWAPFREQ
+    digitalWrite(selpin,LOW);
+    #else
     digitalWrite(selpin,HIGH);
+    #endif
     delay(300);
   }
   frequency = freq;

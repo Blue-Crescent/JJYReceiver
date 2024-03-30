@@ -29,6 +29,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
+// #define SWAPFREQ
 // #define DEBUG_BUILD
 // #define DEBUG_ESP32
 

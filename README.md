@@ -88,6 +88,24 @@ L
 
 P,M
 
+利用したモジュールの参考2：
+
+- 製品番号: JJY-1060N-2R1
+- 基板表記: RCC-02 VER1.0
+- 受信IC: 不明 CME6005?
+
+この基板はAGC端子を持ち、内部PullUpされていない？ためpull upする必要があります。
+また、周波数選択がH:40kHz, L:60kHzでした。
+
+```
+#define SWAPFREQ
+```
+をヘッダファイル読み込み前に定義することでL/Hを反転できます。
+
+![5](img/Module2.jpeg)
+![6](img/Module2-2.jpeg)
+![7](img/Module2Test.jpeg)
+
 # 回路
 
 3.3V Normal Connection以外は確認したわけではありませんが、考えうる参考例です。
@@ -100,11 +118,12 @@ P,M
 
 | 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------- | ------------ |
-| SEL                             | L: 40kHz<br/>H: 60kHz                                                                                              | PDN1       | pinsel       |
-| OUT<br/>T、TN、TCOなどと書かれている場合もあり。 | JJYデータ負論理出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
+| SEL<br/>FSの場合もあり                             | L: 40kHz<br/>H: 60kHz<br/>                                                                                             | PDN1       | pinsel       |
+| OUT<br/>T、TN、TCO、RFなどと書かれている場合もあり。 | JJYデータ負論理出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
 | PON                             | L: 動作<br/> H: 停止                                                                                                   | PDN2       | pinpon       |
 | GND                             | 基準電位                                                                                                               | VSS        | -            |
 | VDD                             | 1.1~3.3 v                                                                                                          | VDD        | -            |
+| AGC      | L: AGC OFF H: AGC ON AGC端子を持つ場合はPullUp|AON|-|
 
 補足
 lgt8f328pを使用する場合は、書き込み時にVccは5Vが出力されます。この受信モジュールは3.6Vが絶対最大定格ですので、書き込み時は受信モジュールを外すか、電圧レギュレーターをライタとの間に設けて保護してください。3.3Vでも書き込めました。
