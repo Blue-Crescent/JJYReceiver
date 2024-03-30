@@ -118,7 +118,7 @@ P,M
 
 | 基板シルク                           | 機能                                                                                                                 | MAS6181B端子 | ライブラリコンストラクタ |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------- | ------------ |
-| SEL<br/>F、FSの場合もあり                             | L: 40kHz H: 60kHz<br/> L: 60kHz H: 40kHz(SWAPFREQ defineをJJYReceiver.hの前に定義)                                                                                            | PDN1       | pinsel       |
+| SEL<br/>F、FSの場合もあり                             | L: 40kHz H: 60kHz<br/> L: 60kHz H: 40kHz(#define SWAPFREQをJJYReceiver.hの前に定義)                                                                                            | PDN1       | pinsel       |
 | OUT<br/>T、TN、TCO、RFなどと書かれている場合もあり。 | JJYデータ負論理出力 PWM<br/>P,M : 0.2sec Low - 0.8sec High<br/>H: 0.5sec Low - 0.5sec High<br/>L: 0.8sec Low - 0.2sec High | OUT        | pindata      |
 | PON<br/>Pの場合もあり           | L: 動作<br/> H: 停止                                                                                                   | PDN2       | pinpon       |
 | GND                             | 基準電位                                                                                                               | VSS        | -            |
