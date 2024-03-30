@@ -56,7 +56,7 @@ RTCなどを使用して時刻を維持し、マイコン側で時を刻まな�
 
 [電波時計モジュール - aitendo](https://www.aitendo.com/product-list?keyword=電波時計モジュール)
 
-[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-JJY-receiver-40kHz-60kHz.html?spm=a2g0o.productlist.search.0)
+[JJY receiver 40kHz 60kHz –AliExpress](https://ja.aliexpress.com/w/wholesale-jjy--module.html?spm=a2g0o.productlist.search.0)
 
 利用したモジュールの参考：
 
