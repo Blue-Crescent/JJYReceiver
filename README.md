@@ -196,7 +196,7 @@ void loop() {
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
-    JJYReceiver(int pindata,int pinpon, int pinsel);
+    JJYReceiver(int pindata,int pinsel,int pinpon);
 
 - pindata  JJYデータ入力端子の端子番号
 
