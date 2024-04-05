@@ -200,9 +200,9 @@ void loop() {
 
 - pindata  JJYデータ入力端子の端子番号
 
+- pinsel 周波数選択 (L:40kHz, H:60kHz 又は　L: 60kHz H: 40kHz(#define SWAPFREQをJJYReceiver.h内に定義時))
+- 
 - pinpon 電源動作（アクティブロー)
-
-- pinsel 周波数選択 (L:40kHz, H:60kHz)
 
 [Note] v0.4.0より変更
 
