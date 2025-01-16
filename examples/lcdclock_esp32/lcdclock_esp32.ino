@@ -6,12 +6,13 @@
 #define PON 33
 #define SEL 25
 
+
 hw_timer_t * timer = NULL;
 
 JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
 LiquidCrystal lcd = LiquidCrystal(16,17,4,0,2,15); // RS, Enable, D4, D5, D6, D7
 
-void IRAM_ATTR ticktock() {
+void ARDUINO_ISR_ATTR ticktock() {
   jjy.delta_tick();
 }
 
@@ -23,16 +24,23 @@ void setup()
 {
     
     // 10msec Timer for clock ticktock (Mandatory)
-    
-    timer = timerBegin(0, 80, true);  // タイマー0, 分周比80（これにより1カウントが1マイクロ秒になる）
-    timerAttachInterrupt(timer, &ticktock, true);  // 割り込み関数をアタッチ
-    timerAlarmWrite(timer, 10000, true);  // 10ミリ秒のタイマー（10,000マイクロ秒）
-    timerAlarmEnable(timer);  // タイマーを有効にする
+
+    // タイマーの初期化
+    timer = timerBegin(1000000); // タイマー周波数を1MHzに設定
+
+    // Attach ticktock function to our timer.
+    timerAttachInterrupt(timer, &ticktock);
+
+    // Set alarm to call onTimer function every 10 milliseconds (value in microseconds).
+    // Repeat the alarm (third parameter) with unlimited count = 0 (fourth parameter).
+    timerAlarm(timer, 10000, true, 0); // 10ミリ秒ごとの割り込み設定
+
+    // DATA pin signal change edge detection. (Mandatory)
     attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
-
-    jjy.freq(40); // Carrier frequency setting. Default:40
+    jjy.freq(60); // Carrier frequency setting. Default:40
     jjy.begin(); // Start JJY Receive
+    
     lcd.begin(16, 2);
     lcd.clear();
     lcd.setCursor(0,0);
