@@ -7,9 +7,9 @@
 
 JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
 
-Ticker timer;
+hw_timer_t * timer = NULL;
 
-void IRAM_ATTR ticktock() {
+void ARDUINO_ISR_ATTR ticktock() {
   jjy.delta_tick();
 }
 
@@ -22,7 +22,10 @@ void setup() {
   Serial.begin(115200);
   
   // 10msec Timer for clock ticktock (Mandatory)
-  timer.attach_ms(10, ticktock);
+  timer = timerBegin(1000000); // タイマー周波数を1MHzに設定
+  timerAttachInterrupt(timer, &ticktock);
+  timerAlarm(timer, 10000, true, 0); // 10ミリ秒ごとの割り込み設定
+  
 
   // DATA pin signal change edge detection. (Mandatory)
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);

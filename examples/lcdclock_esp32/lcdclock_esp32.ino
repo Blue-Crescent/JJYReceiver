@@ -1,18 +1,18 @@
 
 #include <LiquidCrystal.h>
 #include <JJYReceiver.h>
-#include <Ticker.h>
 
 #define DATA 39
 #define PON 33
 #define SEL 25
 
-Ticker timer;
+
+hw_timer_t * timer = NULL;
 
 JJYReceiver jjy(DATA,SEL,PON); // JJYReceiver lib set up.
 LiquidCrystal lcd = LiquidCrystal(16,17,4,0,2,15); // RS, Enable, D4, D5, D6, D7
 
-void IRAM_ATTR ticktock() {
+void ARDUINO_ISR_ATTR ticktock() {
   jjy.delta_tick();
 }
 
@@ -24,10 +24,23 @@ void setup()
 {
     
     // 10msec Timer for clock ticktock (Mandatory)
-    timer.attach_ms(10, ticktock);
+
+    // タイマーの初期化
+    timer = timerBegin(1000000); // タイマー周波数を1MHzに設定
+
+    // Attach ticktock function to our timer.
+    timerAttachInterrupt(timer, &ticktock);
+
+    // Set alarm to call onTimer function every 10 milliseconds (value in microseconds).
+    // Repeat the alarm (third parameter) with unlimited count = 0 (fourth parameter).
+    timerAlarm(timer, 10000, true, 0); // 10ミリ秒ごとの割り込み設定
+
+    // DATA pin signal change edge detection. (Mandatory)
+    attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
     jjy.freq(60); // Carrier frequency setting. Default:40
     jjy.begin(); // Start JJY Receive
+    
     lcd.begin(16, 2);
     lcd.clear();
     lcd.setCursor(0,0);
