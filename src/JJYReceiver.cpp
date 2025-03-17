@@ -122,6 +122,12 @@ time_t JJYReceiver::get_time() {
   return globaltime;
 }
 
+long JJYReceiver::set_time(time_t newtime) {
+  long diff = (long)(newtime - globaltime);
+  globaltime = newtime;
+  return diff;
+}
+
 time_t JJYReceiver::get_time(uint8_t index) {
   return updateTimeInfo(jjydata,index,1);
 }
@@ -315,17 +321,6 @@ void JJYReceiver::calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8
   *day = dayOfYear;
 }
 
-// 偶数パリティを計算する関数
-bool calculate_even_parity(uint8_t data, uint8_t bit_count, uint8_t parity_bit) {
-    uint8_t parity = parity_bit;
-
-    // 指定されたビット数に基づいてパリティを計算
-    for (uint8_t i = 0; i < bit_count; i++) {
-        parity ^= (data >> i) & 1;
-    }
-
-    return parity == 0;
-}
 
 // ***********************************************************************************************
 //  DEBUG FUNCTION
