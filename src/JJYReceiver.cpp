@@ -122,6 +122,12 @@ time_t JJYReceiver::get_time() {
   return globaltime;
 }
 
+long JJYReceiver::set_time(time_t newtime) {
+  long diff = (long)(newtime - globaltime);
+  globaltime = newtime;
+  return diff;
+}
+
 time_t JJYReceiver::get_time(uint8_t index) {
   return updateTimeInfo(jjydata,index,1);
 }
@@ -314,6 +320,7 @@ void JJYReceiver::calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8
   }
   *day = dayOfYear;
 }
+
 
 // ***********************************************************************************************
 //  DEBUG FUNCTION

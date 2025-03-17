@@ -33,6 +33,7 @@
 // #define DEBUG_BUILD
 // #define DEBUG_ESP32
 
+#define PARITYCHK
 #ifdef DEBUG_BUILD
 # define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
 # define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
@@ -104,8 +105,8 @@ class JJYReceiver {
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
     volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0xF0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFC,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
@@ -130,11 +131,12 @@ class JJYReceiver {
     void calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
     int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
-    bool calculateParity(uint8_t value, uint8_t bitLength, uint8_t expectedParity);
     bool timeCheck();
     time_t getTime();
     time_t get_time();
+    long set_time(time_t newtime);
     time_t get_time(uint8_t index);
+
     #ifdef DEBUG_BUILD
     void debug();
     void debug2();
@@ -147,6 +149,16 @@ class JJYReceiver {
       if(lencheck(jjypayloadlen) == false){
          return false;
       }
+      #ifdef PARITYCHK 
+      uint8_t PA2 = (jjypayload[JJY_DOYL] & 0x0002) >> 1;
+      uint8_t PA1 = (jjypayload[JJY_DOYL] & 0x0004) >> 2;
+      if(!calculate_even_parity(jjypayload[JJY_MIN],0xEF,PA2)){
+         return false;
+      }
+      if(!calculate_even_parity(jjypayload[JJY_HOUR],0x6F,PA1)){
+         return false;
+      }
+      #endif
       jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
       jjydata[index].bits.doyh =(uint16_t) 0x007F & jjypayload[JJY_DOYH]; 
       jjydata[index].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
@@ -184,6 +196,22 @@ class JJYReceiver {
         }
         return true;
     }
+    #ifdef PARITYCHK
+    // 偶数パリティを計算する関数
+    bool calculate_even_parity(uint8_t data, uint8_t mask,uint8_t parity_bit) {
+        uint8_t parity = parity_bit;
+
+        // 指定されたビット数に基づいてパリティを計算
+        for (uint8_t i = 0; i < 8; i++) {
+            // mask の i ビット目が1なら、そのビットをパリティ計算に含める
+            if ((mask >> i) & 1) {
+                parity ^= (data >> i) & 1;
+            }
+        }
+
+        return parity == 0;
+    }
+    #endif
 
 };
 #endif
