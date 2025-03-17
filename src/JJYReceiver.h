@@ -104,8 +104,8 @@ class JJYReceiver {
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
     volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0xF0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFC,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
@@ -135,6 +135,8 @@ class JJYReceiver {
     time_t getTime();
     time_t get_time();
     time_t get_time(uint8_t index);
+    bool calculate_even_parity(uint8_t data, uint8_t bit_count, uint8_t parity_bit);
+
     #ifdef DEBUG_BUILD
     void debug();
     void debug2();
@@ -145,6 +147,12 @@ class JJYReceiver {
   private:
     bool settime(uint8_t index){
       if(lencheck(jjypayloadlen) == false){
+         return false;
+      }
+      if(calculate_even_parity(jjydata[index].bits.min, 7, (jjydata[index].bits.parity >> 1) & 0x1)){
+         return false;
+      }
+      if(calculate_even_parity(jjydata[index].bits.hour, 6, jjydata[index].bits.parity & 0x1 )){
          return false;
       }
       jjydata[index].bits.year =(uint8_t) 0x00FF & jjypayload[JJY_YEAR]; 
