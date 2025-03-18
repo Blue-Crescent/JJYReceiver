@@ -30,7 +30,7 @@
 */
 #ifdef DEBUG_BUILD
 #ifndef DEBUG_ESP32
-  //extern SoftwareSerial Serial;
+  extern SoftwareSerial Serial;
 #endif
 #endif
 

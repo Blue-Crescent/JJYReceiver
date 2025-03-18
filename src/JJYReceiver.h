@@ -30,13 +30,16 @@
 #include <stdint.h>
 
 // #define SWAPFREQ
-// #define DEBUG_BUILD
-// #define DEBUG_ESP32
+//#define DEBUG_BUILD
+//#define DEBUG_ESP32
 
+// Following checking features can be applied for JJY only
 #define PARITYCHK
+#define WEEKDAYCHK
+
 #ifdef DEBUG_BUILD
-# define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
-# define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
+#define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
+#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
 
 #ifndef DEBUG_ESP32
 // For LGT8F328P
@@ -111,7 +114,9 @@ class JJYReceiver {
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
     struct tm timeinfo;
-    
+    uint16_t year, yday;
+    uint8_t jjy_weekday;
+    uint8_t calc_weekday;
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
@@ -164,14 +169,33 @@ class JJYReceiver {
       jjydata[index].bits.doyl =(uint8_t) ((0x01E0 & jjypayload[JJY_DOYL]) >> 5); 
       jjydata[index].bits.hour =(uint16_t) 0x006F & jjypayload[JJY_HOUR];
       jjydata[index].bits.min =(uint8_t) 0x00FF & jjypayload[JJY_MIN]; 
+      #ifdef WEEKDAYCHK
+      jjy_weekday = (uint8_t) ((0x01C0 & jjypayload[JJY_WEEK]) >> 6);
+      year = getyear(jjydata,index);
+      yday = getyday(jjydata,index);
+      calc_weekday = get_weekday(year, yday);
+      if(calc_weekday != jjy_weekday){
+        return false;
+      }
+      #endif
       timeinfo.tm_sec   = 1;           // 秒
       return true;
-     }
+    }
+    uint16_t getyday(JJYData* jjydata, int8_t index){
+        uint16_t yday;
+        yday = ((((jjydata[index].bits.doyh >> 5) & 0x0003)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
+        return yday;
+    }
+    uint16_t getyear(JJYData* jjydata, int8_t index){
+        uint16_t year;
+        year = (((jjydata[index].bits.year & 0x00F0) >> 4) * 10 + (jjydata[index].bits.year & 0x000f)) + 2000;
+        return year;
+    }
     time_t updateTimeInfo(JJYData* jjydata, int8_t index, int8_t offset) {
         uint16_t year, yday;
-        year = (((jjydata[index].bits.year & 0xf0) >> 4) * 10 + (jjydata[index].bits.year & 0x0f)) + 2000;
+        year = getyear(jjydata,index);
         timeinfo.tm_year  = year - 1900; // 年      
-        yday = ((((jjydata[index].bits.doyh >> 5) & 0x0003)) * 100) + (((jjydata[index].bits.doyh & 0x000f)) * 10) + jjydata[index].bits.doyl;
+        yday = getyday(jjydata,index);
         calculateDate(year, yday ,(uint8_t*) &timeinfo.tm_mon,(uint8_t*) &timeinfo.tm_mday);
         timeinfo.tm_hour  = ((jjydata[index].bits.hour >> 5) & 0x3) * 10 + (jjydata[index].bits.hour & 0x0f) ;         // 時
         timeinfo.tm_min   = ((jjydata[index].bits.min >> 5) & 0x7)  * 10 + (jjydata[index].bits.min & 0x0f) + offset;          // 分
@@ -189,7 +213,7 @@ class JJYReceiver {
         if (arr[0] != 8) {
             return false;
         }
-        for (int i = 1; i < 5; i++) { // except WEEK
+        for (int i = 1; i < 6; i++) {
             if (arr[i] != 9) {
                 return false;
             }
@@ -212,7 +236,21 @@ class JJYReceiver {
         return parity == 0;
     }
     #endif
+    #ifdef WEEKDAYCHK
+    uint8_t get_weekday(uint16_t year, uint16_t yday)
+    {
+        return true;
+        // 1月1日の曜日を求める（ツェラーの公式）
+        uint16_t zyear = year - 1;
+        uint16_t j = zyear/100;
+        uint16_t k = zyear - (j * 100);
+        uint8_t base_weekday = ((37 + k + k/4 + j/4 - 2*j) % 7) - 1; // Sunday = 0
 
+        // yday を加算して曜日を求める
+        uint8_t weekday = (uint8_t)((base_weekday + yday - 1) % 7);
+        return weekday;
+    }
+    #endif
 };
 #endif
 
