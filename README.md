@@ -431,7 +431,7 @@ m = 13(1月), d = 1(1日), y = year -1
 h = \left( \left( 1 + \left\lfloor \frac{ 26 (13 + 1) }{ 10 } \right\rfloor + k + \left\lfloor \frac k 4 \right\rfloor  - 2 j + \left\lfloor \frac j 4 \right\rfloor \right) \bmod 7  + 6 \right) \bmod 7
 ```
 ```math
- = \left( 43 + k + (k \gt\gt 2)  - (j \lt\lt 1) +  ( j \gt\gt 2 )>>  \right) \bmod 7
+ = \left( 43 + k + (k \gt\gt 2)  - (j \lt\lt 1) +  ( j \gt\gt 2 ) \right) \bmod 7
 ```
 - j (int型)
 ```math
