@@ -241,9 +241,9 @@ class JJYReceiver {
     {
         // 1月1日の曜日を求める（Zellerの公式）
         uint16_t zyear = year - 1;
-        uint16_t j = zyear / 100;
-        uint16_t k = zyear - (j * 100);
-        uint8_t base_weekday = (uint8_t)(((37 + k + (k>>2) + (j>>2) - (j<<1)) % 7) - 1); // Sunday = 0
+        uint8_t j = zyear / 100;
+        uint8_t k = zyear - (j * 100);
+        uint8_t base_weekday = (uint8_t)((43 + k + (k>>2) + (j>>2) - (j<<1)) % 7); // Sunday = 0
 
         // yday を加算して曜日を求める
         uint8_t weekday = (uint8_t)((base_weekday + yday - 1) % 7);
