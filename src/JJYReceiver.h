@@ -24,6 +24,7 @@
 #define JJYReceiver_h
 
 #define VERIFYLOOP 3
+#define FREQSWITCHTHRESHOLD 60
 
 #include <time.h>
 #include <Arduino.h>
@@ -103,14 +104,13 @@ class JJYReceiver {
 
     volatile uint8_t tick = 0;
     volatile uint16_t jjypayload[6]; // 9bits bit data between marker
-    volatile int8_t jjypayloadcnt = -2;
 
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
-    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x07,0x00,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x0F,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0x7F,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0x7F,0x0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
@@ -119,6 +119,7 @@ class JJYReceiver {
     uint16_t year, yday;
     uint8_t jjy_weekday;
     uint8_t calc_weekday;
+    long diff;
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
@@ -260,15 +261,28 @@ class JJYReceiver {
     }
     void autoselectfreq(JJYSTATE jjystate){
         uint8_t count = (uint8_t) jjypayloadlen[jjystate];
-        if(count > 30 && autofreq==FREQ_AUTO){
-            if(frequency == 40){
-                freq(60);
-            }else{
-                freq(40);
-            }
-            autofreq = FREQ_AUTO;
+        if(count > FREQSWITCHTHRESHOLD && autofreq==FREQ_AUTO){
+            frequency == 40 ?  setfreq(60) : setfreq(40);
+            DEBUG_PRINT("FREQ SWITCHED: ")
+            DEBUG_PRINTLN(frequency)
             clearpayload();
         }
+    }
+    void setfreq(uint8_t freq){
+        if(freq==40){
+            #ifdef SWAPFREQ
+            digitalWrite(selpin,HIGH);
+            #else
+            digitalWrite(selpin,LOW);
+            #endif
+        }else{
+            #ifdef SWAPFREQ
+            digitalWrite(selpin,LOW);
+            #else
+            digitalWrite(selpin,HIGH);
+            #endif
+        }
+        frequency = freq;
     }
 };
 #endif

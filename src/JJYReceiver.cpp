@@ -123,7 +123,7 @@ time_t JJYReceiver::get_time() {
 }
 
 long JJYReceiver::set_time(time_t newtime) {
-  long diff = (long)(newtime - globaltime);
+  diff = (long)(newtime - globaltime);
   globaltime = newtime;
   return diff;
 }
@@ -147,7 +147,7 @@ time_t JJYReceiver::getTime() {
     }
     return -1;
    case TIMEVALID:
-    globaltime = updateTimeInfo(last_jjydata,0,1);
+    set_time(updateTimeInfo(last_jjydata,0,1));
     state = TIMETICK;
     received_time = globaltime;
     break;
@@ -163,7 +163,7 @@ void JJYReceiver::delta_tick(){
   if(tick == 0){
     clock_tick();
   }
-  if(state == TIMEVALID) return;
+  if(state >= TIMEVALID) return;
   data = digitalRead(datapin)==HIGH ? 1 : 0;  
   shift_in(data, sampling, N);
   sampleindex++;
@@ -205,14 +205,12 @@ void JJYReceiver::delta_tick(){
           #ifdef DEBUG_BUILD
           debug3();
           #endif
-          jjypayloadcnt=0;
           jjystate = JJY_MIN;
           clearpayload();
           DEBUG_PRINT("M");
         }else{
           DEBUG_PRINT("P");
           jjystate = static_cast<JJYSTATE>((jjystate + 1) % 6);
-          jjypayloadcnt++;
         }
       quality = PM;
       break;
@@ -221,7 +219,7 @@ void JJYReceiver::delta_tick(){
     autoselectfreq(jjystate);
     #ifdef DEBUG_BUILD
     debug();
-    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
+    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality) DEBUG_PRINT(" F:") DEBUG_PRINT(frequency)DEBUG_PRINT(autofreq);;
     #endif
     DEBUG_PRINTLN("");
   }
@@ -229,7 +227,7 @@ void JJYReceiver::delta_tick(){
 }
 
 void JJYReceiver::jjy_receive(){
-  if(state == TIMEVALID) return;
+  if(state >= TIMEVALID) return;
   bool data = digitalRead(datapin);  // ピンの状態を読み取る
   if (data == LOW) {
     if(monitorpin != -1) digitalWrite(monitorpin,LOW);
@@ -245,27 +243,16 @@ void JJYReceiver::jjy_receive(){
 uint8_t JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
   if(freq == 40){
-    #ifdef SWAPFREQ
-    digitalWrite(selpin,HIGH);
-    #else
-    digitalWrite(selpin,LOW);
-    #endif
+    setfreq(40);
     autofreq = FREQ_MANUAL;
-    // delay(300);
   }else if(freq == 60){
-    #ifdef SWAPFREQ
-    digitalWrite(selpin,LOW);
-    #else
-    digitalWrite(selpin,HIGH);
-    #endif
+    setfreq(60);
     autofreq = FREQ_MANUAL;
-    // delay(300);
   }else if(freq==0){
     autofreq = FREQ_AUTO;
   }
-  if(state == INIT) autofreq = FREQ_AUTO;
   frequency = freq;
-  DEBUG_PRINT("FREQ:");
+  DEBUG_PRINT(" FREQ:");
   DEBUG_PRINTLN(frequency);
   return frequency;
 }
@@ -283,7 +270,7 @@ bool JJYReceiver::power(bool powerstate){
   if(powerstate == true){
     digitalWrite(ponpin,LOW);
     if(selpin == -1) return false;
-    freq(frequency);
+    setfreq(frequency);
     DEBUG_PRINTLN("POWER:ON");
     return true;
   }else{
@@ -390,9 +377,6 @@ void JJYReceiver::debug3(){
   DEBUG_PRINT("PAYLOADLEN:");
   for(uint8_t i=0; i < 6; i++)
     DEBUG_PRINT(jjypayloadlen[i],HEX);
-  DEBUG_PRINTLN("");
-  DEBUG_PRINT("PAYLOADCNT:");
-  DEBUG_PRINTLN((int)jjypayloadcnt);
   DEBUG_PRINTLN("");
   DEBUG_PRINT("PAYLOAD:");
   for(uint8_t i=0; i < 6; i++)
