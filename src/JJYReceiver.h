@@ -24,14 +24,15 @@
 #define JJYReceiver_h
 
 #define VERIFYLOOP 3
+#define FREQSWITCHTHRESHOLD 60
 
 #include <time.h>
 #include <Arduino.h>
 #include <stdint.h>
 
 // #define SWAPFREQ
-//#define DEBUG_BUILD
-//#define DEBUG_ESP32
+// #define DEBUG_BUILD
+// #define DEBUG_ESP32
 
 // Following checking features can be applied for JJY only
 #define PARITYCHK
@@ -45,13 +46,13 @@
 // For LGT8F328P
 //#include <SoftwareSerial.h>
 //extern SoftwareSerial debugSerial;
-# define DEBUG_PRINT(...)  debugSerial.print(__VA_ARGS__);
-# define DEBUG_PRINTLN(...) debugSerial.println(__VA_ARGS__);
+#define DEBUG_PRINT(...)  debugSerial.print(__VA_ARGS__);
+#define DEBUG_PRINTLN(...) debugSerial.println(__VA_ARGS__);
 #endif
 //HardwareSerial& Serial = Serial0;
 #else
-# define DEBUG_PRINT(fmt,...)
-# define DEBUG_PRINTLN(fmt,...)
+#define DEBUG_PRINT(fmt,...)
+#define DEBUG_PRINTLN(fmt,...)
 #endif
 
 const int N = 12;
@@ -84,39 +85,41 @@ typedef union {
 
 class JJYReceiver {
     enum STATE {INIT,RECEIVE,TIMEVALID,TIMETICK};
-    enum JJYSTATE {JJY_INIT=-1,JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
+    enum JJYSTATE {JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
+    enum AUTOFREQ {FREQ_AUTO=1, FREQ_MANUAL=0};
   
 	public:
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
     JJYData jjydata[VERIFYLOOP];
     JJYData last_jjydata[1];
     volatile enum STATE state = INIT;
-    volatile enum JJYSTATE jjystate = JJY_INIT;
+    volatile enum JJYSTATE jjystate = JJY_MIN;
     volatile uint8_t rcvcnt = 0;
     volatile const int8_t datapin,selpin,ponpin;
     volatile int8_t monitorpin = -1;
-    volatile uint8_t frequency = 0;
+    volatile uint8_t frequency = 40;
     volatile uint8_t markercount = 0;
     volatile uint8_t reliability = 0;
     volatile uint8_t quality = 0;
 
     volatile uint8_t tick = 0;
     volatile uint16_t jjypayload[6]; // 9bits bit data between marker
-    volatile int8_t jjypayloadcnt = -2;
 
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
-    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xF0,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFC,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x0F,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0x7F,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0x7F,0x0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
     struct tm timeinfo;
+    volatile uint8_t autofreq = FREQ_AUTO;
     uint16_t year, yday;
     uint8_t jjy_weekday;
     uint8_t calc_weekday;
+    long diff;
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
@@ -202,12 +205,12 @@ class JJYReceiver {
         return mktime(&timeinfo);
     }
     void init(){
-      state = RECEIVE;
       clear(sampling,N);
       jjydata[0].bits.hour = 25;
       jjydata[1].bits.hour = 26;
       jjydata[2].bits.hour = 27;
       power(true);
+      state = RECEIVE;
     }
     bool lencheck(volatile uint8_t* arr) {
         if (arr[0] != 8) {
@@ -250,6 +253,37 @@ class JJYReceiver {
         return weekday;
     }
     #endif
+    void clearpayload(){
+        for (uint8_t i = 0; i < 6; i++){
+            jjypayload[i]=0;
+            jjypayloadlen[i]=0;
+        }
+    }
+    void autoselectfreq(JJYSTATE jjystate){
+        uint8_t count = (uint8_t) jjypayloadlen[jjystate];
+        if(count > FREQSWITCHTHRESHOLD && autofreq==FREQ_AUTO){
+            frequency == 40 ?  setfreq(60) : setfreq(40);
+            DEBUG_PRINT("FREQ SWITCHED: ")
+            DEBUG_PRINTLN(frequency)
+            clearpayload();
+        }
+    }
+    void setfreq(uint8_t freq){
+        if(freq==40){
+            #ifdef SWAPFREQ
+            digitalWrite(selpin,HIGH);
+            #else
+            digitalWrite(selpin,LOW);
+            #endif
+        }else{
+            #ifdef SWAPFREQ
+            digitalWrite(selpin,LOW);
+            #else
+            digitalWrite(selpin,HIGH);
+            #endif
+        }
+        frequency = freq;
+    }
 };
 #endif
 
