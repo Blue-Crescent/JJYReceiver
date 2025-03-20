@@ -207,10 +207,7 @@ void JJYReceiver::delta_tick(){
           #endif
           jjypayloadcnt=0;
           jjystate = JJY_MIN;
-          for (uint8_t i = 0; i < 6; i++){
-            jjypayload[i]=0;
-            jjypayloadlen[i]=0;
-          }
+          clearpayload();
           DEBUG_PRINT("M");
         }else{
           DEBUG_PRINT("P");
@@ -221,6 +218,7 @@ void JJYReceiver::delta_tick(){
       break;
     }
     quality = (uint8_t) constrain((((quality * 100) / (N*8)) - 50) * 2,0,100);
+    autoselectfreq(jjystate);
     #ifdef DEBUG_BUILD
     debug();
     DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality);
@@ -243,6 +241,7 @@ void JJYReceiver::jjy_receive(){
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
   }
 }
+
 uint8_t JJYReceiver::freq(uint8_t freq){
   if(selpin == -1) return -1;
   if(freq == 40){
@@ -251,15 +250,20 @@ uint8_t JJYReceiver::freq(uint8_t freq){
     #else
     digitalWrite(selpin,LOW);
     #endif
-    delay(300);
+    autofreq = FREQ_MANUAL;
+    // delay(300);
   }else if(freq == 60){
     #ifdef SWAPFREQ
     digitalWrite(selpin,LOW);
     #else
     digitalWrite(selpin,HIGH);
     #endif
-    delay(300);
+    autofreq = FREQ_MANUAL;
+    // delay(300);
+  }else if(freq==0){
+    autofreq = FREQ_AUTO;
   }
+  if(state == INIT) autofreq = FREQ_AUTO;
   frequency = freq;
   DEBUG_PRINT("FREQ:");
   DEBUG_PRINTLN(frequency);
@@ -287,7 +291,6 @@ bool JJYReceiver::power(bool powerstate){
     if(selpin == -1) return false;
     digitalWrite(selpin,HIGH);
     DEBUG_PRINTLN("POWER:OFF");
-
     return false;
   }
 }
@@ -332,9 +335,6 @@ void JJYReceiver::debug(){
     //DEBUG_PRINT(jjypayloadcnt);
     //DEBUG_PRINT(":");
     switch(jjystate) {
-        case JJY_INIT:
-            DEBUG_PRINT("INIT");
-            break;
         case JJY_MIN:
             DEBUG_PRINT("MIN");
             break;
