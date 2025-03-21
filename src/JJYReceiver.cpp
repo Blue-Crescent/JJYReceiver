@@ -219,7 +219,7 @@ void JJYReceiver::delta_tick(){
     autoselectfreq(jjystate);
     #ifdef DEBUG_BUILD
     debug();
-    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:") DEBUG_PRINT(quality) DEBUG_PRINT(" F:") DEBUG_PRINT(frequency)DEBUG_PRINT(autofreq);;
+    DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:"); DEBUG_PRINT(quality); DEBUG_PRINT(" F:"); DEBUG_PRINT(frequency); DEBUG_PRINT(autofreq);
     #endif
     DEBUG_PRINTLN("");
   }

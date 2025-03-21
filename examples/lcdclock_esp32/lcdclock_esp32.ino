@@ -38,7 +38,7 @@ void setup()
     // DATA pin signal change edge detection. (Mandatory)
     attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
-    jjy.freq(60); // Carrier frequency setting. Default:40
+    //jjy.freq(60); // Carrier frequency setting. Default or 0:Auto selection, 40 or 60 : Fixed frequency
     jjy.begin(); // Start JJY Receive
     
     lcd.begin(16, 2);
@@ -61,8 +61,9 @@ void loop()
   lcd.setCursor(0,0);
   char buf1[16];
   if(lastreceived==-1){
-    lcd.print("Receiving.. Q:");
+    lcd.print("Q:");
     lcd.print(jjy.quality);
+
     lcd.setCursor(0,1);
     strftime(buf1, sizeof(buf1), "%H:%M:%S", &tm_info);
     lcd.print(buf1);
@@ -78,9 +79,17 @@ void loop()
     strftime(buf3, sizeof(buf3), "%H:%M:%S", &tm_info);
     lcd.print(buf3);
   }
+  lcd.print(" F:");
+  lcd.print(jjy.frequency);
+  if(jjy.autofreq == 1){
+    lcd.print("a");
+  }else{
+    lcd.print("m");
+  }
 
   delay(100);
   if(tm_info.tm_min == 0 && lastreceived != -1){ // Receive start on the hour 
     jjy.begin();
   } 
 }
+
