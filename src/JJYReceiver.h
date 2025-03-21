@@ -25,6 +25,7 @@
 
 #define VERIFYLOOP 3
 #define FREQSWITCHTHRESHOLD 60
+#define FREQSWITCHTHRESHOLD2 900
 
 #include <time.h>
 #include <Arduino.h>
@@ -88,7 +89,7 @@ class JJYReceiver {
     enum JJYSTATE {JJY_MIN=0,JJY_HOUR=1,JJY_DOYH=2,JJY_DOYL=3,JJY_YEAR=4,JJY_WEEK=5};
     enum AUTOFREQ {FREQ_AUTO=1, FREQ_MANUAL=0};
   
-	public:
+  public:
     volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
     JJYData jjydata[VERIFYLOOP];
     JJYData last_jjydata[1];
@@ -108,12 +109,13 @@ class JJYReceiver {
     volatile uint8_t sampleindex = 0;
     volatile uint8_t sampling [N];
     volatile int8_t timeavailable = -1;
-    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x0F,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0x7F,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0x7F,0x0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00};
+    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x07,0x00,0x00,0x00,0x00,0x00,0x00};
+    volatile const uint8_t CONST_L [N]  = {0xFF,0x7F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
     volatile time_t globaltime = 0;
     volatile time_t received_time = -1;
+    volatile time_t start_time = -1; // FREQ_AUTO時は周波数変更時点から
     struct tm timeinfo;
     volatile uint8_t autofreq = FREQ_AUTO;
     uint16_t year, yday;
@@ -263,7 +265,14 @@ class JJYReceiver {
         uint8_t count = (uint8_t) jjypayloadlen[jjystate];
         if(count > FREQSWITCHTHRESHOLD && autofreq==FREQ_AUTO){
             frequency == 40 ?  setfreq(60) : setfreq(40);
-            DEBUG_PRINT("FREQ SWITCHED: ")
+            DEBUG_PRINT("FREQ SWITCHED1: ")
+            DEBUG_PRINTLN(frequency)
+            clearpayload();
+        }
+        if( (globaltime - start_time) > FREQSWITCHTHRESHOLD2 && autofreq==FREQ_AUTO){
+            frequency == 40 ?  setfreq(60) : setfreq(40);
+            start_time = globaltime;
+            DEBUG_PRINT("FREQ SWITCHED2: ")
             DEBUG_PRINTLN(frequency)
             clearpayload();
         }
