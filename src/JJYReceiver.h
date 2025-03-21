@@ -213,6 +213,7 @@ class JJYReceiver {
       jjydata[2].bits.hour = 27;
       power(true);
       state = RECEIVE;
+      start_time = globaltime;
     }
     bool lencheck(volatile uint8_t* arr) {
         if (arr[0] != 8) {
