@@ -16,6 +16,8 @@ https://www.nict.go.jp/sts/jjy_signal.html
 
 [![atomicclock](https://img.youtube.com/vi/x8oni1Ydn4E/0.jpg)](https://www.youtube.com/watch?v=x8oni1Ydn4E)
 
+<img src="examples/ledclock_lgt8f328p/image.png" width="300">
+
 # 機能
 
 JJYの日本標準時刻データを受信します。C言語標準のtime_t型のUTC基準＋9で時刻を返します。受信後は、タイマにより時刻を刻み維持することもできます。
