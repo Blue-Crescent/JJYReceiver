@@ -42,7 +42,7 @@ void setup() {
 
   // JJY Library
   jjy.begin(); // Start JJY Receive
-  // jjy.freq(40); // Set frequency 40kHz if SEL pin connected.
+  jjy.freq(60); // Set frequency 40kHz if SEL pin connected.
 
 }
 
@@ -60,9 +60,9 @@ void loop() {
   localtime_r(&now, &tm_info);
   if(lastreceived != -1){
     led.switchColon();
-    char buf1[5];
-    strftime(buf1, sizeof(buf1), "%H%M", &tm_info);
-    led.display(String(buf1));
+    char buf[5];
+    sprintf(buf, "%d%2d", tm_info.tm_hour, tm_info.tm_min);
+    led.display(String(buf));
     firstreception = 0;
   }else{
     if (firstreception == 1){ // Display receiving quality
@@ -81,9 +81,9 @@ void loop() {
       led.displayRawBytes(rawBuffer, 1);
     }else{
       led.colonOn();
-      char buf1[5];
-      strftime(buf1, sizeof(buf1), "%H%M", &tm_info);
-      led.display(String(buf1));
+      char buf[5];
+      sprintf(buf, "%d%2d", tm_info.tm_hour, tm_info.tm_min);
+      led.display(String(buf));
     }
   }
   if(tm_info.tm_min == 0 && lastreceived != -1){ // receive from last over an hour.
