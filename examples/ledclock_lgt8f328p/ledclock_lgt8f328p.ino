@@ -45,11 +45,10 @@ void setup() {
   jjy.freq(40); // Set frequency 40kHz if SEL pin connected.
 
 }
-uint8_t i=0;
+
 static auto d = DisplayDigit().setG();
 static uint8_t rawBuffer[4] = {0, 0, 0, 0};
 uint8_t counter=0;
-uint8_t dispstate=0;
 uint8_t firstreception = 1;
 
 void loop() {
@@ -66,8 +65,8 @@ void loop() {
     led.display(String(buf1));
     firstreception = 0;
   }else{
-    counter = (counter + 1) % 4;
     if (firstreception == 1){ // Display receiving quality
+      counter = (counter + 1) % 4;
       led.colonOff();
       switch(counter){
         case(0): d = DisplayDigit().setG(); break;
