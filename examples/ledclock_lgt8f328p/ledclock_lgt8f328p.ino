@@ -61,7 +61,7 @@ void loop() {
   if(lastreceived != -1){
     led.switchColon();
     char buf[5];
-    sprintf(buf, "%d%2d", tm_info.tm_hour, tm_info.tm_min);
+    sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
     led.display(String(buf));
     firstreception = 0;
   }else{
@@ -82,7 +82,7 @@ void loop() {
     }else{
       led.colonOn();
       char buf[5];
-      sprintf(buf, "%d%2d", tm_info.tm_hour, tm_info.tm_min);
+      sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
       led.display(String(buf));
     }
   }
