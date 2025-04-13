@@ -42,7 +42,7 @@ void setup() {
 
   // JJY Library
   jjy.begin(); // Start JJY Receive
-  jjy.freq(40); // Set frequency 40kHz if SEL pin connected.
+  // jjy.freq(40); // Set frequency 40kHz if SEL pin connected.
 
 }
 
