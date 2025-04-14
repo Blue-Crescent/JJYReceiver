@@ -42,7 +42,7 @@ void setup() {
 
   // JJY Library
   jjy.begin(); // Start JJY Receive
-  // jjy.freq(60); // Set frequency 40kHz if SEL pin connected.
+  //jjy.freq(60); // Set frequency 40kHz if SEL pin connected.
 
 }
 
@@ -61,7 +61,11 @@ void loop() {
   if(lastreceived != -1){
     led.switchColon();
     char buf[5];
-    sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
+    if(tm_info.tm_hour<10){
+      sprintf(buf, " %d%02d", tm_info.tm_hour, tm_info.tm_min);
+    }else{
+      sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
+    }
     led.display(String(buf));
     firstreception = 0;
   }else{
@@ -82,7 +86,11 @@ void loop() {
     }else{
       led.colonOn();
       char buf[5];
-      sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
+      if(tm_info.tm_hour<10){
+        sprintf(buf, " %d%02d", tm_info.tm_hour, tm_info.tm_min);
+      }else{
+        sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
+      }
       led.display(String(buf));
     }
   }
