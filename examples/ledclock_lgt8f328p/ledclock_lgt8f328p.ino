@@ -31,6 +31,10 @@ void setup() {
   pinMode(DATA, INPUT);
   pinMode(SEL,OUTPUT);
   pinMode(PON, OUTPUT);
+
+  // Buzz
+  pinMode(3, OUTPUT);pinMode(4, INPUT);
+  tone(3,262,1000);
   
   led.setBrightnessPercent(50);
  // 10msec Timer for clock ticktock (Mandatory)
@@ -48,15 +52,13 @@ void setup() {
 
 static auto d = DisplayDigit().setG();
 static uint8_t rawBuffer[4] = {0, 0, 0, 0};
-uint8_t counter=0;
+uint16_t counter=0;
 uint8_t firstreception = 1;
 
 void loop() {
   time_t now = jjy.get_time();
   time_t lastreceived = jjy.getTime();
   tm tm_info;
-
-
   localtime_r(&now, &tm_info);
   if(lastreceived != -1){
     led.switchColon();
@@ -68,34 +70,35 @@ void loop() {
     }
     led.display(String(buf));
     firstreception = 0;
-  }else{
-    if (firstreception == 1){ // Display receiving quality
-      counter = (counter + 1) % 4;
-      led.colonOff();
-      switch(counter){
-        case(0): d = DisplayDigit().setG(); break;
-        case(1): d = DisplayDigit().setC(); break;
-        case(2): d = DisplayDigit().setD(); break;
-        case(3): d = DisplayDigit().setE(); break;
-      }
-      rawBuffer[0] = d;
-      char buf[5];
-      sprintf(buf, "%4d", jjy.quality); 
-      led.display(String(buf));
-      led.displayRawBytes(rawBuffer, 1);
-    }else{
-      led.colonOn();
-      char buf[5];
-      if(tm_info.tm_hour<10){
-        sprintf(buf, " %d%02d", tm_info.tm_hour, tm_info.tm_min);
-      }else{
-        sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
-      }
-      led.display(String(buf));
+    delay(500);
+  }else{// Receiving
+    counter = (counter + 1) % 10;
+    if (firstreception == 1){ // Display receiving quality only 1st reception
+        char buf[5];
+        if(counter == 0){
+          led.colonOff();
+          sprintf(buf, "%d%3d",jjy.frequency/10, jjy.quality); 
+          led.display(String(buf));
+        }else if(counter == 5){
+          led.colonOff();
+          sprintf(buf, " %3d",jjy.quality); 
+          led.display(String(buf));
+        }
+    }else{ // Continuous colon LED on while 2nd~ reception
+        if(counter == 0){
+          led.colonOn();
+          char buf[5];
+          if(tm_info.tm_hour<10){
+            sprintf(buf, " %d%02d", tm_info.tm_hour, tm_info.tm_min);
+          }else{
+            sprintf(buf, "%d%02d", tm_info.tm_hour, tm_info.tm_min);
+          }
+          led.display(String(buf));
+        }
     }
+    delay(200);
   }
   if(tm_info.tm_min == 0 && lastreceived != -1){ // receive from last over an hour.
     jjy.begin();
   } 
-  delay(500);
 }
