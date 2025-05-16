@@ -108,18 +108,13 @@ void setup() {
   
   // DATA pin signal change edge detection. (Mandatory)
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
-  //Wire.begin();
   rtc.begin();
   if (! rtc.isrunning()) {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     while (true);
   }
-  rtc.adjust(DateTime(2014, 1, 21, 14, 47, 0)); // For debug
   // JJY Library
   jjy.begin(); // Start JJY Receive
-  // jjy.monitor(LED_BUILTIN);
-  jjy.freq(60); // Set frequency 40kHz if SEL pin connected.
-
 }
 void loop() {
   now = rtc.now();
