@@ -1,13 +1,14 @@
 #include <Arduino.h>
 #include <TM1637.h>
 #include <RTClib.h>
+#include <Wire.h>
 #define SWAPFREQ
 #include <JJYReceiver.h>
 #include <MsTimer2.h>
 
 //	akj7/TM1637 Driver@^2.2.1
 //	blue-crescent/JJYReceiver@^0.11.2
-//	paulstoffregen/MsTimer2@^1.1
+//	paulstoffregen/MsTimer1@^1.1
 //	adafruit/RTClib@^2.1.4
 
 #define CLK 10
@@ -127,11 +128,20 @@ void setup() {
   
   // DATA pin signal change edge detection. (Mandatory)
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
+  Wire.begin();
   rtc.begin();
+
+  // Clock output quiescence for noize reduction 
+  Wire.beginTransmission(0x68);
+  Wire.write(0x07);           // RTC clock output stop
+  Wire.write(0x00);           // SQWE = 0, OUT = 0
+  Wire.endTransmission();
+
   if (! rtc.isrunning()) {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     while (true);
   }
+  // rtc.adjust(DateTime(2014, 1, 2, 3, 0, 0));
   // JJY Library
   jjy.begin(); // Start JJY Receive
 }
@@ -141,13 +151,17 @@ void loop() {
 
   if(lastreceived != -1){
     led.switchColon();
+
     if(now.second()==0){
+      // Display date every 00 second
       printCalendar();
     }else{
+      // Display current time
       printTime();
       delay_nonblk(50);
     }
     if (rtcupdate == 1){
+      // Reception 
       setRTC();
       led.colonOff();
       led.display("Good");
