@@ -12,3 +12,5 @@
 # 裏面
 ![alt text](IMG_6463.jpeg)
 
+# 回路図
+![](rtcclock_lgt8f328.png)
