@@ -68,12 +68,31 @@ void printTime(){
     }
     led.display(String(buf));
 }
+void printDay(){
+    led.display("    ");
+    rawBuffer[0] = 0;
+    rawBuffer[1] = 0;
+    rawBuffer[2] = 0;
+    rawBuffer[3] = 0;
+    switch(now.dayOfTheWeek()){
+      case(0): d = DisplayDigit().setE(); rawBuffer[0] = d;break;
+      case(1): d = DisplayDigit().setC(); rawBuffer[0] = d;break;
+      case(2): d = DisplayDigit().setE(); rawBuffer[1] = d;break;
+      case(3): d = DisplayDigit().setC(); rawBuffer[1] = d;break;
+      case(4): d = DisplayDigit().setE(); rawBuffer[2] = d;break;
+      case(5): d = DisplayDigit().setC(); rawBuffer[2] = d;break;
+      case(6): d = DisplayDigit().setE(); rawBuffer[3] = d;break;
+    }
+    led.displayRawBytes(rawBuffer, 4);
+}
 void printCalendar(){
   led.colonOff();
   printYear();
   delay_nonblk(209);
   printDate();
   delay_nonblk(200);
+  printDay();
+  delay_nonblk(209);
   led.colonOn();
   printTime();
   delay_nonblk(200);
