@@ -53,9 +53,9 @@ void printYear(){
 void printDate(){
     char buf[5];
     if(now.month()<10){
-      sprintf(buf, "%d %02d", now.month(),now.day());
+      sprintf(buf, "%d %2d", now.month(),now.day());
     }else{
-      sprintf(buf, "%d%02d", now.month(),now.day());
+      sprintf(buf, "%d%2d", now.month(),now.day());
     }
     led.display(String(buf));
 }
