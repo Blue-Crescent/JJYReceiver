@@ -86,6 +86,12 @@ void printDay(){
     }
     led.displayRawBytes(rawBuffer, 4);
 }
+void printFreq(){
+  led.colonOn();
+  char buf[5];
+  sprintf(buf, " F%d", jjy.frequency);
+  led.display(String(buf));
+}
 void printCalendar(){
   led.colonOff();
   printYear();
@@ -175,6 +181,8 @@ void loop() {
       counter = (counter + 1) % 25;
       if(counter == 24) {
         printCalendar();
+        printFreq();
+        delay_nonblk(200);
       }else{
         // Display reception quality level.
         led.colonOff();
