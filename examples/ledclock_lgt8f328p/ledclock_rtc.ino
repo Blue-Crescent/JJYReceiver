@@ -202,6 +202,7 @@ void loop() {
     }else{
       led.colonOn();
       printTime();
+      delay_nonblk(50);
     }
   }
   if(now.minute() == 0 && lastreceived != -1){ // receive from last over an hour.
