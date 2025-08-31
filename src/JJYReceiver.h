@@ -160,12 +160,12 @@ class JJYReceiver {
          return false;
       }
       #ifdef PARITYCHK 
-      uint8_t PA2 = (jjypayload[JJY_DOYL] & 0x0002) >> 1;
-      uint8_t PA1 = (jjypayload[JJY_DOYL] & 0x0004) >> 2;
-      if(!calculate_even_parity(jjypayload[JJY_MIN],0xEF,PA2)){
+      uint8_t PA_2 = (jjypayload[JJY_DOYL] & 0x0002) >> 1;
+      uint8_t PA_1 = (jjypayload[JJY_DOYL] & 0x0004) >> 2;
+      if(!calculate_even_parity(jjypayload[JJY_MIN],0xEF,PA_2)){
          return false;
       }
-      if(!calculate_even_parity(jjypayload[JJY_HOUR],0x6F,PA1)){
+      if(!calculate_even_parity(jjypayload[JJY_HOUR],0x6F,PA_1)){
          return false;
       }
       #endif
