@@ -1,6 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Arduino-lint](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduinolint.yml/badge.svg)](https://github.com/Blue-Crescent/JJYReceiver/actions/workflows/arduinolint.yml)
-[![Arduino-lib](https://test.ardu-badge.com/badge/JJYReceiver.svg)](https://test.ardu-badge.com/JJYReceiver)
 [![PlatformIO Registry](https://badges.registry.platformio.org/packages/blue-crescent/library/JJYReceiver.svg)](https://registry.platformio.org/libraries/blue-crescent/JJYReceiver)
 
 # JJY Receiver
@@ -489,4 +488,5 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
