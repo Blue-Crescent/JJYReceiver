@@ -133,10 +133,7 @@ long JJYReceiver::set_time(time_t newtime) {
             delta_true_sec > 60 &&
             delta_true_sec < 40000000UL) {
             uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
-
-            // 2. 「現在のincrementが初期値(1000000)のままなら初回学習」とみなす
-            // もしくは、一度も学習していないことを示す別の条件
-            if (increment != 1000000UL) {
+            if (calibrated) {
                 // 【2回目以降】 1%リミッターを適用
                 int32_t diff_inc = (int32_t)(ideal_inc - increment);
                 int32_t limit = (int32_t)(increment / 100);
