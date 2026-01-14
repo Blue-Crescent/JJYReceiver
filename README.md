@@ -469,7 +469,7 @@ kは除算結果がjで既にあるので、modより演算コストが低い引
 ## 自動刻み幅補正（ソフトウェアSLEW）
 
 安価なマイコン（内蔵RC発振子やセラミックレゾネータ使用時）のクロックドリフトをJJY受信タイミングで自動補正。
-二回目以降のJJY受信時刻の前回受信時刻との経過秒と内部タイマによるカウンタを比較し、刻み幅`increment`（単位: µs、初期値1000000）を動的に調整し、
+二回目以降のJJY受信時刻の前回受信時刻との経過秒と内部タイマによるカウンタを比較し、刻み幅`increment`（delta_tick 1回あたりの加算量µs相当、初期値1000000）を動的に調整し、
 経時による累積誤差を少なくします。
 
 **更新ルール（2段階）**
@@ -508,6 +508,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
