@@ -127,8 +127,11 @@ long JJYReceiver::set_time(time_t newtime) {
     if (last_sync_time != 0) {
         uint32_t delta_true_sec = (uint32_t)(newtime - last_sync_time);
         uint32_t delta_internal_ticks = total_ticks - last_sync_ticks;
+       
 
-        if (delta_true_sec > 60 && delta_true_sec < 40000000UL) {
+        if (delta_internal_ticks > 0 &&
+            delta_true_sec > 60 &&
+            delta_true_sec < 40000000UL) {
             uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
 
             // 2. 「現在のincrementが初期値(1000000)のままなら初回学習」とみなす
@@ -137,10 +140,7 @@ long JJYReceiver::set_time(time_t newtime) {
                 // 【2回目以降】 1%リミッターを適用
                 int32_t diff_inc = (int32_t)(ideal_inc - increment);
                 int32_t limit = (int32_t)(increment / 100);
-
-                if (diff_inc > limit) diff_inc = limit;
-                if (diff_inc < -limit) diff_inc = -limit;
-
+                diff_inc = constrain(diff_inc, -limit, limit);
                 increment += diff_inc;
             } else {
                 // 【初回学習】 リミッターなしで理想値に一気に合わせる
