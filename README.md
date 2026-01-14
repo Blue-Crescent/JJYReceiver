@@ -479,12 +479,10 @@ kは除算結果がjで既にあるので、modより演算コストが低い引
 
 3. **以降の微調整（2回目以降、経年・温度変化ドリフト補正）**
 
-   - 刻み幅調整による変化幅は±1%までに制限（刻みが極端変化しないよう安全フィルタ）
-   
-   これにより、毎回の変更量を**現在の値の±1%以内**に抑え、急激な変化（ノイズ・異常受信）を防ぎつつ、温度変化や経年ドリフトにゆっくり追従します。
-
-  - 前回同期からの実時間経過（delta_true_sec）が60秒以上  
-  - かつ約1.27年（40,000,000秒）未満
+   - 刻み幅調整による変化幅は±1%までに制限、毎回の変更量を**現在の値の±1%以内**に抑え、急激な変化（ノイズ・異常受信）を防ぎつつ、温度変化や経年ドリフトにゆっくり追従します。
+  
+  ** 作動条件**
+  - 前回受信時からの実時間経過（delta_true_sec）が60秒以上かつ約1.27年（40,000,000秒）未満以内の受信時
 
 # 受信
 
@@ -508,6 +506,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
