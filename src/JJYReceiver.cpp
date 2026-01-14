@@ -144,6 +144,19 @@ long JJYReceiver::set_time(time_t newtime) {
                 // 【初回学習】 リミッターなしで理想値に一気に合わせる
                 increment = constrain(ideal_inc, 900000UL, 1100000UL);
             }
+            #ifdef DEBUG_BUILD
+                DEBUG_PRINT("SLEW: delta_sec=");
+                DEBUG_PRINT(delta_true_sec);
+                DEBUG_PRINT(" ideal=");
+                DEBUG_PRINT(ideal_inc);
+                DEBUG_PRINT(" old_inc=");
+                DEBUG_PRINT(increment);
+                if (increment != 1000000UL) {
+                    DEBUG_PRINT(" diff=");
+                    DEBUG_PRINT(diff_inc);
+                }
+                DEBUG_PRINTLN("");
+            #endif
         }
     }
 
