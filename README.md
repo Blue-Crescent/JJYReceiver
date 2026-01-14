@@ -466,6 +466,26 @@ kは除算結果がjで既にあるので、modより演算コストが低い引
 
   #define FREQTHRESHOLD2(>60)で切り替えカウントを指定。受信スタート時もしくは周波数切り替え時の時刻を記録しFREQTHRESHOLD2を超える秒数以上受信できていなかった場合に切り替えます。(設定は15分程度)
 
+## 自動刻み幅補正（ソフトウェアSLEW）
+
+安価なマイコン（内蔵RC発振子やセラミックレゾネータ使用時）のクロックドリフトをJJY受信タイミングで自動補正。
+二回目以降のJJY受信時刻の前回受信時刻との経過秒と内部タイマによるカウンタを比較し、刻み幅`increment`（単位: µs、初期値1000000）を動的に調整し、
+経時による累積誤差を少なくします。
+
+**更新ルール（2段階）**
+1. **初回補正（初回JJY受信時、発振器製造個体差の補正）**
+   
+   - 二点間のJJY受信時刻から刻み幅を決定
+
+3. **以降の微調整（2回目以降、経年・温度変化ドリフト補正）**
+
+   - 刻み幅調整による変化幅は±1%までに制限（刻みが極端変化しないよう安全フィルタ）
+   
+   これにより、毎回の変更量を**現在の値の±1%以内**に抑え、急激な変化（ノイズ・異常受信）を防ぎつつ、温度変化や経年ドリフトにゆっくり追従します。
+
+  - 前回同期からの実時間経過（delta_true_sec）が60秒以上  
+  - かつ約1.27年（40,000,000秒）未満
+
 # 受信
 
 受信のコツ。アンテナはなるべく回路のようなノイズ源から離しましょう。esp32であると10cm程度は、アンテナとICを離しておいたほうが良いです。
@@ -488,5 +508,6 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
