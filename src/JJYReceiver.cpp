@@ -123,9 +123,38 @@ time_t JJYReceiver::get_time() {
 }
 
 long JJYReceiver::set_time(time_t newtime) {
-  diff = (long)(newtime - globaltime);
-  globaltime = newtime;
-  return diff;
+    if (last_sync_time != 0) {
+        uint32_t delta_true_sec = (uint32_t)(newtime - last_sync_time);
+        uint32_t delta_internal_ticks = total_ticks - last_sync_ticks;
+
+        if (delta_true_sec > 60 && delta_true_sec < 40000000UL) {
+            uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
+
+            // --- 補正ロジック ---
+            if (is_calibrated) {
+                // 【2回目以降】 1%リミッターを適用して安定させる
+                int32_t diff_inc = (int32_t)(ideal_inc - increment);
+                int32_t limit = (int32_t)(increment / 100); // 1%
+
+                if (diff_inc > limit) diff_inc = limit;
+                if (diff_inc < -limit) diff_inc = -limit;
+
+                increment += diff_inc;
+            } else {
+                // 【初回学習】 リミッターなしで理想値に一気に合わせる
+                increment = ideal_inc;
+                is_calibrated = true; // 学習完了フラグを立てる
+            }
+        }
+    }
+
+    // 時刻同期と起点の保存
+    long diff = (long)(newtime - globaltime);
+    globaltime = newtime;
+    last_sync_time = newtime;
+    last_sync_ticks = total_ticks;
+
+    return diff;
 }
 
 time_t JJYReceiver::get_time(uint8_t index) {
