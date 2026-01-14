@@ -142,6 +142,7 @@ long JJYReceiver::set_time(time_t newtime) {
                 int32_t limit = (int32_t)(increment / 100);
                 diff_inc = constrain(diff_inc, -limit, limit);
                 increment += diff_inc;
+                increment = constrain(increment, 900000UL, 1100000UL);
             } else {
                 // 【初回学習】 リミッターなしで理想値に一気に合わせる
                 increment = ideal_inc;
