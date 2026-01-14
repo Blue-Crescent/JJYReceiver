@@ -155,6 +155,16 @@ class JJYReceiver {
     #endif
 
   private:
+    // 時刻維持用
+    uint32_t tick_accumulator = 0;
+    uint32_t increment = 1000000;      // 10msの重み（初期値: 1秒を100分割）
+    const uint32_t TARGET = 100000000; // 1秒の閾値 (1,000,000 * 100)
+
+    // 補正計算用（2点間比較用）
+    uint32_t total_ticks = 0;          // 10msごとの通算カウント
+    uint32_t last_sync_ticks = 0;      // 前回補正時の通算カウント
+    time_t last_sync_time = 0;         // 前回補正時の受信時刻
+
     bool settime(uint8_t index){
       if(lencheck(jjypayloadlen) == false){
          return false;
