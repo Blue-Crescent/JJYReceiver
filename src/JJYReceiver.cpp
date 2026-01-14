@@ -189,9 +189,14 @@ time_t JJYReceiver::getTime() {
 
 void JJYReceiver::delta_tick(){
   uint8_t data, PM, H, L, max;
-  tick = (tick+1) % 100;
-  if(tick == 0){
-    clock_tick();
+  total_ticks++; // 補正用の通算カウンター
+  // 蓄積器に重みを加算
+  tick_accumulator += increment;
+    
+  // 1秒(TARGET)に達したか判定
+  if (tick_accumulator >= TARGET) {
+      tick_accumulator -= TARGET; // 余りを次へ繰り越し（誤差の蓄積防止）
+      clock_tick();               // globaltime++
   }
   if(state >= TIMEVALID) return;
   data = digitalRead(datapin)==HIGH ? 1 : 0;  
