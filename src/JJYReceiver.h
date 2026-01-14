@@ -164,6 +164,7 @@ class JJYReceiver {
     uint32_t total_ticks = 0;          // 10msごとの通算カウント
     uint32_t last_sync_ticks = 0;      // 前回補正時の通算カウント
     time_t last_sync_time = 0;         // 前回補正時の受信時刻
+    bool calibrated = false;
 
     bool settime(uint8_t index){
       if(lencheck(jjypayloadlen) == false){
