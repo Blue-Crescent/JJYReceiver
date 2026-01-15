@@ -149,12 +149,10 @@ long JJYReceiver::set_time(time_t newtime) {
                 DEBUG_PRINT(delta_true_sec);
                 DEBUG_PRINT(" ideal=");
                 DEBUG_PRINT(ideal_inc);
-                DEBUG_PRINT(" old_inc=");
+                DEBUG_PRINT(" inc=");
                 DEBUG_PRINT(increment);
-                if (increment != 1000000UL) {
-                    DEBUG_PRINT(" diff=");
-                    DEBUG_PRINT(diff_inc);
-                }
+                DEBUG_PRINT(" diff=");
+                DEBUG_PRINT(diff_inc);
                 DEBUG_PRINTLN("");
             #endif
         }
