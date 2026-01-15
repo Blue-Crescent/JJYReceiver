@@ -45,8 +45,8 @@
 
 #ifndef DEBUG_ESP32
 // For LGT8F328P
-//#include <SoftwareSerial.h>
-//extern SoftwareSerial debugSerial;
+#include <SoftwareSerial.h>
+extern SoftwareSerial debugSerial;
 #define DEBUG_PRINT(...)  debugSerial.print(__VA_ARGS__);
 #define DEBUG_PRINTLN(...) debugSerial.println(__VA_ARGS__);
 #endif
