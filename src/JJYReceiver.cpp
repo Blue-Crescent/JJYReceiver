@@ -30,7 +30,7 @@
 */
 #ifdef DEBUG_BUILD
 #ifndef DEBUG_ESP32
-  extern SoftwareSerial Serial;
+ // extern SoftwareSerial Serial;
 #endif
 #endif
 
@@ -123,9 +123,53 @@ time_t JJYReceiver::get_time() {
 }
 
 long JJYReceiver::set_time(time_t newtime) {
-  diff = (long)(newtime - globaltime);
-  globaltime = newtime;
-  return diff;
+    // 1. 学習（補正）が可能かチェック
+    if (last_sync_time != 0) {
+        uint32_t delta_true_sec = (uint32_t)(newtime - last_sync_time);
+        uint32_t delta_internal_ticks = total_ticks - last_sync_ticks;
+
+        if (delta_internal_ticks > 0 &&
+            delta_true_sec > 60 &&
+            delta_true_sec < 40000000UL) {
+            uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);            
+            if (calibrated) {
+                // 【2回目以降】 1%リミッターを適用
+                int32_t diff_inc = (int32_t)(ideal_inc - increment);
+                int32_t limit = (int32_t)(increment / 100);
+                diff_inc = constrain(diff_inc, -limit, limit);
+                increment += diff_inc;
+                increment = constrain(increment, 900000UL, 1100000UL);
+            #ifdef DEBUG_BUILD
+                DEBUG_PRINT("SLEW:");
+                DEBUG_PRINT(" ideal=");
+                DEBUG_PRINT(ideal_inc);
+                DEBUG_PRINT(" diff_inc=");
+                DEBUG_PRINT(diff_inc);            
+            #endif
+            } else {
+                // 【初回学習】 リミッターなしで理想値に一気に合わせる
+                increment = constrain(ideal_inc, 900000UL, 1100000UL);
+                calibrated = true;
+            }
+            #ifdef DEBUG_BUILD
+                DEBUG_PRINT(" inc=");
+                DEBUG_PRINT(increment);
+                DEBUG_PRINT(" delta_true_sec=");
+                DEBUG_PRINT(delta_true_sec);
+                DEBUG_PRINT(" delta_internal_ticks=");
+                DEBUG_PRINT(delta_internal_ticks);    
+                DEBUG_PRINTLN("");
+            #endif
+        }
+    }
+
+    // 3. 時刻同期と起点の更新
+    long diff = (long)(newtime - globaltime);
+    globaltime = newtime;
+    last_sync_time = newtime;
+    last_sync_ticks = total_ticks;
+
+    return diff;
 }
 
 time_t JJYReceiver::get_time(uint8_t index) {
@@ -159,9 +203,14 @@ time_t JJYReceiver::getTime() {
 
 void JJYReceiver::delta_tick(){
   uint8_t data, PM, H, L, max;
-  tick = (tick+1) % 100;
-  if(tick == 0){
-    clock_tick();
+  total_ticks++; // 補正用の通算カウンター
+  // 蓄積器に重みを加算
+  tick_accumulator += increment;
+    
+  // 1秒(TARGET)に達したか判定
+  if (tick_accumulator >= TARGET) {
+      tick_accumulator -= TARGET; // 余りを次へ繰り越し（誤差の蓄積防止）
+      clock_tick();               // globaltime++
   }
   if(state >= TIMEVALID) return;
   data = digitalRead(datapin)==HIGH ? 1 : 0;  

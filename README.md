@@ -157,9 +157,12 @@ void setup() {
 
   // JJY Library
   jjy.freq(40); // 受信周波数の設定
-  jjy.begin(); // 受信の開始
 
-  while(jjy.getTime() == -1); // 受信が終わるまで次を実行させない場合に書く
+  jjy.begin(); // 受信の開始
+  while(jjy.getTime() == -1); 
+
+  jjy.begin(); // クロック補正用受信の開始(2回目の受信により、クロック補償を行いさらに高精度な内部クロック動作となります)
+  while(jjy.getTime() == -1);// 受信が終わるまで次を実行させない場合に書く
 }
 
 void isr_routine() { // 入力信号変化割り込みで呼び出すハンドラ
@@ -212,6 +215,18 @@ void loop() {
 
 JJYデータの受信を開始します。マイコンのクロック精度は、100ppmの発振器で2時間で1秒弱程度ずれますので、適宜受信してください。
 現在時刻が確定した時点で、getTime()が受信完了時刻を返し、内部受信動作は停止します。再び受信動作を実行する場合はbegin()を呼び出します。
+
+
+- ソフトウエアSlew機能 [Note] v1.1.1より追加
+RTCなどで時刻を管理せずこのライブラリの内部管理時刻(get_time())を取得して利用する場合は、初期動作時は2回受信を実行することを推奨します。
+その後の計時動作がより正確になります。(行わなくても理論値10msecのタイマ間隔が実際の10msecに一致している前提で動作はします)
+
+```
+  jjy.begin(); // 初回受信の開始
+  while(jjy.getTime() == -1); // 初回受信完了待ち
+  jjy.begin(); // 刻み幅校正用受信の開始。以降JJYにて測定したタイマ校正値を利用して計時します。
+```
+
 
 [Note] v0.4.0より変更
 
@@ -466,6 +481,25 @@ kは除算結果がjで既にあるので、modより演算コストが低い引
 
   #define FREQTHRESHOLD2(>60)で切り替えカウントを指定。受信スタート時もしくは周波数切り替え時の時刻を記録しFREQTHRESHOLD2を超える秒数以上受信できていなかった場合に切り替えます。(設定は15分程度)
 
+## 自動刻み幅補正（ソフトウェアSLEW）
+
+安価なマイコン（内蔵RC発振子やセラミックレゾネータ使用時）のクロックドリフトをJJY受信タイミングで自動補正。
+2回目以降のJJY受信時刻の前回受信時刻との経過秒と内部タイマによるカウンタを比較して理想カウント値からのずれを検出し、
+クロック刻み幅を動的に調整して、経時による累積誤差を少なくします。
+
+**更新ルール（2段階）**
+1. **初回補正（初回JJY受信時、発振器製造個体差の補正）**
+   
+   - 2点間のJJY受信時刻から刻み幅を決定
+
+3. **以降の微調整（2回目以降、経年・温度・電圧等の環境変化ドリフト補正）**
+
+   - 刻み幅調整による変化幅は、毎回の変更量を±1%以内に抑え、急激な変化（ノイズ・異常受信）を防ぎつつ、温度変化や経年ドリフトにゆっくり追従します。
+  
+  ** 作動条件**
+  - 前回受信時からの実時間経過（delta_true_sec）が60秒以上かつ約1.27年（40,000,000秒）未満以内の受信時
+
+
 # 受信
 
 受信のコツ。アンテナはなるべく回路のようなノイズ源から離しましょう。esp32であると10cm程度は、アンテナとICを離しておいたほうが良いです。
@@ -488,5 +522,8 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
+
+
 
 
