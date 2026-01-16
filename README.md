@@ -488,11 +488,11 @@ kは除算結果がjで既にあるので、modより演算コストが低い引
 クロック刻み幅を動的に調整して、経時による累積誤差を少なくします。
 
 **更新ルール（2段階）**
-1. **初回補正（初回JJY受信時、発振器製造個体差の補正）**
+1. **初回補正（2回目JJY受信時、発振器製造個体差の補正）**
    
    - 2点間のJJY受信時刻から刻み幅を決定
 
-3. **以降の微調整（2回目以降、経年・温度・電圧等の環境変化ドリフト補正）**
+3. **以降の微調整（3回目以降、経年・温度・電圧等の環境変化ドリフト補正）**
 
    - 刻み幅調整による変化幅は、毎回の変更量を±1%以内に抑え、急激な変化（ノイズ・異常受信）を防ぎつつ、温度変化や経年ドリフトにゆっくり追従します。
   
@@ -522,6 +522,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
