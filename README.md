@@ -215,7 +215,7 @@ JJYデータの受信を開始します。マイコンのクロック精度は�
 
 [Note] v0.4.0より変更
 
-#### 秒の刻み幅の補償 ソフトウェアSlew調整
+#### 秒の刻み幅の補償動作
 
 RTCなどで時刻を管理せずこのライブラリの内部管理時刻(get_time()で返る時刻)を取得して利用する場合は、初期動作時は2回受信を実行することを推奨します。その後の内部カウンタでの秒の計時動作が補償されより正確になります。
 (行わなくても理論値10msecのタイマ間隔が実際の10msecに一致している前提で動作はします)
@@ -520,6 +520,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
