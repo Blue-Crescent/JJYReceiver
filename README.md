@@ -156,12 +156,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(DATA), isr_routine, CHANGE);
 
   // JJY Library
-  jjy.freq(40); // 受信周波数の設定
+  jjy.freq(40); // 受信周波数の設定、自動選択させる時は呼び出し不要
 
   jjy.begin(); // 受信の開始
-  while(jjy.getTime() == -1); 
-
-  jjy.begin(); // クロック補正用受信の開始(2回目の受信により、クロック補償を行いさらに高精度な内部クロック動作となります)
   while(jjy.getTime() == -1);// 受信が終わるまで次を実行させない場合に書く
 }
 
@@ -522,6 +519,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
