@@ -55,7 +55,7 @@ extern SoftwareSerial dSerial;
 #define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
 #endif
-//HardwareSerial& Serial = Serial0;
+// HardwareSerial& Serial = Serial0;
 #else
 #define DEBUG_PRINT(fmt,...)
 #define DEBUG_PRINTLN(fmt,...)
