@@ -372,7 +372,7 @@ if(jjy.quality > 80){
 ### increment
 
 1秒の刻みに必要なカウンタ量(分解能 μsec)
-この変数は刻み幅補正により変化します。分解能はマイクロ秒ですが、10msecが量子化豪差となります。
+この変数は刻み幅補正により変化します。分解能はマイクロ秒ですが、10msecが量子化誤差となります。
 マイコンのクロックドリフトの傾向が予め判明している場合は手動で書き換えておくことにより調整できます。(その場合、#TICK_CALIBRATIONをコメントアウト)
 
 - 刻み幅(デフォルト 1000000)
@@ -580,6 +580,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
