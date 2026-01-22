@@ -23,9 +23,12 @@
 #ifndef JJYReceiver_h
 #define JJYReceiver_h
 
-#define VERIFYLOOP 3
 #define FREQSWITCHTHRESHOLD 60
 #define FREQSWITCHTHRESHOLD2 900
+#define TARGET_PPM 10
+#define TICK_CALIBRATION
+
+#define VERIFYLOOP 3
 
 #include <time.h>
 #include <Arduino.h>
@@ -40,17 +43,19 @@
 #define WEEKDAYCHK
 
 #ifdef DEBUG_BUILD
-#define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
-#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
+
 
 #ifndef DEBUG_ESP32
 // For LGT8F328P
 #include <SoftwareSerial.h>
-extern SoftwareSerial debugSerial;
-#define DEBUG_PRINT(...)  debugSerial.print(__VA_ARGS__);
-#define DEBUG_PRINTLN(...) debugSerial.println(__VA_ARGS__);
+extern SoftwareSerial dSerial;
+#define DEBUG_PRINT(...)  dSerial.print(__VA_ARGS__);
+#define DEBUG_PRINTLN(...) dSerial.println(__VA_ARGS__);
+#else
+#define DEBUG_PRINT(...)  Serial.print(__VA_ARGS__);
+#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__);
 #endif
-//HardwareSerial& Serial = Serial0;
+// HardwareSerial& Serial = Serial0;
 #else
 #define DEBUG_PRINT(fmt,...)
 #define DEBUG_PRINTLN(fmt,...)
@@ -90,38 +95,46 @@ class JJYReceiver {
     enum AUTOFREQ {FREQ_AUTO=1, FREQ_MANUAL=0};
   
   public:
-    volatile uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
+    uint8_t jjypayloadlen[6] = {0,0,0,0,0,0};
     JJYData jjydata[VERIFYLOOP];
     JJYData last_jjydata[1];
-    volatile enum STATE state = INIT;
-    volatile enum JJYSTATE jjystate = JJY_MIN;
-    volatile uint8_t rcvcnt = 0;
-    volatile const int8_t datapin,selpin,ponpin;
-    volatile int8_t monitorpin = -1;
-    volatile uint8_t frequency = 40;
-    volatile uint8_t markercount = 0;
-    volatile uint8_t reliability = 0;
-    volatile uint8_t quality = 0;
+    enum STATE state = INIT;
+    enum JJYSTATE jjystate = JJY_MIN;
+    uint8_t rcvcnt = 0;
+    const int8_t datapin,selpin,ponpin;
+    int8_t monitorpin = -1;
+    uint8_t frequency = 40;
+    uint8_t markercount = 0;
+    uint8_t reliability = 0;
+    uint8_t quality = 0;
 
-    volatile uint8_t tick = 0;
-    volatile uint16_t jjypayload[6]; // 9bits bit data between marker
+    uint8_t tick = 0;
+    uint16_t jjypayload[6]; // 9bits bit data between marker
 
-    volatile uint8_t sampleindex = 0;
-    volatile uint8_t sampling [N];
-    volatile int8_t timeavailable = -1;
-    volatile const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00};
-    volatile const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x07,0x00,0x00,0x00,0x00,0x00,0x00};
-    volatile const uint8_t CONST_L [N]  = {0xFF,0x7F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    uint8_t sampleindex = 0;
+    uint8_t sampling [N];
+    int8_t timeavailable = -1;
+    const uint8_t CONST_PM [N] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00};
+    const uint8_t CONST_H [N]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0x07,0x00,0x00,0x00,0x00,0x00,0x00};
+    const uint8_t CONST_L [N]  = {0xFF,0x7F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-    volatile time_t globaltime = 0;
-    volatile time_t received_time = -1;
-    volatile time_t start_time = -1; // FREQ_AUTO時は周波数変更時点から
+    time_t globaltime = 0;
+    time_t received_time = -1;
+    time_t start_time = -1; // FREQ_AUTO時は周波数変更時点から
     struct tm timeinfo;
-    volatile uint8_t autofreq = FREQ_AUTO;
+    uint8_t autofreq = FREQ_AUTO;
     uint16_t year, yday;
     uint8_t jjy_weekday;
     uint8_t calc_weekday;
     long diff;
+
+    // 時刻維持用
+    uint32_t increment = 1000000;      // 10msの重み（初期値: 1秒を100分割）
+    // 補正計算用（2点間比較用）
+    bool calibrated = false;
+    // JJYジッタ計算用
+    uint32_t jjy_period_sec = 0;
+    uint32_t jitter_us = 0;
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
@@ -130,16 +143,16 @@ class JJYReceiver {
     void jjy_receive();
     time_t clock_tick();
     void delta_tick();
-    void shift_in(uint8_t data,volatile uint8_t* sampling, int length);
-    void clear(volatile uint8_t* sampling, int length);
+    void shift_in(uint8_t data,uint8_t* sampling, int length);
+    void clear(uint8_t* sampling, int length);
     void begin();
     void stop();
     bool power(bool powerstate);
     bool power();
     uint8_t freq(uint8_t freq);
     void monitor(int pin);
-    void calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day);
-    int distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size);
+    void calculateDate(uint16_t year, uint16_t dayOfYear,uint8_t *month,uint8_t *day);
+    int distance(const uint8_t* arr1,uint8_t* arr2, int size);
     int max_of_three(uint8_t a, uint8_t b, uint8_t c);
     bool timeCheck();
     time_t getTime();
@@ -157,14 +170,20 @@ class JJYReceiver {
   private:
     // 時刻維持用
     uint32_t tick_accumulator = 0;
-    uint32_t increment = 1000000;      // 10msの重み（初期値: 1秒を100分割）
     const uint32_t TARGET = 100000000; // 1秒の閾値 (1,000,000 * 100)
 
     // 補正計算用（2点間比較用）
+    #ifdef TICK_CALIBRATION    
     uint32_t total_ticks = 0;          // 10msごとの通算カウント
     uint32_t last_sync_ticks = 0;      // 前回補正時の通算カウント
     time_t last_sync_time = 0;         // 前回補正時の受信時刻
-    bool calibrated = false;
+
+    // JJYジッタ計算用
+    unsigned long jjy_sec_micros = 0;
+    unsigned long last_jjy_sec_micros = 0;
+    uint8_t jjy_sec_count = 0;
+    uint64_t M2 = 0;
+    #endif
 
     bool settime(uint8_t index){
       if(lencheck(jjypayloadlen) == false){
@@ -226,7 +245,7 @@ class JJYReceiver {
       state = RECEIVE;
       start_time = globaltime;
     }
-    bool lencheck(volatile uint8_t* arr) {
+    bool lencheck(uint8_t* arr) {
         if (arr[0] != 8) {
             return false;
         }
@@ -305,6 +324,45 @@ class JJYReceiver {
         }
         frequency = freq;
     }
+
+
+    #ifdef TICK_CALIBRATION
+    void addValue(uint32_t period) {
+        if (period < 990000 || period > 1100000) period = 1000000;
+        int32_t deviation = (int32_t)period - 1000000;
+        M2 += (uint64_t)((int64_t)deviation * deviation);
+    }
+
+    uint32_t getStdDev() {
+        if (jjy_sec_count > 254){
+            jjy_sec_count = 0;
+            M2 = 0;
+        } 
+        if (jjy_sec_count < 2) return 0;
+        uint32_t variance = (uint32_t)(M2 / jjy_sec_count);
+        return isqrt(variance);
+    }
+
+    uint32_t isqrt(uint32_t x) {
+        uint32_t r = 0;
+        uint32_t bit = 1UL << 30;  // 2^30
+
+        while (bit > x)
+            bit >>= 2;
+
+        while (bit != 0) {
+            if (x >= r + bit) {
+            x -= r + bit;
+            r = (r >> 1) + bit;
+            } else {
+            r >>= 1;
+            }
+            bit >>= 2;
+        }
+        return r;
+    }
+    #endif
+
 };
 #endif
 
