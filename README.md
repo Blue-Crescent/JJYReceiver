@@ -394,7 +394,7 @@ JJYのジッタの影響がなくなる(10ppm,TARGET_PPM以下)ために必要�
 
  - 最低の受信間隔(秒)
 
- 2回目のJJY受信をこの秒以上経過後に計測することで刻み幅補正に必要な目標精度(10ppm)が得られます。
+ 次回のJJY受信をこの秒以上経過後に計測することで刻み幅補正に必要な目標精度(10ppm)が得られます。(JJYのジッタの影響を長期間の計測により薄めます)
 
 [刻み幅補正]
 
@@ -580,6 +580,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
