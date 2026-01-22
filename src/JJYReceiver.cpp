@@ -28,11 +28,11 @@
 /*!
     @brief  Constructor for JJYReceiver
 */
-#ifdef DEBUG_BUILD
-#ifndef DEBUG_ESP32
- // extern SoftwareSerial Serial;
-#endif
-#endif
+// #ifdef DEBUG_BUILD
+// #ifndef DEBUG_ESP32
+//  extern SoftwareSerial dSerial;
+// #endif
+// #endif
 
 JJYReceiver::JJYReceiver(int pindata,int pinsel,int pinpon) : 
  datapin(pindata), selpin(pinsel), ponpin(pinpon) {
@@ -54,11 +54,20 @@ JJYReceiver::~JJYReceiver(){
 }
 
 time_t JJYReceiver::clock_tick(){
-  globaltime = globaltime + 1;
+  #ifdef TICK_CALIBRATION
+  total_ticks++; // 補正用の通算カウンター
+  #endif
+  // 蓄積器に重みを加算
+  tick_accumulator += increment;
+  // 1秒(TARGET)に達したか判定
+  if (tick_accumulator >= TARGET) {
+      tick_accumulator -= TARGET; // 余りを次へ繰り越し（誤差の蓄積防止）
+      globaltime++;
+  }
   return globaltime;
 }
 
-int JJYReceiver::distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, int size) {
+int JJYReceiver::distance(const uint8_t* arr1,uint8_t* arr2, int size) {
     int hammingDistance = 0;
     uint8_t temp;
     for (uint8_t i = 0; i < size; i++) {
@@ -75,14 +84,14 @@ int JJYReceiver::distance(const volatile uint8_t* arr1,volatile uint8_t* arr2, i
 int JJYReceiver::max_of_three(uint8_t a, uint8_t b, uint8_t c) {
     return (a > b) ? ((a > c) ? 0 : 2) : ((b > c) ? 1 : 2);
 }
-void JJYReceiver::clear(volatile uint8_t* sampling, int length){
+void JJYReceiver::clear(uint8_t* sampling, int length){
     for (uint8_t i = 0; i < length; i++) {
       sampling[i] = 0;
     }
 }
 
 
-void JJYReceiver::shift_in(uint8_t data,volatile uint8_t* sampling, int length){
+void JJYReceiver::shift_in(uint8_t data,uint8_t* sampling, int length){
   uint8_t carry;
   for (int i = 0; i < length; i++) {
     if(i==0) carry = data;
@@ -119,19 +128,26 @@ bool JJYReceiver::timeCheck(){
 }
 
 time_t JJYReceiver::get_time() {
-  return globaltime;
+  //noInterrupts();
+  time_t temp = globaltime;
+  //interrupts();
+  return temp;
 }
 
 long JJYReceiver::set_time(time_t newtime) {
+
+    #ifdef TICK_CALIBRATION
     // 1. 学習（補正）が可能かチェック
     if (last_sync_time != 0) {
         uint32_t delta_true_sec = (uint32_t)(newtime - last_sync_time);
         uint32_t delta_internal_ticks = total_ticks - last_sync_ticks;
+        uint32_t ppm_required_sec = (uint32_t) (2 * jitter_us)/TARGET_PPM;
 
-        if (delta_internal_ticks > 0 &&
-            delta_true_sec > 60 &&
-            delta_true_sec < 40000000UL) {
-            uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);            
+        if (delta_internal_ticks > 0
+             && delta_true_sec > 60
+             && delta_true_sec < 40000000UL
+             && delta_true_sec > ppm_required_sec ) {
+            uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
             if (calibrated) {
                 // 【2回目以降】 1%リミッターを適用
                 int32_t diff_inc = (int32_t)(ideal_inc - increment);
@@ -140,11 +156,7 @@ long JJYReceiver::set_time(time_t newtime) {
                 increment += diff_inc;
                 increment = constrain(increment, 900000UL, 1100000UL);
             #ifdef DEBUG_BUILD
-                DEBUG_PRINT("SLEW:");
-                DEBUG_PRINT(" ideal=");
-                DEBUG_PRINT(ideal_inc);
-                DEBUG_PRINT(" diff_inc=");
-                DEBUG_PRINT(diff_inc);            
+                DEBUG_PRINT(" diff_inc:");DEBUG_PRINTLN(diff_inc);            
             #endif
             } else {
                 // 【初回学習】 リミッターなしで理想値に一気に合わせる
@@ -152,22 +164,28 @@ long JJYReceiver::set_time(time_t newtime) {
                 calibrated = true;
             }
             #ifdef DEBUG_BUILD
-                DEBUG_PRINT(" inc=");
-                DEBUG_PRINT(increment);
-                DEBUG_PRINT(" delta_true_sec=");
-                DEBUG_PRINT(delta_true_sec);
-                DEBUG_PRINT(" delta_internal_ticks=");
-                DEBUG_PRINT(delta_internal_ticks);    
-                DEBUG_PRINTLN("");
+                uint32_t drift_ppm = (ideal_inc > 1000000) ? (ideal_inc - 1000000) : (1000000 - ideal_inc);
+                DEBUG_PRINT(" ideal:");DEBUG_PRINTLN(ideal_inc);
+                DEBUG_PRINT(" drift_ppm:");DEBUG_PRINTLN(drift_ppm);
             #endif
         }
+        #ifdef DEBUG_BUILD
+          DEBUG_PRINT(" increment:");DEBUG_PRINT(increment);
+          DEBUG_PRINT(" delta_internal_ticks:");DEBUG_PRINT(delta_internal_ticks);    
+          DEBUG_PRINT(" delta_true_sec:");DEBUG_PRINT(delta_true_sec);
+          DEBUG_PRINT(" ppm_required_sec:");DEBUG_PRINTLN(ppm_required_sec);
+        #endif
     }
+    #endif
 
     // 3. 時刻同期と起点の更新
     long diff = (long)(newtime - globaltime);
     globaltime = newtime;
-    last_sync_time = newtime;
-    last_sync_ticks = total_ticks;
+
+    #ifdef TICK_CALIBRATION
+      last_sync_time = newtime;
+      last_sync_ticks = total_ticks;
+    #endif
 
     return diff;
 }
@@ -203,15 +221,8 @@ time_t JJYReceiver::getTime() {
 
 void JJYReceiver::delta_tick(){
   uint8_t data, PM, H, L, max;
-  total_ticks++; // 補正用の通算カウンター
-  // 蓄積器に重みを加算
-  tick_accumulator += increment;
-    
-  // 1秒(TARGET)に達したか判定
-  if (tick_accumulator >= TARGET) {
-      tick_accumulator -= TARGET; // 余りを次へ繰り越し（誤差の蓄積防止）
-      clock_tick();               // globaltime++
-  }
+
+  clock_tick();               // globaltime++
   if(state >= TIMEVALID) return;
   data = digitalRead(datapin)==HIGH ? 1 : 0;  
   shift_in(data, sampling, N);
@@ -251,9 +262,16 @@ void JJYReceiver::delta_tick(){
             timeCheck();
             timeavailable = rcvcnt;
           }
+          #ifdef TICK_CALIBRATION
+          else{
+            jjy_sec_count = 0;
+            M2 = 0;
+          }
+          #endif
           #ifdef DEBUG_BUILD
           debug3();
           #endif
+
           jjystate = JJY_MIN;
           clearpayload();
           DEBUG_PRINT("M");
@@ -266,6 +284,17 @@ void JJYReceiver::delta_tick(){
     }
     quality = (uint8_t) constrain((((quality * 100) / (N*8)) - 50) * 2,0,100);
     autoselectfreq(jjystate);
+
+    #ifdef TICK_CALIBRATION
+    jjy_period_sec = (uint32_t)(jjy_sec_micros - last_jjy_sec_micros);
+    addValue(jjy_period_sec);
+    jitter_us = getStdDev();
+    last_jjy_sec_micros = jjy_sec_micros;
+    #ifdef DEBUG_BUILD
+    DEBUG_PRINT(" jitter_us:"); DEBUG_PRINT(jitter_us);
+    #endif
+    #endif
+
     #ifdef DEBUG_BUILD
     debug();
     DEBUG_PRINT(" "); DEBUG_PRINT(L); DEBUG_PRINT(":"); DEBUG_PRINT(H); DEBUG_PRINT(":"); DEBUG_PRINT(PM); DEBUG_PRINT(" Q:"); DEBUG_PRINT(quality); DEBUG_PRINT(" F:"); DEBUG_PRINT(frequency); DEBUG_PRINT(autofreq);
@@ -281,8 +310,12 @@ void JJYReceiver::jjy_receive(){
   if (data == LOW) {
     if(monitorpin != -1) digitalWrite(monitorpin,LOW);
     if(sampleindex < 20){
+      #ifdef TICK_CALIBRATION
+      jjy_sec_micros = micros();
+      jjy_sec_count++;
+      #endif
       sampleindex = 0;
-      clear(sampling,N);
+      //clear(sampling,N);
     }
   }else{
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
@@ -346,7 +379,7 @@ void JJYReceiver::stop(){
 }
 
 //timeinfo.tm_yday = // Day of the year is not implmented in Arduino time.h
-void JJYReceiver::calculateDate(uint16_t year, uint16_t dayOfYear,volatile uint8_t *month,volatile uint8_t *day) {
+void JJYReceiver::calculateDate(uint16_t year, uint16_t dayOfYear,uint8_t *month,uint8_t *day) {
   uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
     // 閏年の場合、2月は29日
