@@ -141,13 +141,15 @@ long JJYReceiver::set_time(time_t newtime) {
     if (last_sync_time != 0) {
         uint32_t delta_true_sec = (uint32_t)(newtime - last_sync_time);
         uint32_t delta_internal_ticks = total_ticks - last_sync_ticks;
-        uint32_t ppm_required_sec = (uint32_t) (2 * jitter_us)/TARGET_PPM;
+        uint32_t sigma2 = 2 * jitter_us;
+        uint32_t ppm_required_sec = (uint32_t) (sigma2)/TARGET_PPM;
+        uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
+        uint32_t drift_ppm = (ideal_inc > 1000000) ? (ideal_inc - 1000000) : (1000000 - ideal_inc);
 
         if (delta_internal_ticks > 0
-             && delta_true_sec > 60
+             && delta_true_sec > ppm_required_sec 
              && delta_true_sec < 40000000UL
-             && delta_true_sec > ppm_required_sec ) {
-            uint32_t ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
+             || drift_ppm > sigma2) {
             if (calibrated) {
                 // 【2回目以降】 1%リミッターを適用
                 int32_t diff_inc = (int32_t)(ideal_inc - increment);
@@ -156,21 +158,24 @@ long JJYReceiver::set_time(time_t newtime) {
                 increment += diff_inc;
                 increment = constrain(increment, 900000UL, 1100000UL);
             #ifdef DEBUG_BUILD
+                DEBUG_PRINT(" CALIBRATED:2nd-:"); DEBUG_PRINTLN(increment);        
                 DEBUG_PRINT(" diff_inc:");DEBUG_PRINTLN(diff_inc);            
             #endif
             } else {
                 // 【初回学習】 リミッターなしで理想値に一気に合わせる
                 increment = constrain(ideal_inc, 900000UL, 1100000UL);
                 calibrated = true;
+            #ifdef DEBUG_BUILD
+                DEBUG_PRINT(" CALIBRATED:1st:"); DEBUG_PRINTLN(increment);        
+            #endif
             }
             #ifdef DEBUG_BUILD
-                uint32_t drift_ppm = (ideal_inc > 1000000) ? (ideal_inc - 1000000) : (1000000 - ideal_inc);
-                DEBUG_PRINT(" ideal:");DEBUG_PRINTLN(ideal_inc);
                 DEBUG_PRINT(" drift_ppm:");DEBUG_PRINTLN(drift_ppm);
             #endif
         }
         #ifdef DEBUG_BUILD
           DEBUG_PRINT(" increment:");DEBUG_PRINT(increment);
+          DEBUG_PRINT(" ideal:");DEBUG_PRINTLN(ideal_inc);
           DEBUG_PRINT(" delta_internal_ticks:");DEBUG_PRINT(delta_internal_ticks);    
           DEBUG_PRINT(" delta_true_sec:");DEBUG_PRINT(delta_true_sec);
           DEBUG_PRINT(" ppm_required_sec:");DEBUG_PRINTLN(ppm_required_sec);
@@ -315,7 +320,7 @@ void JJYReceiver::jjy_receive(){
       jjy_sec_count++;
       #endif
       sampleindex = 0;
-      //clear(sampling,N);
+      clear(sampling,N);
     }
   }else{
     if(monitorpin != -1) digitalWrite(monitorpin,HIGH);
