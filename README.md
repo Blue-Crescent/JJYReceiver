@@ -405,6 +405,8 @@ JJYのジッタの影響がなくなる(10ppm,TARGET_PPM以下)ために必要�
 
 - 2点のJJY受信時刻から計算される理想カウンタ量と実際のカウンタ量の割合
 
+一秒あたりのドリフト量、マイクロ秒として解釈することができます。
+
 [刻み幅補正]
 
 # デバッグモード
@@ -581,6 +583,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
