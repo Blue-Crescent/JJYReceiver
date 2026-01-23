@@ -220,7 +220,7 @@ JJYデータの受信を開始します。マイコンのクロック精度は�
 - ソフトウエアSlew機能 [Note] v1.1.1より追加
 RTCなどで時刻を管理せずこのライブラリの内部管理時刻(get_time())を取得して利用する場合は、初期動作時は2回受信を実行することを推奨します。
 その後の計時動作がより正確になります。
-(JJY受信ジッタとクロック精度によりますが、30分から1時間経過後に再受信することで補正が効きます。行わなくても理論値10msecのタイマ間隔が実際の10msecに一致している前提で動作はします)
+(JJY受信ジッタとクロック精度によりますが、刻み幅補正は前回受信時から15分から1時間経過後(ppm_required_sec以上経過後)に再受信することで補正が効きます。行わなくても理論値10msecのタイマ間隔が実際の10msecに一致している前提で動作はします)
 
 [Note] v0.4.0より変更
 
@@ -577,6 +577,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
