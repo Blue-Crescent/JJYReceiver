@@ -555,9 +555,9 @@ kは除算結果がjで既にあるので、modより演算コストが低い引
    - 刻み幅調整による変化幅は、毎回の変更量を±1%以内に抑え、急激な変化（ノイズ・異常受信）を防ぎつつ、温度変化や経年ドリフトにゆっくり追従します。
   
   ** 作動条件**
-  - 前回受信時からの実時間経過（delta_true_sec）が60秒以上かつ約1.27年（40,000,000秒）未満以内の受信時
-  - 2点のJJY受信時刻から計測されるカウンタの1秒当たりのズレがJJY受信時のジッタ2σ以上の時
-  - 2点のJJY受信時刻間隔とJJY受信時のジッタ量から10ppm以上の精度を見込めるとき(前回の受信からppm_required_sec以上の秒数が経過しているとき)
+  - 2点のJJY受信時刻間隔とJJY受信時のジッタ量から10ppm以上の精度を見込めるとき(前回の受信からの実時間経過（delta_true_sec）がppm_required_sec以上の秒数が経過している時)
+  - 前回受信時からの実時間経過が約1.27年（40,000,000秒）未満以内の受信時
+  - 2点のJJY受信時刻から計測されるカウンタの1秒当たりのズレ(ドリフト量)がJJY受信時のジッタ2σ以上の時
 
 [Note] V1.1.1より。JJYジッタの計測はV1.2.0より
 
@@ -583,6 +583,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
