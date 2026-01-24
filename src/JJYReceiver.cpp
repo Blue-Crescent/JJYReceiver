@@ -146,10 +146,10 @@ long JJYReceiver::set_time(time_t newtime) {
         ideal_inc = (uint32_t)(((uint64_t)TARGET * delta_true_sec) / delta_internal_ticks);
         drift_ppm = (ideal_inc > 1000000) ? (ideal_inc - 1000000) : (1000000 - ideal_inc);
 
-        if (delta_internal_ticks > 0
+        if ((delta_internal_ticks > 0
              && delta_true_sec > ppm_required_sec 
-             && delta_true_sec < 40000000UL
-             || drift_ppm > sigma2) {
+             && delta_true_sec < 40000000UL)
+             || (drift_ppm > sigma2)) {
             if (calibrated) {
                 // 【2回目以降】 1%リミッターを適用
                 int32_t diff_inc = (int32_t)(ideal_inc - increment);
@@ -171,6 +171,9 @@ long JJYReceiver::set_time(time_t newtime) {
             }
         }
         #ifdef DEBUG_BUILD
+          else{
+            DEBUG_PRINTLN(" CALIBRATE SKIPPED: ");
+          }
           DEBUG_PRINT(" drift_ppm:");DEBUG_PRINTLN(drift_ppm);
           DEBUG_PRINT(" increment:");DEBUG_PRINT(increment);
           DEBUG_PRINT(" ideal:");DEBUG_PRINTLN(ideal_inc);
