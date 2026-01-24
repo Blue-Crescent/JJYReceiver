@@ -35,7 +35,7 @@
 #include <stdint.h>
 
 // #define SWAPFREQ
-#define DEBUG_BUILD
+// #define DEBUG_BUILD
 // #define DEBUG_ESP32
 
 // Following checking features can be applied for JJY only
