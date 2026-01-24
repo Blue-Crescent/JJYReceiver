@@ -123,18 +123,23 @@ class JJYReceiver {
     time_t start_time = -1; // FREQ_AUTO時は周波数変更時点から
     struct tm timeinfo;
     uint8_t autofreq = FREQ_AUTO;
-    uint16_t year, yday;
-    uint8_t jjy_weekday;
-    uint8_t calc_weekday;
+
+
     long diff;
 
     // 時刻維持用
     uint32_t increment = 1000000;      // 10msの重み（初期値: 1秒を100分割）
+    
+    #ifdef TICK_CALIBRATION  
     // 補正計算用（2点間比較用）
     bool calibrated = false;
     // JJYジッタ計算用
-    uint32_t jjy_period_sec = 0;
+
     uint32_t jitter_us = 0;
+    uint32_t ppm_required_sec = 0;
+    uint32_t ideal_inc = 0;
+    uint32_t drift_ppm = 0;
+    #endif
 
     JJYReceiver(int pindata);
     JJYReceiver(int pindata,int pinpon);
@@ -168,6 +173,10 @@ class JJYReceiver {
     #endif
 
   private:
+    uint16_t year, yday;
+    uint8_t jjy_weekday;
+    uint8_t calc_weekday;
+
     // 時刻維持用
     uint32_t tick_accumulator = 0;
     const uint32_t TARGET = 100000000; // 1秒の閾値 (1,000,000 * 100)
