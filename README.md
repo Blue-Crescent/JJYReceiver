@@ -159,9 +159,6 @@ void setup() {
   jjy.freq(40); // 受信周波数の設定、自動選択の場合は不要
 
   jjy.begin(); // 受信の開始
-  while(jjy.getTime() == -1); 
-
-  jjy.begin(); // クロック補正用受信の開始(2回目の受信により、クロック補償を行いさらに高精度な内部クロック動作となります)
   while(jjy.getTime() == -1);// 受信が終わるまで次を実行させない場合に書く
 }
 
@@ -380,7 +377,7 @@ if(jjy.quality > 80){
 
 最後のJJY受信時に計測された1秒を刻むための理想カウント量(分解能 μsec)を返します。
 
-- 理想カウント量(標準偏差1σ, μsec)
+- 理想カウント量(μsec)
 
 [刻み幅補正]
 
@@ -579,6 +576,7 @@ It seems similar time code format uses in WWVB. It may be also works with WWVB p
 I have put WWVB version code on another branch. [WWVB version](https://github.com/Blue-Crescent/JJYReceiver/tree/wwvb "See WWVB Branch")
 I can't check WWVB modification will be worked or not. Because, I can't receive WWVB wave due to geographical reason.
 If somebody report me it works or not, I might support it. If someone need my library. :D
+
 
 
 
