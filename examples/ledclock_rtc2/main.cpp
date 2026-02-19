@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <TM1637.h> // smougenot/TM1637 (TM1637Display)
+#include <TM1637.h>
 #include <Ds1302.h>        // treboada/Ds1302
 #include <JJYReceiver.h>
 #include <MsTimer2.h>
